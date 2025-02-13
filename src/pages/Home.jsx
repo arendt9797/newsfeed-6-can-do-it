@@ -1,6 +1,11 @@
+import HomeList from '../components/home/HomeList';
 
 function Home() {
-  return <div>Home</div>;
+  return (
+    <>
+      <HomeList />
+    </>
+  );
 }
 
 export default Home;
