@@ -10,8 +10,6 @@ function AuthProvider({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(event, session);
-
       if (session) {
         setIsLogin(true);
       } else {
@@ -29,4 +27,4 @@ function AuthProvider({ children }) {
   );
 }
 
-export { AuthContext, AuthProvider }
+export { AuthContext, AuthProvider };
