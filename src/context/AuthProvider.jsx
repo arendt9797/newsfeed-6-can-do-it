@@ -5,6 +5,7 @@ const AuthContext = createContext(null);
 
 function AuthProvider({ children }) {
   const [isLogin, setIsLogin] = useState(false);
+  let temp
 
   useEffect(() => {
     const {
