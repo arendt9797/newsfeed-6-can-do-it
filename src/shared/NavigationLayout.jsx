@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 import logo from '../assets/test-logo.png';
 
 function NavigationLayout() {
+  const [isLogin, setIsLogin] = useState(false); // NOTE: 현재는 로그아웃 상태
+
   return (
     <StBody>
       <header>
@@ -13,7 +15,7 @@ function NavigationLayout() {
 
         <nav>
           <Link to="/sign-in" className="sign">
-            sign-in
+            {isLogin ? '로그인' : '로그아웃'}
           </Link>
           <Link to="/category">Categories</Link>
           <Link to="/create-feed">Create Feed</Link>
@@ -62,18 +64,18 @@ const StBody = styled.body`
     nav {
       display: flex;
       flex-direction: column;
-      width: 300px;
       margin: auto 0;
       margin-top: 100px;
 
       a {
         background-color: #46d7ab;
         border-radius: 5px;
-        margin: 20px;
+        width: 200px;
+        margin: 15px;
         padding: 10px 0;
         text-decoration: none;
         color: black;
-        font-size: 25px;
+        font-size: 20px;
         text-align: center;
       }
 
@@ -94,5 +96,7 @@ const StBody = styled.body`
 `;
 
 const StMain = styled.main`
+  flex: 1;
   padding-left: 5vw;
+  background-color: green;
 `;
