@@ -24,29 +24,36 @@ function MyProfile() {
   return (
     <StProfileContainer>
       <h2>My Profile</h2>
-      <StForm onSubmit={handleSubmit} >
-        <label>이미지</label>
-        <StInput type="file" value={profile.image} onChange={handleChange} />
+      <StFormContainer onSubmit={handleSubmit}>
+        {/* 왼쪽: 프로필 이미지 */}
+        <StImageContainer>
+          <StProfileImage src={profile.image || "/src/assets/test-logo.png"} alt="프로필 이미지" />
+          <input type="file" onChange={handleChange} />
+        </StImageContainer>
 
-        <label>아이디</label>
-        <StInput type="text" value={profile.userId} onChange={handleChange} />
+        {/* 오른쪽: 입력 필드 및 버튼 */}
+        <StForm>
+          <label>아이디</label>
+          <StInput type="text" value={profile.userId} onChange={handleChange} />
 
-        <label>비밀번호</label>
-        <StInput type="text" value={profile.password} onChange={handleChange} />
+          <label>비밀번호</label>
+          <StInput type="password" value={profile.password} onChange={handleChange} />
 
-        <label>E-mail</label>
-        <StInput type="text" value={profile.email} onChange={handleChange} />
+          <label>E-mail</label>
+          <StInput type="email" value={profile.email} onChange={handleChange} />
 
-        <label>GitHub</label>
-        <StInput type="url" value={profile.github} onChange={handleChange} />
+          <label>GitHub</label>
+          <StInput type="url" value={profile.github} onChange={handleChange} />
 
-        <label>Blog</label>
-        <StInput type="url" value={profile.blog} onChange={handleChange} />
+          <label>Blog</label>
+          <StInput type="url" value={profile.blog} onChange={handleChange} />
 
-        <label>관심사?</label>
+          <label>관심사?</label>
+          <input type="checkbox" />
 
-        <StButton>수정완료</StButton>
-      </StForm>
+          <StButton>수정완료</StButton>
+        </StForm>
+      </StFormContainer>
     </StProfileContainer>
   );
 }
@@ -54,20 +61,59 @@ function MyProfile() {
 export default MyProfile;
 
 const StProfileContainer = styled.div`
-  width: 400px;
+  width: 650px;
   margin: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
   padding: 2rem;
   border: 1px solid #ddd;
   border-radius: 10px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
   background: #fff;
+
+  & h2 {
+    margin-bottom: 30px;
+    font-size: 25px;
+    font-weight: bold;
+  }
 `;
 
-const StForm = styled.form`
+// 전체 폼을 가로 정렬
+const StFormContainer = styled.form`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 2rem;
+  width: 100%;
+  max-width: 600px;
+
+  @media (max-width: 600px) {
+    flex-direction: column; 
+    align-items: center;
+  }
+`;
+
+// 왼쪽 프로필 이미지
+const StImageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  gap: 1rem;
+`;
+
+const StProfileImage = styled.img`
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+`;
+
+// 오른쪽 입력 필드 및 버튼
+const StForm = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
