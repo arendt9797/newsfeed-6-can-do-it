@@ -56,7 +56,7 @@ const StBody = styled.body`
     }
 
     .logo-img {
-      width: 200px;
+      width: 100px;
       margin: 0 auto;
     }
     nav {
@@ -64,7 +64,7 @@ const StBody = styled.body`
       flex-direction: column;
       width: 300px;
       margin: auto 0;
-      margin-top: 100px;
+      margin-top: 200px;
 
       a {
         background-color: #46d7ab;
