@@ -6,13 +6,13 @@ import { AuthContext } from '../context/AuthProvider';
 
 function NavigationLayout() {
   // const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
-const [isLogin] = useState(true);
+  const [isLogin] = useState(true);
 
   return (
     <StBodyDiv>
       <header>
         <Link className="home-link" to="/">
-          <img className="logo-img" src={logo} alt="" />
+          <img className="logo-img" src={logo} alt="logo" />
         </Link>
 
         <nav>
@@ -24,12 +24,8 @@ const [isLogin] = useState(true);
           <Link to="/create-feed">Create Feed</Link>
           <Link to="/my-profile">My Profile</Link>
           <Link to="/about-us">About Us</Link>
-          <Link to="/my-feed" className={!isLogin && 'is-logout'}>
-            My Feed
-          </Link>
-          <Link to="/my-like" className={!isLogin && 'is-logout'}>
-            My Like
-          </Link>
+          {isLogin && <Link to="/"> My Feed </Link>}
+          {isLogin && <Link to="/"> My Like</Link>}
         </nav>
 
         <footer>
@@ -86,10 +82,6 @@ const StBodyDiv = styled.div`
         color: black;
         font-size: 20px;
         text-align: center;
-      }
-
-      .is-logout {
-        display: none;
       }
 
       .sign {
