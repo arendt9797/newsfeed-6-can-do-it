@@ -20,7 +20,8 @@ function MyProfile() {
       try {
         const { data, error } = await supabase.from("test_user_table").select("*")
         if(error) throw error;
-        setProfile(data);
+        console.log("Fetched Data:", data); // 데이터 확인
+        setProfile(data[0]); // test로 첫번째 유저 설정
       } catch (error) {
         console(error)
       }
