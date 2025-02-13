@@ -46,6 +46,7 @@ const StBody = styled.body`
     flex-direction: column;
     align-items: center;
     width: 400px;
+    height: 100vh;
 
     .home-link {
       text-decoration: none;
@@ -55,16 +56,15 @@ const StBody = styled.body`
     }
 
     .logo-img {
-      width: 200px;
+      width: 100px;
       margin: 0 auto;
     }
     nav {
       display: flex;
       flex-direction: column;
       width: 300px;
-      height: 100vh;
-      margin-top: 20vh;
-      padding-top: 20px;
+      margin: auto 0;
+      margin-top: 100px;
 
       a {
         background-color: #46d7ab;
@@ -80,11 +80,15 @@ const StBody = styled.body`
       .sign {
         background-color: inherit;
         color: white;
+
+        &:hover {
+          color: #acacac;
+        }
       }
     }
-    
+
     footer {
-        margin-bottom: 20px;
+      margin-bottom: 20px;
     }
   }
 `;
