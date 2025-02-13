@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { useState } from "react";
 import styled from "styled-components";
+import { supabase } from "../supabase/client";
 
 function MyProfile() {
 
@@ -11,6 +13,21 @@ function MyProfile() {
     github: "test",
     blog: "test",
   });
+
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const { data, error } = await supabase.from("test_user_table").select("*")
+        if(error) throw error;
+        setProfile(data);
+      } catch (error) {
+        console(error)
+      }
+    }
+    fetchUserData();
+  }, [])
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
