@@ -1,5 +1,10 @@
+import CreateFeedComponent from '../components/CreateFeed';
 function CreateFeed() {
-  return <div>CreateFeed</div>;
+  return (
+    <div>
+      <CreateFeedComponent />
+    </div>
+  );
 }
 
 export default CreateFeed;
