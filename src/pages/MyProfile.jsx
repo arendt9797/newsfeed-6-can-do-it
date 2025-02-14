@@ -13,7 +13,7 @@ function MyProfile() {
     github: "",
     blog: "",
   });
-  const [image, setImage] = useState('../assets/test-logo.png')
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -73,19 +73,29 @@ function MyProfile() {
   //파일 선택 호출 함수
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
-  }
+  };
+  const handleImageUpload = async () => {
+    if (!image) return;
 
-  
+    const { data, error } = await supabase.storage.from("test-profile-images").upload(`public/${image.name}`, image);
+
+    if (error) {
+      console.error("업로드실패", error.message);
+    } else {
+      console.log("업로드성공", data);
+    }
+  };
+
   return (
     <StProfileContainer>
       <h2>My Profile</h2>
+      {/* 왼쪽: 프로필 이미지 */}
+      <StImageContainer>
+        <StProfileImage src={profile.image || "/src/assets/test-logo.png"} alt="프로필 이미지" />
+        <input type="file" onChange={handleImageChange} />
+        <button onClick={handleImageUpload}>이미지 수정</button>
+      </StImageContainer>
       <StFormContainer onSubmit={handleSubmit}>
-        {/* 왼쪽: 프로필 이미지 */}
-        <StImageContainer>
-          <StProfileImage src={profile.image || "/src/assets/test-logo.png"} alt="프로필 이미지" />
-          <input type="file" onChange={handleImageChange} style={{ display: "none"}}/>
-          <button>이미지 수정</button>
-        </StImageContainer>
 
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
