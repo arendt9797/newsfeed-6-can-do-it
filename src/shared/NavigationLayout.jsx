@@ -3,14 +3,21 @@ import styled from 'styled-components';
 import logo from '../assets/test-logo.png';
 import profile from '../assets/test-profile.png';
 import { AuthContext } from '../context/AuthProvider';
-import { useState } from 'react';
+import { supabase } from '../supabase/client';
+import { useContext } from 'react';
 function NavigationLayout() {
-  // const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
-  const [isLogin] = useState(false);
+  const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
+
   //임시 user
   const user = {
     name: '육캔두잇',
     age: 66,
+  };
+
+  // NOTE: 로그아웃
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    alert('로그아웃 되었습니다');
   };
 
   return (
@@ -33,10 +40,16 @@ function NavigationLayout() {
         </div>
 
         <nav>
-          <Link to="/sign-in" className="sign">
-            {/* 로그아웃같은 경우는 기능이 달라 이렇게 텍스타만 바꾸면 안되지만 임시로 해놓았습니다.*/}
-            {isLogin ? 'sign out' : 'sign in'}
-          </Link>
+          {isLogin ? (
+            <button onClick={handleLogout} className="sign">
+              sign out
+            </button>
+          ) : (
+            <Link to="/sign-in" className="sign">
+              {' '}
+              sign in{' '}
+            </Link>
+          )}
           <Link to="/category">Categories</Link>
           <Link to={isLogin ? '/create-feed' : '/sign-in'}>Create Feed</Link>
           <Link to="/about-us">About Us</Link>
@@ -160,7 +173,12 @@ const StBodyDiv = styled.div`
       margin: auto 0;
       margin-top: 0px;
 
-      a {
+      button {
+        all: unset;
+      }
+
+      a,
+      button {
         background-color: #46d7ab;
         border-radius: 5px;
         width: 200px;
