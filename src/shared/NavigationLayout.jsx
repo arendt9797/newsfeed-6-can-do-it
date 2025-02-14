@@ -28,7 +28,9 @@ function NavigationLayout() {
           <div className="tip">
             <p>이미지를 클릭하면 My Profile로 이동합니다.</p>
           </div>
-          <div> {isLogin ?`${user.name}님 환영합니다.` : "게스트님 환영합니다."} </div>
+          <div>
+            {isLogin ? `${user.name}님 환영합니다.` : '게스트님 환영합니다.'}
+          </div>
         </div>
 
         <nav>
@@ -37,7 +39,7 @@ function NavigationLayout() {
             {isLogin ? 'sign out' : 'sign in'}
           </Link>
           <Link to="/category">Categories</Link>
-          <Link to="/create-feed">Create Feed</Link>
+          <Link to={isLogin ? '/create-feed' : '/sign-in'}>Create Feed</Link>
           <Link to="/about-us">About Us</Link>
           {isLogin && <Link to="/"> My Feed </Link>}
           {isLogin && <Link to="/"> My Like</Link>}
