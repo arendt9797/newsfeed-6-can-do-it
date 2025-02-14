@@ -6,7 +6,7 @@ const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [myImage, setMyImage] = useState(null);
-  const [myName, setMyName] = useState('');
+  const [myNickname, setMyNickname] = useState('');
   const [myBlog, setMyBlog] = useState('');
   const [myGithub, setMyGithub] = useState('');
 
@@ -18,22 +18,28 @@ const Signup = () => {
 
     try {
       const {
-        data: { user: authUser },
+        data: { user: authUser }, error: signupError
       } = await supabase.auth.signUp({
         email,
         password,
       });
+      if(signupError) throw signupError
 
       const { error: storageError } = await supabase.storage
-        .from('test-signup-image') 
+        .from('profile-image') 
         .upload(`public/${myImage.name}`, myImage); 
       if (storageError) throw storageError;
 
       // 텍스트 추가 정보 public에 저장하기
-      console.log('url =====>', import.meta.env.VITE_APP_SUPABASE_URL);
       const { error: userError } = await supabase
-        .from('test_additional_py_profile')
-        .insert({ id: authUser.id, myName, myGithub, myBlog, my_profile_image_url: `${import.meta.env.VITE_APP_SUPABASE_URL}/storage/v1/object/public/test-signup-image/public/${myImage.name}`});
+        .from('users')
+        .insert({ 
+          id: authUser.id, 
+          nickname: myNickname, 
+          github: myGithub, 
+          blog: myBlog, 
+          my_profile_image_url: `${import.meta.env.VITE_APP_SUPABASE_URL}/storage/v1/object/public/test-signup-image/public/${myImage.name}`
+        });
       if (userError) throw userError;
 
       // 프로필 이미지 추가 정보 storage에 저장하기
@@ -59,8 +65,8 @@ const Signup = () => {
         <input
           type="text"
           placeholder="이름"
-          value={myName}
-          onChange={(e) => setMyName(e.target.value)}
+          value={myNickname}
+          onChange={(e) => setMyNickname(e.target.value)}
           required
         />
         <input
