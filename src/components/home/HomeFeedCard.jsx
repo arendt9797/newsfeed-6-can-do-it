@@ -9,7 +9,7 @@ const HomeFeedCard = ({ feed }) => {
 
   const getComments = async () => {
     const { data } = await supabase
-      .from('test_comments')
+      .from('comments')
       .select('*')
       .eq('feed_id', feed.id);
     setComments(data);
@@ -20,12 +20,23 @@ const HomeFeedCard = ({ feed }) => {
   }, [comment]);
 
   const handleAddComment = async (feedId) => {
-    const { data } = await supabase.from('test_comments').insert({
+    const { data } = await supabase.from('comments').insert({
       feed_id: feedId,
       comments: comment,
     });
     setComment('');
   };
+
+  //삭제 로직 AuthProvider에서 user를 전역으로 뿌려줘야 가능
+  // const handleDeleteFeed = async (id) => {
+  //   const isConfirm = window.confirm("정말 삭제하시겠습니까?");
+  //   if(isConfirm) {
+  //     const {error} = await supabase.from("comments").delete().eq("id", id);
+
+  //     if(error) throw error;
+  //     setComments((prev)=> prev.filter((feed)=> feed.id !== id));
+  //   }
+  // };
 
   return (
     <>
@@ -65,7 +76,11 @@ const HomeFeedCard = ({ feed }) => {
                     </span>
                   </li>
                   <span>
-                    <button>삭제</button>
+                    {/* {user.id === comment.writer_id && (
+                      <button onClick={() => handleDeleteFeed(comment.id)}>
+                        삭제
+                      </button>
+                    )} */}
                   </span>
                 </StCommentsContent>
               );

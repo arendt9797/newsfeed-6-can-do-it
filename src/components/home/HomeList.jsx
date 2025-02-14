@@ -12,7 +12,7 @@ const HomeList = () => {
   useEffect(() => {
     const getFeeds = async () => {
       try {
-        const { data } = await supabase.from('test_feed').select('*');
+        const { data } = await supabase.from('feeds').select('*');
         setFeeds(data);
         console.log;
       } catch (error) {
