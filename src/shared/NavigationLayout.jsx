@@ -191,5 +191,4 @@ const StBodyDiv = styled.div`
 
 const StMain = styled.main`
   flex: 1;
-  padding-left: 5vw;
 `;
