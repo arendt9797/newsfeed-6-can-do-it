@@ -1,24 +1,73 @@
+import { useEffect } from "react";
 import { useState } from "react";
 import styled from "styled-components";
+import { supabase } from "../supabase/client";
 
 function MyProfile() {
 
   const [profile, setProfile] = useState({
-    image: "",
-    userId: "test",
-    password: "test",
-    email: "test",
-    github: "test",
-    blog: "test",
+    image: "/",
+    userId: "",
+    email: "",
+    pw: "",
+    github: "",
+    blog: "",
   });
+
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("test_user_table")
+          .select("*");
+
+        if (error) throw error;
+
+        setProfile(data[0]); // test로 첫번째 유저 설정
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+
+  const handleChange = (e) => {
+    console.log(profile);
+    if (!profile) return;
+
+    const { name, value } = e.target;
+
+    setProfile((prevProfile) => ({
+      ...prevProfile,
+      [name]: value,
+    }));
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // supabase를 통해 프로필 업데이트 하는 로직
-  };
 
-  const handleChange = () => {
+    try {
+      const { error } = await supabase
+        .from("test_user_table")
+        .update({
+          pw: profile.pw,
+          email: profile.email,
+          github: profile.github,
+          blog: profile.blog,
+        })
+        .eq("userId", profile.userId).select("*");
 
+
+      if (error) throw error;
+
+      alert("신분세탁 완료!");
+    } catch (error) {
+      console.error("Update error =>", error);
+    }
   };
 
   return (
@@ -28,30 +77,29 @@ function MyProfile() {
         {/* 왼쪽: 프로필 이미지 */}
         <StImageContainer>
           <StProfileImage src={profile.image || "/src/assets/test-logo.png"} alt="프로필 이미지" />
-          <input type="file" onChange={handleChange} />
+          <input type="file" />
         </StImageContainer>
 
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
           <label>아이디</label>
-          <StInput type="text" value={profile.userId} onChange={handleChange} />
+          <StInput type="text" name="userId" value={profile.userId} readOnly />
 
           <label>비밀번호</label>
-          <StInput type="password" value={profile.password} onChange={handleChange} />
+          <StInput type="password" name="pw" value={profile.pw || ""} onChange={handleChange} />
 
           <label>E-mail</label>
-          <StInput type="email" value={profile.email} onChange={handleChange} />
+          <StInput type="email" name="email" value={profile.email || ""} onChange={handleChange} />
 
           <label>GitHub</label>
-          <StInput type="url" value={profile.github} onChange={handleChange} />
+          <StInput type="url" name="github" value={profile.github || ""} onChange={handleChange} />
 
           <label>Blog</label>
-          <StInput type="url" value={profile.blog} onChange={handleChange} />
+          <StInput type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
 
           <label>관심사?</label>
-          <input type="checkbox" />
 
-          <StButton>수정완료</StButton>
+          <StButton type="submit">수정완료</StButton>
         </StForm>
       </StFormContainer>
     </StProfileContainer>
