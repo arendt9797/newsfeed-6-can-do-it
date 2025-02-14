@@ -6,7 +6,7 @@ import { supabase } from "../supabase/client";
 function MyProfile() {
 
   const [profile, setProfile] = useState({
-    image: "/",
+    image_url: "",
     userId: "",
     email: "",
     pw: "",
@@ -35,7 +35,6 @@ function MyProfile() {
 
   // 수정 내용 입력 함수
   const handleChange = (e) => {
-    console.log(profile);
     if (!profile) return;
 
     const { name, value } = e.target;
@@ -95,8 +94,6 @@ function MyProfile() {
     //업로드된 이미지 URL 가져오기
     const { data: publicUrl } = supabase.storage.from("test-profile-images").getPublicUrl(filePath);
 
-    console.log("업로드된 이미지 url =>", publicUrl);
-
     //Table에 URL 저장
     const { error: updateError } = await supabase.from("test_user_table").update({ image_url: publicUrl.publicUrl }).eq("userId", profile.userId);
 
@@ -108,12 +105,13 @@ function MyProfile() {
     }
   };
 
+
   return (
     <StProfileContainer>
       <h2>My Profile</h2>
       {/* 왼쪽: 프로필 이미지 */}
       <StImageContainer>
-        <StProfileImage src={profile.image || "/src/assets/test-logo.png"} alt="프로필 이미지" />
+        <StProfileImage src={profile.image_url ? profile.image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
         <input type="file" onChange={handleImageChange} />
         <button onClick={handleImageUpload}>이미지 수정</button>
       </StImageContainer>
