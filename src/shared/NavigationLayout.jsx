@@ -24,7 +24,11 @@ function NavigationLayout() {
 
   // NOTE: 로그아웃
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error(error);
+      return { error };
+    }
     alert('로그아웃 되었습니다');
   };
 
@@ -43,7 +47,9 @@ function NavigationLayout() {
             <p>이미지를 클릭하면 My Profile로 이동합니다.</p>
           </div>
           <div>
-            {isLogin ? `${user.nickname}님 환영합니다.` : '게스트님 환영합니다.'}
+            {isLogin
+              ? `${user.nickname}님 환영합니다.`
+              : '게스트님 환영합니다.'}
           </div>
         </div>
 
