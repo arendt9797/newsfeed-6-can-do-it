@@ -1,10 +1,12 @@
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { supabase } from "../supabase/client";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthProvider";
 
 function MyProfile() {
 
+  const { isLogin } = useContext(AuthContext);
   const [profile, setProfile] = useState({
     image_url: "",
     userId: "",
