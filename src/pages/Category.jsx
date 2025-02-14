@@ -3,27 +3,41 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
 function Category() {
+  const interests = [
+    '영화',
+    '여행',
+    '미술',
+    '음악',
+    'DIY',
+    '운동',
+    '게임',
+    '요리',
+    '동물',
+  ];
+  const selectedInterests = ['영화', '음악', '운동'];
+  const test = interests.filter((i) => !selectedInterests.includes(i));
+
   return (
     <StCategoriesSection>
-      <Link to="/">One</Link>
+      <Link to="/">{test[0]}</Link>
       <Link to="/" className="two">
-        Two
+        {selectedInterests[0]}
       </Link>
       <Link to="/" className="three">
-        Three
+        {selectedInterests[1]}
       </Link>
       <Link to="/" className="four">
-        Four
+        {test[1]}
       </Link>
       <Link to="/" className="five">
-        Five
+        {test[2]}
       </Link>
       <Link to="/" className="six">
-        Six
+        {selectedInterests[2]}
       </Link>
-      <Link to="/">Seven</Link>
-      <Link to="/">Eight</Link>
-      <Link to="/">Nine</Link>
+      <Link to="/">{test[3]}</Link>
+      <Link to="/">{test[4]}</Link>
+      <Link to="/">{test[5]}</Link>
       {/* 기타는 고정 */}
       <Link to="/" className="ten">
         기타
