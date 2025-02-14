@@ -7,7 +7,7 @@ import { AuthContext } from '../context/AuthProvider';
 
 function NavigationLayout() {
   // const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
-  const [isLogin] = useState(true);
+  const [isLogin] = useState(false);
   //임시 user
   const user = {
     name: '육캔두잇',
@@ -22,13 +22,13 @@ function NavigationLayout() {
         </Link>
 
         <div className="profile-div">
-          <Link to="/my-profile">
+          <Link to={isLogin ? '/my-profile' : '/sign-in'}>
             <img src={profile} alt="profile" />
           </Link>
           <div className="tip">
             <p>이미지를 클릭하면 My Profile로 이동합니다.</p>
           </div>
-          <div> {user.name}님 환영합니다.</div>
+          <div> {isLogin ?`${user.name}님 환영합니다.` : "게스트님 환영합니다."} </div>
         </div>
 
         <nav>
