@@ -3,11 +3,15 @@ import HomeFeedCard from './HomeFeedCard';
 import { useEffect } from 'react';
 import { supabase } from '../../supabase/client';
 import { useState } from 'react';
+import { useContext } from 'react';
+import { AuthContext } from '../../context/AuthProvider';
+import { Link } from 'react-router-dom';
 
 const emtpyArr = Array(2).fill(0);
 
 const HomeList = () => {
   const [feeds, setFeeds] = useState([]);
+  const { isLogin } = useContext(AuthContext);
 
   useEffect(() => {
     const getFeeds = async () => {
@@ -30,7 +34,9 @@ const HomeList = () => {
         })}
       </div>
       <div>
-        <StButton>+</StButton>
+        <Link to={isLogin ? '/create-feed' : '/sign-in'}>
+          <StButton>+</StButton>
+        </Link>
       </div>
     </StHomeWrap>
   );
