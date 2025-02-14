@@ -4,16 +4,15 @@ import styled from "styled-components";
 import { supabase } from "../supabase/client";
 
 function MyProfile() {
-  const [profile, setProfile] = useState({});
 
-  // const [profile, setProfile] = useState({
-  //   image: "/",
-  //   userId: "",
-  //   email: "",
-  //   pw: "",
-  //   github: "",
-  //   blog: "",
-  // });
+  const [profile, setProfile] = useState({
+    image: "/",
+    userId: "",
+    email: "",
+    pw: "",
+    github: "",
+    blog: "",
+  });
 
 
   useEffect(() => {
@@ -24,7 +23,6 @@ function MyProfile() {
           .select("*");
 
         if (error) throw error;
-        console.log("data =>", data);
 
         setProfile(data[0]); // test로 첫번째 유저 설정
       } catch (error) {
@@ -37,11 +35,10 @@ function MyProfile() {
 
 
   const handleChange = (e) => {
-
+    console.log(profile);
     if (!profile) return;
 
     const { name, value } = e.target;
-    console.log("Input Changed => ", name, value); // 값 변경 확인
 
     setProfile((prevProfile) => ({
       ...prevProfile,
@@ -53,9 +50,8 @@ function MyProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Submitting with => ", profile);  // 실행 확인
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("test_user_table")
         .update({
           pw: profile.pw,
@@ -64,12 +60,11 @@ function MyProfile() {
           blog: profile.blog,
         })
         .eq("userId", profile.userId).select("*");
-        
-      console.log("Update response =>", data, error);  
+
 
       if (error) throw error;
 
-      alert("정보수정 완료요");
+      alert("신분세탁 완료!");
     } catch (error) {
       console.error("Update error =>", error);
     }
