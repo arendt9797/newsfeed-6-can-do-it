@@ -6,14 +6,14 @@ import { supabase } from "../supabase/client";
 function MyProfile() {
 
   const [profile, setProfile] = useState({
-    image: "/",
+    image_url: "",
     userId: "",
     email: "",
     pw: "",
     github: "",
     blog: "",
   });
-
+  const [image, setImage] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -33,9 +33,8 @@ function MyProfile() {
     fetchUserData();
   }, []);
 
-
+  // 수정 내용 입력 함수
   const handleChange = (e) => {
-    console.log(profile);
     if (!profile) return;
 
     const { name, value } = e.target;
@@ -46,7 +45,7 @@ function MyProfile() {
     }));
   };
 
-
+  // 수정 제출 함수
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -70,15 +69,53 @@ function MyProfile() {
     }
   };
 
+  //파일 선택 호출 함수
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  };
+
+  //파일 업로드 함수
+  const handleImageUpload = async () => {
+
+    // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
+    const filePath = `public/${Date.now()}_${image.name}`;
+
+
+    if (!image) return;
+
+    const { data, error } = await supabase.storage.from("test-profile-images").upload(filePath, image);
+
+    if (error) {
+      console.error("업로드실패", error.message);
+    } else {
+      console.log("업로드성공", data);
+    }
+
+    //업로드된 이미지 URL 가져오기
+    const { data: publicUrl } = supabase.storage.from("test-profile-images").getPublicUrl(filePath);
+
+    //Table에 URL 저장
+    const { error: updateError } = await supabase.from("test_user_table").update({ image_url: publicUrl.publicUrl }).eq("userId", profile.userId);
+
+    if (updateError) {
+      console.error("URL업데이트 실패", updateError.message);
+    } else {
+      console.log("이미지 URL 업데이트 성공");
+      setProfile((prev) => ({ ...prev, image_url: publicUrl.publicUrl }));
+    }
+  };
+
+
   return (
     <StProfileContainer>
       <h2>My Profile</h2>
+      {/* 왼쪽: 프로필 이미지 */}
+      <StImageContainer>
+        <StProfileImage src={profile.image_url ? profile.image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
+        <input type="file" onChange={handleImageChange} />
+        <button onClick={handleImageUpload}>이미지 수정</button>
+      </StImageContainer>
       <StFormContainer onSubmit={handleSubmit}>
-        {/* 왼쪽: 프로필 이미지 */}
-        <StImageContainer>
-          <StProfileImage src={profile.image || "/src/assets/test-logo.png"} alt="프로필 이미지" />
-          <input type="file" />
-        </StImageContainer>
 
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
@@ -148,7 +185,7 @@ const StImageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+  flex: 1;
   gap: 1rem;
 `;
 
@@ -164,6 +201,7 @@ const StProfileImage = styled.img`
 const StForm = styled.div`
   display: flex;
   flex-direction: column;
+  flex: 1;
   width: 100%;
   gap: 1rem;
 `;

@@ -1,6 +1,43 @@
 import styled from 'styled-components';
+import { supabase } from '../../supabase/client';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
-const HomeFeedCard = () => {
+const HomeFeedCard = ({ feed }) => {
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState([]);
+
+  const getComments = async () => {
+    const { data } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('feed_id', feed.id);
+    setComments(data);
+  };
+
+  useEffect(() => {
+    getComments();
+  }, [comment]);
+
+  const handleAddComment = async (feedId) => {
+    const { data } = await supabase.from('comments').insert({
+      feed_id: feedId,
+      comments: comment,
+    });
+    setComment('');
+  };
+
+  //삭제 로직 AuthProvider에서 user를 전역으로 뿌려줘야 가능
+  // const handleDeleteFeed = async (id) => {
+  //   const isConfirm = window.confirm("정말 삭제하시겠습니까?");
+  //   if(isConfirm) {
+  //     const {error} = await supabase.from("comments").delete().eq("id", id);
+
+  //     if(error) throw error;
+  //     setComments((prev)=> prev.filter((feed)=> feed.id !== id));
+  //   }
+  // };
+
   return (
     <>
       <StFeedBox>
@@ -17,12 +54,51 @@ const HomeFeedCard = () => {
               alt="이미지 에러"
               width={80}
             />
-            <StH2>title</StH2>
-            <div>content : 작성자가 작성한 내용이 들어갑니다.</div>
-            <div>comments(00)</div>
+            <StH2>{feed.title}</StH2>
+            <br />
+            <div>{feed.content}</div>
+            <br />
+            <div>comments({comments.length})</div>
           </div>
         </StFeedTop>
-        <div>댓글 컴포넌트 따로만들기(추후에)</div>
+        {comments.length > 0 && (
+          <StCommentsContainer>
+            {comments.map((comment) => {
+              return (
+                <StCommentsContent>
+                  <li>
+                    <span>
+                      <span>
+                        <img src="#" />
+                      </span>
+                      <span>이름 : </span>
+                      <span>{comment.comments}</span>
+                    </span>
+                  </li>
+                  <span>
+                    {/* {user.id === comment.writer_id && (
+                      <button onClick={() => handleDeleteFeed(comment.id)}>
+                        삭제
+                      </button>
+                    )} */}
+                  </span>
+                </StCommentsContent>
+              );
+            })}
+          </StCommentsContainer>
+        )}
+        <div>
+          <StCommentBox
+            type="text"
+            placeholder="댓글을 입력해주세요"
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+          />
+          <StCommentBtn type="submit" onClick={() => handleAddComment(feed.id)}>
+            {' '}
+            댓글 추가
+          </StCommentBtn>
+        </div>
       </StFeedBox>
     </>
   );
@@ -31,8 +107,7 @@ const HomeFeedCard = () => {
 export default HomeFeedCard;
 
 const StFeedBox = styled.div`
-  width: 500px;
-  height: 300px;
+  width: 600px;
   background-color: white;
   border-radius: 10px;
   border: 2px solid lightgrey;
@@ -56,4 +131,49 @@ const StH2 = styled.h2`
   font-size: 1.5rem;
   font-weight: 800;
   color: black;
+`;
+
+const StCommentBox = styled.input`
+  width: 75%;
+  height: 30px;
+  border: 1px solid lightgrey;
+  border-radius: 10px;
+  padding-left: 10px;
+  box-shadow: rgba(135, 135, 245, 0.2) 0px 7px 29px 0px;
+  margin-bottom: 10px;
+`;
+
+const StCommentBtn = styled.button`
+  height: 32px;
+  width: 80px;
+  margin-left: 10px;
+  background-color: #63b39b;
+  border: none;
+  border-radius: 10px;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  margin-bottom: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #285f49;
+    color: white;
+  }
+`;
+
+const StCommentsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 10px;
+  overflow-y: auto;
+  background-color: #f1f1f1;
+  border-radius: 10px;
+  margin-left: 25px;
+  margin-right: 25px;
+  margin-bottom: 5px;
+`;
+
+const StCommentsContent = styled.ul`
+  display: flex;
+  justify-content: space-between;
 `;
