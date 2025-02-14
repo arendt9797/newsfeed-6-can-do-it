@@ -13,7 +13,7 @@ function MyProfile() {
     github: "",
     blog: "",
   });
-
+  const [image, setImage] = useState('../assets/test-logo.png')
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -33,7 +33,7 @@ function MyProfile() {
     fetchUserData();
   }, []);
 
-
+  // 수정 내용 입력 함수
   const handleChange = (e) => {
     console.log(profile);
     if (!profile) return;
@@ -46,7 +46,7 @@ function MyProfile() {
     }));
   };
 
-
+  // 수정 제출 함수
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -70,6 +70,12 @@ function MyProfile() {
     }
   };
 
+  //파일 선택 호출 함수
+  const handleImageChange = (e) => {
+    setImage(e.target.files[0]);
+  }
+
+  
   return (
     <StProfileContainer>
       <h2>My Profile</h2>
@@ -77,7 +83,7 @@ function MyProfile() {
         {/* 왼쪽: 프로필 이미지 */}
         <StImageContainer>
           <StProfileImage src={profile.image || "/src/assets/test-logo.png"} alt="프로필 이미지" />
-          <input type="file" />
+          <input type="file" onChange={handleImageChange}/>
         </StImageContainer>
 
         {/* 오른쪽: 입력 필드 및 버튼 */}
