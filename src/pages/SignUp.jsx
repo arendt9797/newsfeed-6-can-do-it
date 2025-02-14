@@ -5,6 +5,7 @@ import { supabase } from '../supabase/client';
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [myImage, setMyImage] = useState(null);
   const [myName, setMyName] = useState('');
   const [myBlog, setMyBlog] = useState('');
   const [myGithub, setMyGithub] = useState('');
@@ -13,6 +14,8 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    if (!myImage) return;
+
     try {
       const {
         data: { user: authUser },
@@ -21,11 +24,19 @@ const Signup = () => {
         password,
       });
 
+      const { error: storageError } = await supabase.storage
+        .from('test-signup-image') 
+        .upload(`public/${myImage.name}`, myImage); 
+      if (storageError) throw storageError;
+
+      // 텍스트 추가 정보 public에 저장하기
+      console.log('url =====>', import.meta.env.VITE_APP_SUPABASE_URL);
       const { error: userError } = await supabase
         .from('test_additional_py_profile')
-        .insert({ id: authUser.id, myName, myGithub, myBlog });
-
+        .insert({ id: authUser.id, myName, myGithub, myBlog, my_profile_image_url: `${import.meta.env.VITE_APP_SUPABASE_URL}/storage/v1/object/public/test-signup-image/public/${myImage.name}`});
       if (userError) throw userError;
+
+      // 프로필 이미지 추가 정보 storage에 저장하기
       // alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
       // navigate("/sign-in");
     } catch (error) {
@@ -41,6 +52,10 @@ const Signup = () => {
         onSubmit={handleSignup}
         style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
       >
+        <input
+          type="file"
+          onChange={(e) => setMyImage(e.target.files[0])}
+        />
         <input
           type="text"
           placeholder="이름"
