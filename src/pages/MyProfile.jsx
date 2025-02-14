@@ -41,7 +41,14 @@ function MyProfile() {
         if (userError) throw userError;
 
         // 3. profile 상태 업데이트
-        setProfile();
+        setProfile({
+          nickname: userData?.nickname || "",
+          email: userEmail, // 이메일은 auth에서 가져옴
+          password: "********", // 보안상 비밀번호는 표시하지 않음
+          github: userData?.github || "",
+          blog: userData?.blog || "",
+          my_profile_image_url: userData?.my_profile_image_url || "",
+        });
 
       } catch (error) {
         console.error(error);
@@ -76,7 +83,7 @@ function MyProfile() {
           github: profile.github,
           blog: profile.blog,
         })
-        .eq("userId", profile.userId).select("*");
+        .eq("email", profile.email).select("*");
 
 
       if (error) throw error;
