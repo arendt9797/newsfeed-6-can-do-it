@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import logo from '../assets/test-logo.png';
 import profile from '../assets/test-profile.png';
 import { AuthContext } from '../context/AuthProvider';
-
+import { useState } from 'react';
 function NavigationLayout() {
   // const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
   const [isLogin] = useState(false);
