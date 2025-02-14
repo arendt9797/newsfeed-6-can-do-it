@@ -73,22 +73,32 @@ const CreateFeed = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  // useEffect 제거: 사용자 입력에 따른 삽입은 버튼 클릭 시에만 수행하도록 함
-
   const handleAddFeed = async () => {
     console.log('handleAddFeed 호출됨');
+
+    // const {
+    //   data: { users },
+    //   error: authError,
+    // } = await supabase.auth.getUser();
+    // //현재 로그인 한 사용자의 정보 불러오기
+    // //2025.02.14 기준 로그아웃 상태에서 콘솔에서 에러 확인
+    // if (authError) {
+    //   console.log('auth에러', authError);
+    // }
+
     try {
       const { data, error } = await supabase
-        .from('testFeed2')
-        .insert([{ title, content }]); // 배열로 전달
+        .from('feeds')
+        .insert([{ title, content}]);
+      //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id 
       if (error) {
         console.log('error=>', error);
       } else {
-        alert('데이터 입력 완료');
-        console.log('삽입된 데이터:', data);
+        alert('데이터 입력 성공');
+        console.log(data);
       }
     } catch (error) {
-      console.error('Insertion error:', error);
+      console.error('error=>', error);
     }
   };
 
