@@ -83,7 +83,8 @@ function MyProfile() {
         {/* 왼쪽: 프로필 이미지 */}
         <StImageContainer>
           <StProfileImage src={profile.image || "/src/assets/test-logo.png"} alt="프로필 이미지" />
-          <input type="file" onChange={handleImageChange}/>
+          <input type="file" onChange={handleImageChange} style={{ display: "none"}}/>
+          <button>이미지 수정</button>
         </StImageContainer>
 
         {/* 오른쪽: 입력 필드 및 버튼 */}
@@ -154,7 +155,7 @@ const StImageContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+  flex: 1;
   gap: 1rem;
 `;
 
@@ -170,6 +171,7 @@ const StProfileImage = styled.img`
 const StForm = styled.div`
   display: flex;
   flex-direction: column;
+  flex: 1;
   width: 100%;
   gap: 1rem;
 `;
