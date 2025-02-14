@@ -74,15 +74,37 @@ function MyProfile() {
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
   };
+
+  //파일 업로드 함수
   const handleImageUpload = async () => {
+
+    // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
+    const filePath = `public/${Date.now()}_${image.name}`;
+
+
     if (!image) return;
 
-    const { data, error } = await supabase.storage.from("test-profile-images").upload(`public/${image.name}`, image);
+    const { data, error } = await supabase.storage.from("test-profile-images").upload(filePath, image);
 
     if (error) {
       console.error("업로드실패", error.message);
     } else {
       console.log("업로드성공", data);
+    }
+
+    //업로드된 이미지 URL 가져오기
+    const { data: publicUrl } = supabase.storage.from("test-profile-images").getPublicUrl(filePath);
+
+    console.log("업로드된 이미지 url =>", publicUrl);
+
+    //Table에 URL 저장
+    const { error: updateError } = await supabase.from("test_user_table").update({ image_url: publicUrl.publicUrl }).eq("userId", profile.userId);
+
+    if (updateError) {
+      console.error("URL업데이트 실패", updateError.message);
+    } else {
+      console.log("이미지 URL 업데이트 성공");
+      setProfile((prev) => ({ ...prev, image_url: publicUrl.publicUrl }));
     }
   };
 
