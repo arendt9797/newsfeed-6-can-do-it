@@ -26,28 +26,30 @@ function MyProfile() {
       try {
         // 1. 로그인한 사용자 정보 가져오기 (auth)
         const { data: authData, error: authError } = await supabase.auth.getUser();
-
+        console.log(authData);
         if (authError) throw authError;
+        const userId = authData.user.id;
         const userEmail = authData.user.email;
         console.log(userEmail);
+        console.log(userId)
 
         // 2. users 테이블에서 추가적인 유저정보 가져오기 (로그인한 유저)
         const { data: userData, error: userError } = await supabase
           .from("users")
           .select("nickname, github, blog, my_profile_image_url")
-          .eq("email", userEmail)
+          .eq("id", userId)
           .single()
 
         if (userError) throw userError;
 
         // 3. profile 상태 업데이트
         setProfile({
-          nickname: userData?.nickname || "",
-          email: userEmail, // 이메일은 auth에서 가져옴
-          password: "********", // 보안상 비밀번호는 표시하지 않음
-          github: userData?.github || "",
-          blog: userData?.blog || "",
-          my_profile_image_url: userData?.my_profile_image_url || "",
+          nickname: userData.nickname ,
+          email: userEmail,
+          password: "********", 
+          github: userData.github ,
+          blog: userData.blog,
+          my_profile_image_url: userData.my_profile_image_url,
         });
 
       } catch (error) {
