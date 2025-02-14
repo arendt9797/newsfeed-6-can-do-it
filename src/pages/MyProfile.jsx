@@ -9,7 +9,6 @@ function MyProfile() {
   const { isLogin } = useContext(AuthContext);
   const [profile, setProfile] = useState({
     image_url: "",
-    userId: "",
     nickname: "",
     email: "",
     password: "",
@@ -19,22 +18,31 @@ function MyProfile() {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
+    //로그인이 아닐시 실행안함
+    if (!isLogin) return;
+
     const fetchUserData = async () => {
+
       try {
-        const { data, error } = await supabase
-          .from("users")
-          .select("*");
+        // 1. 로그인한 사용자 정보 가져오기 (auth)
+        const { data: authData, error: authError } = await supabase.auth.getUser();
 
-        if (error) throw error;
+        if (authError) throw authError;
+        const userEmail = authData.user.email;
+        console.log(userEmail);
 
-        setProfile(data[0]); // test로 첫번째 유저 설정
+        // 2. users 테이블에서 추가적인 유저정보 가져오기 (로그인한 유저)
+
+        // 3. profile 상태 업데이트
+        setProfile();
+
       } catch (error) {
         console.error(error);
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [isLogin]);
 
   // 수정 내용 입력 함수
   const handleChange = (e) => {
@@ -106,7 +114,6 @@ function MyProfile() {
     const { error: updateError } = await supabase
       .from("users")
       .update({ my_profile_image_url: publicUrl.publicUrl })
-      .eq("userId", profile.userId);
 
     if (updateError) {
       console.error("URL업데이트 실패", updateError.message);
@@ -130,17 +137,14 @@ function MyProfile() {
 
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
-          <label>아이디</label>
-          <StInput type="text" name="userId" value={profile.userId} readOnly />
+          <label>E-mail</label>
+          <StInput type="email" name="userId" value={profile.email} readOnly />
 
           <label>닉네임</label>
           <StInput type="text" name="nickname" value={profile.nickname} onChange={handleChange} />
 
           <label>비밀번호</label>
           <StInput type="password" name="password" value={profile.password || ""} onChange={handleChange} />
-
-          <label>E-mail</label>
-          <StInput type="email" name="email" value={profile.email || ""} onChange={handleChange} />
 
           <label>GitHub</label>
           <StInput type="url" name="github" value={profile.github || ""} onChange={handleChange} />
