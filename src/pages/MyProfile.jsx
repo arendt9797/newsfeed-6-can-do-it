@@ -32,6 +32,13 @@ function MyProfile() {
         console.log(userEmail);
 
         // 2. users 테이블에서 추가적인 유저정보 가져오기 (로그인한 유저)
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("nickname, github, blog, my_profile_image_url")
+          .eq("email", userEmail)
+          .single()
+
+        if (userError) throw userError;
 
         // 3. profile 상태 업데이트
         setProfile();
