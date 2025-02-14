@@ -21,7 +21,6 @@ const Signup = () => {
         : [...prev, category];
     });
   };
-  console.log('selectedInterests =====>', selectedInterests);
 
   const handleSignup = async (e) => {
     e.preventDefault();
