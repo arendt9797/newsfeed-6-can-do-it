@@ -1,4 +1,3 @@
-import { useContext, useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 import logo from '../assets/test-logo.png';
