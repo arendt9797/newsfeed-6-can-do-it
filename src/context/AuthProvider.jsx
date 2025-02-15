@@ -32,7 +32,7 @@ function AuthProvider({ children }) {
         `,
         )
         .eq('id', session.user.id)
-        .maybeSingle(); // [ { ... } ] 형태로 반환하기 때문에 single()로 내부 하나의 객체만 가져온다
+        .maybeSingle(); // single 대신 maybeSingle. 데이터가 없더라도 null을 반환하도록 함 (에러 방지)
       if (error) throw error;
       setUser({ ...session.user, ...userData });
     } catch (error) {
