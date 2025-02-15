@@ -7,7 +7,7 @@ import { ETC } from '../constants/categoryName';
 
 function Category() {
   const { isLogin, user } = useContext(AuthContext);
-  const myInterests = user?.user_interests.map((i) => i.user_interest) || [];
+  const myInterests = user?.user_interests?.map((i) => i.user_interest) || [];
   const others = categories.filter(
     (i) => !myInterests.includes(i) && i !== ETC
   );
