@@ -7,13 +7,13 @@ import { AuthContext } from '../context/AuthProvider';
 function Category() {
   const { isLogin, user } = useContext(AuthContext);
   const myInterests = user?.user_interests.map((i) => i.user_interest) || [];
-  const etc = categories.filter(
+  const others = categories.filter(
     (i) => !myInterests.includes(i) && i !== '기타',
   );
 
   return (
     <StCategoriesSection>
-      <Link to="/">{isLogin ? etc[0] : categories[0]}</Link>
+      <Link to="/">{isLogin ? others[0] : categories[0]}</Link>
       <Link to="/" className="two">
         {isLogin ? myInterests[0] : categories[1]}
       </Link>
@@ -21,17 +21,17 @@ function Category() {
         {isLogin ? myInterests[1] : categories[2]}
       </Link>
       <Link to="/" className="four">
-        {isLogin ? etc[1] : categories[3]}
+        {isLogin ? others[1] : categories[3]}
       </Link>
       <Link to="/" className="five">
-        {isLogin ? etc[2] : categories[4]}
+        {isLogin ? others[2] : categories[4]}
       </Link>
       <Link to="/" className="six">
         {isLogin ? myInterests[2] : categories[5]}
       </Link>
-      <Link to="/">{isLogin ? etc[3] : categories[6]}</Link>
-      <Link to="/">{isLogin ? etc[4] : categories[7]}</Link>
-      <Link to="/">{isLogin ? etc[5] : categories[8]}</Link>
+      <Link to="/">{isLogin ? others[3] : categories[6]}</Link>
+      <Link to="/">{isLogin ? others[4] : categories[7]}</Link>
+      <Link to="/">{isLogin ? others[5] : categories[8]}</Link>
       {/* 기타는 고정 */}
       <Link to="/" className="ten">
         기타
