@@ -81,8 +81,9 @@ function MyProfile() {
           nickname: profile.nickname,
           github: profile.github,
           blog: profile.blog,
+          my_profile_image_url: profile.my_profile_image_url,
         })
-        .eq("id", profile.id).select("*");
+        .eq("id", profile.id);
 
 
       if (error) throw error;
@@ -151,7 +152,7 @@ function MyProfile() {
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
           <label>E-mail</label>
-          <StInput type="email" name="userEmail" value={profile.email} readOnly />
+          <StInput type="email" name="email" value={profile.email} readOnly />
 
           <label>닉네임</label>
           <StInput type="text" name="nickname" value={profile.nickname} onChange={handleChange} />
