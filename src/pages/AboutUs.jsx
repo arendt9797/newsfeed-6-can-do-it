@@ -24,78 +24,123 @@ function AboutUs() {
   }, []);
 
   return (
-    <StyledAboutUsContainer>
-      <div>
-        <StyledAboutUsTitle>Hi Developer!</StyledAboutUsTitle>
-        <StyledTeamMemberList>
-          {users && users.length > 0 ? (
-            users.map((user) => (
-              <StyledTeamMemberCard key={user.id}>
-                <StyledMemberPhoto
-                  src={user.my_profile_image_url}
-                  alt={user.nickname || 'User'}
-                />
-                <StyledMemberInfo>
-                  <h3>{user.nickname}</h3>
-                  {user.github && (
-                    <p>
-                      <a href={user.github} target="_blank">
-                        Github
-                      </a>
-                    </p>
-                  )}
-                  {user.blog && (
-                    <p>
-                      <a href={user.blog} target="_blank">
-                        Blog
-                      </a>
-                    </p>
-                  )}
-                </StyledMemberInfo>
-              </StyledTeamMemberCard>
-            ))
-          ) : (
-            <p>등록된 사용자가 없습니다.</p>
-          )}
-        </StyledTeamMemberList>
-      </div>
-    </StyledAboutUsContainer>
+    <>
+      <StyledAboutUsContainer>
+        <div>
+          <StyledAboutUsTitle>Meet Our Developers</StyledAboutUsTitle>
+          <StyledTeamMemberList>
+            {users && users.length > 0 ? (
+              users.map((user) => (
+                <StyledTeamMemberCard key={user.id}>
+                  <StyledMemberPhoto
+                    src={user.my_profile_image_url}
+                    alt={user.nickname || 'User'}
+                  />
+                  <StyledMemberInfo>
+                    <h3>{user.nickname}</h3>
+                    <StyledLinks>
+                      {user.github && (
+                        <StyledLink href={user.github} target="_blank">
+                          <img
+                            src="https://cdn-icons-png.flaticon.com/512/25/25231.png"
+                            alt="Github"
+                          />
+                        </StyledLink>
+                      )}
+                      {user.blog && (
+                        <StyledLink href={user.blog} target="_blank">
+                          <img
+                            src="https://cdn-icons-png.flaticon.com/128/3669/3669981.png"
+                            alt="Blog"
+                          />
+                        </StyledLink>
+                      )}
+                    </StyledLinks>
+                  </StyledMemberInfo>
+                </StyledTeamMemberCard>
+              ))
+            ) : (
+              <p>등록된 사용자가 없습니다.</p>
+            )}
+          </StyledTeamMemberList>
+        </div>
+      </StyledAboutUsContainer>
+    </>
   );
 }
 
-const StyledAboutUsTitle = styled.h1`
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 1rem;
-`;
 const StyledAboutUsContainer = styled.div`
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 2rem;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+`;
+
+const StyledAboutUsTitle = styled.h1`
+  text-align: center;
+  font-size: 3.5rem;
+  color: #333;
+  margin-bottom: 2rem;
 `;
 
 const StyledTeamMemberList = styled.ul`
-  list-style-type: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2.5rem;
   padding: 0;
+  list-style: none;
+  width: 100%;
+  max-width: 1200px;
 `;
 
 const StyledTeamMemberCard = styled.li`
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
   display: flex;
-  float: left;
+  flex-direction: column;
   align-items: center;
-  width: 500px;
-  height: 150px;
-  margin: 20px 90px;
-  border: 1px solid #ccc;
-  padding: 10px;
+  transition: transform 0.3s ease;
+  &:hover {
+    transform: translateY(-5px);
+  }
 `;
 
 const StyledMemberPhoto = styled.img`
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
   border-radius: 50%;
-  width: 100px;
-  height: 100px;
-  margin-right: 20px;
-  margin-left: 5px;
+  border: 3px solid #ddd;
+  margin-bottom: 1rem;
 `;
 
-const StyledMemberInfo = styled.div``;
+const StyledMemberInfo = styled.div`
+  text-align: center;
+  h3 {
+    margin-bottom: 1rem;
+    color: #444;
+  }
+`;
+
+const StyledLinks = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+`;
+
+const StyledLink = styled.a`
+  display: inline-block;
+  img {
+    width: 28px;
+    height: 28px;
+    transition: transform 0.2s ease;
+  }
+  &:hover img {
+    transform: scale(1.1);
+  }
+`;
 
 export default AboutUs;
