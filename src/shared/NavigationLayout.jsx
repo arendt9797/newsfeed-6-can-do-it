@@ -6,21 +6,7 @@ import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import { useContext, useEffect, useState } from 'react';
 function NavigationLayout() {
-  const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
-
-  const [user, setUser] = useState('');
-
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data } = await supabase.from('users').select('*');
-        setUser(data[0]); //임시로 해놓은 유저입니다!
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getUser();
-  }, []);
+  const { isLogin, user } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
 
   // NOTE: 로그아웃
   const handleLogout = async () => {
