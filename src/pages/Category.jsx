@@ -4,35 +4,46 @@ import { Link } from 'react-router-dom';
 import categories from '../constants/categories';
 import { AuthContext } from '../context/AuthProvider';
 import { ETC } from '../constants/categoryName';
+import logo from '../assets/test-logo.png';
 
 function Category() {
   const { isLogin, user } = useContext(AuthContext);
   const myInterests = user?.user_interests?.map((i) => i.user_interest) || [];
   const others = categories.filter(
-    (i) => !myInterests.includes(i) && i !== ETC
+    (i) => !myInterests.includes(i) && i !== ETC,
   );
+
+  const categoriesData = [
+    { className: 'one', loginValue: others[0], defaultValue: categories[0] },
+    {
+      className: 'two',
+      loginValue: myInterests[0],
+      defaultValue: categories[1],
+    },
+    {
+      className: 'three',
+      loginValue: myInterests[1],
+      defaultValue: categories[2],
+    },
+    { className: 'four', loginValue: others[1], defaultValue: categories[3] },
+    { className: 'five', loginValue: others[2], defaultValue: categories[4] },
+    {
+      className: 'six',
+      loginValue: myInterests[2],
+      defaultValue: categories[5],
+    },
+    { className: 'seven', loginValue: others[3], defaultValue: categories[6] },
+    { className: 'eight', loginValue: others[4], defaultValue: categories[7] },
+    { className: 'nine', loginValue: others[5], defaultValue: categories[8] },
+  ];
 
   return (
     <StCategoriesSection>
-      <Link to="/">{isLogin ? others[0] : categories[0]}</Link>
-      <Link to="/" className="two">
-        {isLogin ? myInterests[0] : categories[1]}
-      </Link>
-      <Link to="/" className="three">
-        {isLogin ? myInterests[1] : categories[2]}
-      </Link>
-      <Link to="/" className="four">
-        {isLogin ? others[1] : categories[3]}
-      </Link>
-      <Link to="/" className="five">
-        {isLogin ? others[2] : categories[4]}
-      </Link>
-      <Link to="/" className="six">
-        {isLogin ? myInterests[2] : categories[5]}
-      </Link>
-      <Link to="/">{isLogin ? others[3] : categories[6]}</Link>
-      <Link to="/">{isLogin ? others[4] : categories[7]}</Link>
-      <Link to="/">{isLogin ? others[5] : categories[8]}</Link>
+      {categoriesData.map((c) => (
+        <Link key={c.className} to="/" className={c.className}>
+          {isLogin ? c.loginValue : c.defaultValue}
+        </Link>
+      ))}
       {/* 기타는 고정 */}
       <Link to="/" className="ten">
         {ETC}
@@ -54,6 +65,9 @@ const StCategoriesSection = styled.section`
 
   a {
     background-color: #bab7b72d;
+    /* background-image: url(${logo});
+    background-position: center;
+    background-size: cover; */
     border-radius: 14px;
     text-decoration: none;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
