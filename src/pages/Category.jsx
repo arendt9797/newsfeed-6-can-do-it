@@ -1,21 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import categories from '../constants/categories';
 
 function Category() {
-  const interests = [
-    '영화',
-    '여행',
-    '미술',
-    '음악',
-    'DIY',
-    '운동',
-    '게임',
-    '요리',
-    '동물',
-  ];
   const selectedInterests = ['영화', '음악', '운동'];
-  const test = interests.filter((i) => !selectedInterests.includes(i));
+  const test = categories.filter(
+    (i) => !selectedInterests.includes(i) && i !== '기타',
+  );
 
   return (
     <StCategoriesSection>
