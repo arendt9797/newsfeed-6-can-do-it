@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../supabase/client';
 import categories from '../constants/categories';
 import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from 'uuid';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -11,9 +12,9 @@ const Signup = () => {
   const [myBlog, setMyBlog] = useState('');
   const [myGithub, setMyGithub] = useState('');
   const [selectedInterests, setSelectedInterests] = useState([]);
-
   const navigate = useNavigate();
-
+  
+  // 내 관심 카테고리 선택
   const toggleInterest = (category) => {
     setSelectedInterests((prev) => {
       if (prev.includes(category)) {
@@ -28,10 +29,12 @@ const Signup = () => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    // 프로필 사진 필수 업로드
     if (!myImage) {
       console.error('프로필 사진을 올려주세요!');
       return;
     }
+    // 카테고리 필수 3개 선택
     if (selectedInterests.length < 3) {
       console.error('3개를 선택해주세요!');
       return;
@@ -48,9 +51,12 @@ const Signup = () => {
       if (signupError) throw signupError;
 
       // 프로필 이미지 추가 정보 storage에 저장
+      // 파일 중복 및 한글 파일명 오류 해결을 위해 uuid를 활용하여 파일명 변경
+      const imageExt = myImage.name.split('.').pop(); // 확장자 추출
+      const uniqueImageName = `${uuidv4()}.${imageExt}`; // UUID + 원래 확장자
       const { error: storageError } = await supabase.storage
         .from('profile-image')
-        .upload(`public/${myImage.name}`, myImage);
+        .upload(`public/${uniqueImageName}`, myImage);
       if (storageError) throw storageError;
 
       // 텍스트 추가 정보 public users에 저장
