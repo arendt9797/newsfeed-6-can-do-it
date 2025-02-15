@@ -16,15 +16,26 @@ const Signup = () => {
 
   const toggleInterest = (category) => {
     setSelectedInterests((prev) => {
-      return prev.includes(category)
-        ? prev.filter((selected) => selected !== category)
-        : [...prev, category];
+      if (prev.includes(category)) {
+        return prev.filter((selected) => selected !== category);
+      } else if (prev.length < 3) {
+        return [...prev, category];
+      } else {
+        return prev;
+      }
     });
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    if (!myImage) return;
+    if (!myImage) {
+      console.error('프로필 사진을 올려주세요!');
+      return;
+    }
+    if (selectedInterests.length < 3) {
+      console.error('3개를 선택해주세요!');
+      return;
+    }
 
     try {
       const {
@@ -36,6 +47,7 @@ const Signup = () => {
       });
       if (signupError) throw signupError;
 
+      // 프로필 이미지 추가 정보 storage에 저장하기
       const { error: storageError } = await supabase.storage
         .from('profile-image')
         .upload(`public/${myImage.name}`, myImage);
@@ -53,7 +65,21 @@ const Signup = () => {
       });
       if (userError) throw userError;
 
-      // 프로필 이미지 추가 정보 storage에 저장하기
+      // my_interests 테이블에 카테고리 정보 삽입. 각 카테고리 당 하나의 행을 삽입해야함
+      // user_id 속성은 context에서 가져와야 한다... 가 아닌가? 로그인한 상태가 아니잖아.
+      // 위의 코드가 순서대로 실행되니까 현재 로그인한 유저 정보가 있다고 봐야하나?
+      // 로그인 실패해도 이미지 파일은 그대로 올라가는거 보면 그럴지도.
+      // 아니구나!! authUser.id를 사용하면 되네!!!!!!!!!!
+      const { error: categoryError } = await supabase
+        .from('my_interests')
+        .insert(
+          selectedInterests.map((interest) => ({
+            user_id: authUser.id,
+            user_interest: interest,
+          })),
+        );
+      if (categoryError) throw categoryError;
+
       // alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
       // navigate("/sign-in");
     } catch (error) {
@@ -61,7 +87,7 @@ const Signup = () => {
       console.error('회원가입 오류:', error);
     }
   };
-
+  
   return (
     <div>
       <h2>회원가입 페이지</h2>
