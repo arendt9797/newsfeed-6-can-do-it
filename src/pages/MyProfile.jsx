@@ -78,7 +78,6 @@ function MyProfile() {
         .from("users")
         .update({
           nickname: profile.nickname,
-          email: profile.email,
           github: profile.github,
           blog: profile.blog,
         })
@@ -108,7 +107,7 @@ function MyProfile() {
     // storage에 이미지 업로드
     const { data, error } = await supabase
       .storage
-      .from("profile-images")
+      .from("profile-image")
       .upload(filePath, image);
 
     if (error) {
@@ -120,7 +119,7 @@ function MyProfile() {
     //storage에 업로드된 이미지 URL 가져오기
     const { data: publicUrl } = supabase
       .storage
-      .from("profile-images")
+      .from("profile-image")
       .getPublicUrl(filePath);
 
     //table에 URL 저장
@@ -151,7 +150,7 @@ function MyProfile() {
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
           <label>E-mail</label>
-          <StInput type="email" name="userId" value={profile.email} readOnly />
+          <StInput type="email" name="userEmail" value={profile.email} readOnly />
 
           <label>닉네임</label>
           <StInput type="text" name="nickname" value={profile.nickname} onChange={handleChange} />
