@@ -4,15 +4,23 @@ import logo from '../assets/test-logo.png';
 import profile from '../assets/test-profile.png';
 import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 function NavigationLayout() {
   const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
 
-  //임시 user
-  const user = {
-    name: '육캔두잇',
-    age: 66,
-  };
+  const [user, setUser] = useState('');
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data } = await supabase.from('users').select('*');
+        setUser(data[0]); //임시로 해놓은 유저입니다!
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getUser();
+  }, []);
 
   // NOTE: 로그아웃
   const handleLogout = async () => {
@@ -35,7 +43,7 @@ function NavigationLayout() {
             <p>이미지를 클릭하면 My Profile로 이동합니다.</p>
           </div>
           <div>
-            {isLogin ? `${user.name}님 환영합니다.` : '게스트님 환영합니다.'}
+            {isLogin ? `${user.nickname}님 환영합니다.` : '게스트님 환영합니다.'}
           </div>
         </div>
 
