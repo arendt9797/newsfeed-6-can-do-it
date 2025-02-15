@@ -41,6 +41,7 @@ function MyProfile() {
 
         // 3. profile 상태 업데이트
         setProfile({
+          id: userData.id,
           nickname: userData.nickname,
           email: authData.user.email,
           password: "********",
