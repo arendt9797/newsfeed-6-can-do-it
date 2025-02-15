@@ -41,7 +41,7 @@ function MyProfile() {
 
         // 3. profile 상태 업데이트
         setProfile({
-          id: userData.id,
+          id: userId,
           nickname: userData.nickname,
           email: authData.user.email,
           password: "********",
@@ -50,6 +50,7 @@ function MyProfile() {
           my_profile_image_url: userData.my_profile_image_url,
         });
 
+        console.log("updated profile =>", userData);
       } catch (error) {
         console.error(error);
       }
@@ -75,7 +76,7 @@ function MyProfile() {
     e.preventDefault();
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("users")
         .update({
           nickname: profile.nickname,
@@ -83,8 +84,9 @@ function MyProfile() {
           blog: profile.blog,
           my_profile_image_url: profile.my_profile_image_url,
         })
-        .eq("id", profile.id);
-
+        .eq("id", profile.id).select();
+      console.log("profileId =>", profile.id);
+      console.log("data =>", data);
 
       if (error) throw error;
 
@@ -127,7 +129,8 @@ function MyProfile() {
     //table에 URL 저장
     const { error: updateError } = await supabase
       .from("users")
-      .update({ my_profile_image_url: publicUrl.publicUrl });
+      .update({ my_profile_image_url: publicUrl.publicUrl })
+      .eq("id", profile.id);
 
     if (updateError) {
       console.error("URL업데이트 실패", updateError.message);
