@@ -3,12 +3,13 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import categories from '../constants/categories';
 import { AuthContext } from '../context/AuthProvider';
+import { ETC } from '../constants/categoryName';
 
 function Category() {
   const { isLogin, user } = useContext(AuthContext);
   const myInterests = user?.user_interests.map((i) => i.user_interest) || [];
   const others = categories.filter(
-    (i) => !myInterests.includes(i) && i !== '기타',
+    (i) => !myInterests.includes(i) && i !== ETC,
   );
 
   return (
