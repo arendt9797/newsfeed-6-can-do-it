@@ -34,7 +34,7 @@ function NavigationLayout() {
           </div>
           <div>
             {isLogin
-              ? `${user.nickname}님 환영합니다.`
+              ? `${user?.nickname}님 환영합니다.`
               : '게스트님 환영합니다.'}
           </div>
         </div>
