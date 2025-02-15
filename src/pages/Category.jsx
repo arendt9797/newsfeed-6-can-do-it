@@ -14,27 +14,27 @@ function Category() {
   );
 
   const categoriesData = [
-    { className: 'one', login: others[0], default: categories[0] },
-    { className: 'two', login: myInterests[0], default: categories[1] },
-    { className: 'three', login: myInterests[1], default: categories[2] },
-    { className: 'four', login: others[1], default: categories[3] },
-    { className: 'five', login: others[2], default: categories[4] },
-    { className: 'six', login: myInterests[2], default: categories[5] },
-    { className: 'seven', login: others[3], default: categories[6] },
-    { className: 'eight', login: others[4], default: categories[7] },
-    { className: 'nine', login: others[5], default: categories[8] },
+    { class: 'one', login: others[0], default: categories[0] },
+    { class: 'two', login: myInterests[0], default: categories[1] },
+    { class: 'three', login: myInterests[1], default: categories[2] },
+    { class: 'four', login: others[1], default: categories[3] },
+    { class: 'five', login: others[2], default: categories[4] },
+    { class: 'six', login: myInterests[2], default: categories[5] },
+    { class: 'seven', login: others[3], default: categories[6] },
+    { class: 'eight', login: others[4], default: categories[7] },
+    { class: 'nine', login: others[5], default: categories[8] },
   ];
 
   return (
     <StCategoriesSection>
-      {categoriesData.map((c) => (
-        <Link key={c.className} to="/" className={c.className}>
-          {isLogin ? c.login : c.default}
+      {categoriesData.map((c, i) => (
+        <Link key={i} to="/" className={c.class}>
+          <p>{isLogin ? c.login : c.default}</p>
         </Link>
       ))}
       {/* 기타는 고정 */}
       <Link to="/" className="ten">
-        {ETC}
+        <p> {ETC} </p>
       </Link>
     </StCategoriesSection>
   );
@@ -61,12 +61,18 @@ const StCategoriesSection = styled.section`
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     color: black;
-    padding: 10px;
 
     &:hover {
       box-shadow: 0 14px 28px rgba(0, 0, 0, 0.13),
         0 10px 10px rgba(0, 0, 0, 0.11);
       cursor: pointer;
+    }
+
+    p {
+      font-size: 20px;
+      background-color: #46d7ab;
+      padding: 5px;
+      border-radius: 14px 14px 0 0;
     }
   }
 
