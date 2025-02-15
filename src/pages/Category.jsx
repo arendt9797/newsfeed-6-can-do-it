@@ -1,35 +1,37 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import categories from '../constants/categories';
+import { AuthContext } from '../context/AuthProvider';
 
 function Category() {
-  const selectedInterests = ['영화', '음악', '운동'];
-  const test = categories.filter(
-    (i) => !selectedInterests.includes(i) && i !== '기타',
+  const { isLogin, user } = useContext(AuthContext);
+  const myInterests = user?.user_interests.map((i) => i.user_interest) || [];
+  const etc = categories.filter(
+    (i) => !myInterests.includes(i) && i !== '기타',
   );
 
   return (
     <StCategoriesSection>
-      <Link to="/">{test[0]}</Link>
+      <Link to="/">{isLogin ? etc[0] : categories[0]}</Link>
       <Link to="/" className="two">
-        {selectedInterests[0]}
+        {isLogin ? myInterests[0] : categories[1]}
       </Link>
       <Link to="/" className="three">
-        {selectedInterests[1]}
+        {isLogin ? myInterests[1] : categories[2]}
       </Link>
       <Link to="/" className="four">
-        {test[1]}
+        {isLogin ? etc[1] : categories[3]}
       </Link>
       <Link to="/" className="five">
-        {test[2]}
+        {isLogin ? etc[2] : categories[4]}
       </Link>
       <Link to="/" className="six">
-        {selectedInterests[2]}
+        {isLogin ? myInterests[2] : categories[5]}
       </Link>
-      <Link to="/">{test[3]}</Link>
-      <Link to="/">{test[4]}</Link>
-      <Link to="/">{test[5]}</Link>
+      <Link to="/">{isLogin ? etc[3] : categories[6]}</Link>
+      <Link to="/">{isLogin ? etc[4] : categories[7]}</Link>
+      <Link to="/">{isLogin ? etc[5] : categories[8]}</Link>
       {/* 기타는 고정 */}
       <Link to="/" className="ten">
         기타
