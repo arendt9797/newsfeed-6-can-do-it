@@ -9,9 +9,12 @@ function AboutUs() {
   useEffect(() => {
     const fetchUsers = async () => {
       // users 테이블 데이터 가져오기
-      const { data, error } = await supabase.from('users').select('*');
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('role', 'developer'); // role 값이 developer인 사용자만
       if (error) {
-        console.error('사용자 정보 가져오기 오류:', error);
+        console.error('개발자 정보 가져오기 오류:', error);
       } else {
         setUsers(data);
       }
@@ -23,10 +26,7 @@ function AboutUs() {
   return (
     <StyledAboutUsContainer>
       <div>
-        <h1>About Our Project</h1>
-      </div>
-      <div>
-        <h2>Hi Developer!</h2>
+        <StyledAboutUsTitle>Hi Developer!</StyledAboutUsTitle>
         <StyledTeamMemberList>
           {users && users.length > 0 ? (
             users.map((user) => (
@@ -63,6 +63,11 @@ function AboutUs() {
   );
 }
 
+const StyledAboutUsTitle = styled.h1`
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+`;
 const StyledAboutUsContainer = styled.div`
   margin: 0 auto;
 `;
