@@ -1,39 +1,90 @@
 import { useState } from 'react';
 import { supabase } from '../supabase/client';
-// import { useNavigate } from "react-router-dom";
+import categories from '../constants/categories';
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [myName, setMyName] = useState('');
+  const [myImage, setMyImage] = useState(null);
+  const [myNickname, setMyNickname] = useState('');
   const [myBlog, setMyBlog] = useState('');
   const [myGithub, setMyGithub] = useState('');
+  const [selectedInterests, setSelectedInterests] = useState([]);
 
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  const toggleInterest = (category) => {
+    setSelectedInterests((prev) => {
+      if (prev.includes(category)) {
+        return prev.filter((selected) => selected !== category);
+      } else if (prev.length < 3) {
+        return [...prev, category];
+      } else {
+        return prev;
+      }
+    });
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    if (!myImage) {
+      console.error('프로필 사진을 올려주세요!');
+      return;
+    }
+    if (selectedInterests.length < 3) {
+      console.error('3개를 선택해주세요!');
+      return;
+    }
+
     try {
       const {
         data: { user: authUser },
+        error: signupError,
       } = await supabase.auth.signUp({
         email,
         password,
       });
+      if (signupError) throw signupError;
 
-      const { error: userError } = await supabase
-        .from('test_additional_py_profile')
-        .insert({ id: authUser.id, myName, myGithub, myBlog });
+      // 프로필 이미지 추가 정보 storage에 저장
+      const { error: storageError } = await supabase.storage
+        .from('profile-image')
+        .upload(`public/${myImage.name}`, myImage);
+      if (storageError) throw storageError;
 
+      // 텍스트 추가 정보 public users에 저장
+      const { error: userError } = await supabase.from('users').insert({
+        id: authUser.id,
+        nickname: myNickname,
+        github: myGithub,
+        blog: myBlog,
+        my_profile_image_url: `${
+          import.meta.env.VITE_APP_SUPABASE_URL
+        }/storage/v1/object/public/test-signup-image/public/${myImage.name}`,
+      });
       if (userError) throw userError;
-      // alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
-      // navigate("/sign-in");
+
+      // 내 관심 카테고리 정보 public user_interests에 저장
+      const { error: categoryError } = await supabase
+        .from('user_interests')
+        .insert(
+          selectedInterests.map((interest) => ({
+            user_id: authUser.id,
+            user_interest: interest,
+          })),
+        );
+      if (categoryError) throw categoryError;
+
+      // 완료되면 로그인 페이지로 이동
+      alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
+      navigate("/sign-in");
     } catch (error) {
       alert(error.message);
       console.error('회원가입 오류:', error);
     }
   };
-
+  
   return (
     <div>
       <h2>회원가입 페이지</h2>
@@ -41,11 +92,12 @@ const Signup = () => {
         onSubmit={handleSignup}
         style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
       >
+        <input type="file" onChange={(e) => setMyImage(e.target.files[0])} />
         <input
           type="text"
           placeholder="이름"
-          value={myName}
-          onChange={(e) => setMyName(e.target.value)}
+          value={myNickname}
+          onChange={(e) => setMyNickname(e.target.value)}
           required
         />
         <input
@@ -74,6 +126,28 @@ const Signup = () => {
           value={myBlog}
           onChange={(e) => setMyBlog(e.target.value)}
         />
+        {/* 🔹 관심 카테고리 선택 버튼 */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => toggleInterest(category)}
+              style={{
+                padding: '8px 12px',
+                cursor: 'pointer',
+                backgroundColor: selectedInterests.includes(category)
+                  ? '#007bff'
+                  : '#f0f0f0',
+                color: selectedInterests.includes(category) ? 'white' : 'black',
+                border: '1px solid #ccc',
+                borderRadius: '5px',
+              }}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
         <button type="submit">회원가입</button>
       </form>
     </div>

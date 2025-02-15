@@ -1,17 +1,31 @@
-import React, { useContext, useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 import logo from '../assets/test-logo.png';
 import profile from '../assets/test-profile.png';
 import { AuthContext } from '../context/AuthProvider';
-
+import { supabase } from '../supabase/client';
+import { useContext, useEffect, useState } from 'react';
 function NavigationLayout() {
-  // const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
-  const [isLogin] = useState(false);
-  //임시 user
-  const user = {
-    name: '육캔두잇',
-    age: 66,
+  const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
+
+  const [user, setUser] = useState('');
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const { data } = await supabase.from('users').select('*');
+        setUser(data[0]); //임시로 해놓은 유저입니다!
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getUser();
+  }, []);
+
+  // NOTE: 로그아웃
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    alert('로그아웃 되었습니다');
   };
 
   return (
@@ -29,15 +43,21 @@ function NavigationLayout() {
             <p>이미지를 클릭하면 My Profile로 이동합니다.</p>
           </div>
           <div>
-            {isLogin ? `${user.name}님 환영합니다.` : '게스트님 환영합니다.'}
+            {isLogin ? `${user.nickname}님 환영합니다.` : '게스트님 환영합니다.'}
           </div>
         </div>
 
         <nav>
-          <Link to="/sign-in" className="sign">
-            {/* 로그아웃같은 경우는 기능이 달라 이렇게 텍스타만 바꾸면 안되지만 임시로 해놓았습니다.*/}
-            {isLogin ? 'sign out' : 'sign in'}
-          </Link>
+          {isLogin ? (
+            <button onClick={handleLogout} className="sign">
+              sign out
+            </button>
+          ) : (
+            <Link to="/sign-in" className="sign">
+              {' '}
+              sign in{' '}
+            </Link>
+          )}
           <Link to="/category">Categories</Link>
           <Link to={isLogin ? '/create-feed' : '/sign-in'}>Create Feed</Link>
           <Link to="/about-us">About Us</Link>
@@ -161,7 +181,12 @@ const StBodyDiv = styled.div`
       margin: auto 0;
       margin-top: 0px;
 
-      a {
+      button {
+        all: unset;
+      }
+
+      a,
+      button {
         background-color: #46d7ab;
         border-radius: 5px;
         width: 200px;
