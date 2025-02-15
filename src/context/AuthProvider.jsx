@@ -7,7 +7,7 @@ function AuthProvider({ children }) {
   // 현재 로그인 중인지 확인하는 상태 'isLogin'
   const [isLogin, setIsLogin] = useState(false);
   // 현재 로그인한 유저의 auth스키마 정보를 저장하는 상태 'user'
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
 
   const getUserInfo = async (session) => {
     // 로그아웃 됐을 경우
@@ -32,7 +32,7 @@ function AuthProvider({ children }) {
         `,
         )
         .eq('id', session.user.id)
-        .single(); // [ { ... } ] 형태로 반환하기 때문에 single()로 내부 하나의 객체만 가져온다
+        .maybeSingle(); // single 대신 maybeSingle. 데이터가 없더라도 null을 반환하도록 함 (에러 방지)
       if (error) throw error;
       setUser({ ...session.user, ...userData });
     } catch (error) {
