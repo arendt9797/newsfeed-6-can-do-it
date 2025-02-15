@@ -1,7 +1,7 @@
 import St from 'styled-components';
 import { supabase } from '../supabase/client';
 import { useState } from 'react';
-
+import ToastImageEditor from './ToastImageEditor';
 const PageContainer = St.div`
     display:flex;
 `;
@@ -9,8 +9,7 @@ const PageContainer = St.div`
 const ToastImageEditorContainer = St.div`
     display:flex;
     flex:1.5;
-    height:100vh;
-    background-color:blue;
+    height:100vh; 
 `;
 
 const UserFeedContainer = St.div`
@@ -89,8 +88,8 @@ const CreateFeed = () => {
     try {
       const { data, error } = await supabase
         .from('feeds')
-        .insert([{ title, content}]);
-      //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id 
+        .insert([{ title, content }]);
+      //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id
       if (error) {
         console.log('error=>', error);
       } else {
@@ -104,7 +103,9 @@ const CreateFeed = () => {
 
   return (
     <PageContainer>
-      <ToastImageEditorContainer>토스트</ToastImageEditorContainer>
+      <ToastImageEditorContainer>
+        <ToastImageEditor />
+      </ToastImageEditorContainer>
       <UserFeedContainer>
         <div className="button-container">
           <button id="upload-button" onClick={handleAddFeed}>
