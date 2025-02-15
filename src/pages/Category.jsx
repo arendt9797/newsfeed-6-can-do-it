@@ -1,29 +1,38 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
+import categories from '../constants/categories';
+import { AuthContext } from '../context/AuthProvider';
+import { ETC } from '../constants/categoryName';
 
 function Category() {
+  const { isLogin, user } = useContext(AuthContext);
+  const myInterests = user?.user_interests.map((i) => i.user_interest) || [];
+  const others = categories.filter(
+    (i) => !myInterests.includes(i) && i !== ETC,
+  );
+
   return (
     <StCategoriesSection>
-      <Link to="/">One</Link>
+      <Link to="/">{isLogin ? others[0] : categories[0]}</Link>
       <Link to="/" className="two">
-        Two
+        {isLogin ? myInterests[0] : categories[1]}
       </Link>
       <Link to="/" className="three">
-        Three
+        {isLogin ? myInterests[1] : categories[2]}
       </Link>
       <Link to="/" className="four">
-        Four
+        {isLogin ? others[1] : categories[3]}
       </Link>
       <Link to="/" className="five">
-        Five
+        {isLogin ? others[2] : categories[4]}
       </Link>
       <Link to="/" className="six">
-        Six
+        {isLogin ? myInterests[2] : categories[5]}
       </Link>
-      <Link to="/">Seven</Link>
-      <Link to="/">Eight</Link>
-      <Link to="/">Nine</Link>
+      <Link to="/">{isLogin ? others[3] : categories[6]}</Link>
+      <Link to="/">{isLogin ? others[4] : categories[7]}</Link>
+      <Link to="/">{isLogin ? others[5] : categories[8]}</Link>
       {/* 기타는 고정 */}
       <Link to="/" className="ten">
         기타
@@ -49,6 +58,8 @@ const StCategoriesSection = styled.section`
     text-decoration: none;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    color: black;
+    padding: 10px;
 
     &:hover {
       box-shadow: 0 14px 28px rgba(0, 0, 0, 0.13),
