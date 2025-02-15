@@ -61,7 +61,7 @@ const Signup = () => {
         blog: myBlog,
         my_profile_image_url: `${
           import.meta.env.VITE_APP_SUPABASE_URL
-        }/storage/v1/object/public/test-signup-image/public/${myImage.name}`,
+        }/storage/v1/object/public/profile-image/public/${myImage.name}`,
       });
       if (userError) throw userError;
 
