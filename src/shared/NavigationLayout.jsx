@@ -27,10 +27,10 @@ function NavigationLayout() {
 
         <div className="profile-div">
           <Link to={isLogin ? '/my-profile' : '/sign-in'}>
-            <img src={profile} alt="profile" />
+            <img src={user?.my_profile_image_url || profile} alt="profile" />
           </Link>
           <div className="tip">
-            <p>이미지를 클릭하면 My Profile로 이동합니다.</p>
+            <p>이미지를 클릭하면 sign in 혹은 My Profile로 이동합니다.</p>
           </div>
           <div>
             {isLogin
@@ -105,6 +105,7 @@ const StBodyDiv = styled.div`
 
       img {
         width: 50px;
+        height: 50px;
       }
       .tip {
         position: relative;
@@ -138,13 +139,13 @@ const StBodyDiv = styled.div`
         visibility: hidden;
 
         color: #fff;
-        font-size: 13px;
+        font-size: 12px;
         line-height: 1.4;
         text-align: left;
 
         background-color: #0065b75d;
-        width: 140px;
-        padding: 10px;
+        width: 150px;
+        padding: 5px;
         border-radius: 3px;
         box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2),
           -1px -1px 3px rgba(0, 0, 0, 0.2);
