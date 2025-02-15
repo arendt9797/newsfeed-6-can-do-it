@@ -1,0 +1,10 @@
+export const MOVIES = '영화';
+export const TRAVEL = '여행';
+export const ART = '미술';
+export const MUSIC = '음악';
+export const DIY = 'DIY';
+export const EXERCISE = '운동';
+export const GAMES = '게임';
+export const COOKING = '요리';
+export const ANIMALS = '동물';
+export const ETC = '기타';

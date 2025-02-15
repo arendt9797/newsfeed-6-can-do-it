@@ -4,27 +4,17 @@ import logo from '../assets/test-logo.png';
 import profile from '../assets/test-profile.png';
 import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 function NavigationLayout() {
-  const { isLogin } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
-
-  const [user, setUser] = useState('');
-
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const { data } = await supabase.from('users').select('*');
-        setUser(data[0]); //임시로 해놓은 유저입니다!
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getUser();
-  }, []);
+  const { isLogin, user } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
 
   // NOTE: 로그아웃
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error(error);
+      return { error };
+    }
     alert('로그아웃 되었습니다');
   };
 
@@ -37,13 +27,15 @@ function NavigationLayout() {
 
         <div className="profile-div">
           <Link to={isLogin ? '/my-profile' : '/sign-in'}>
-            <img src={profile} alt="profile" />
+            <img src={user?.my_profile_image_url || profile} alt="profile" />
           </Link>
           <div className="tip">
-            <p>이미지를 클릭하면 My Profile로 이동합니다.</p>
+            <p>이미지를 클릭하면 sign in 혹은 My Profile로 이동합니다.</p>
           </div>
           <div>
-            {isLogin ? `${user.nickname}님 환영합니다.` : '게스트님 환영합니다.'}
+            {isLogin
+              ? `${user?.nickname}님 환영합니다.`
+              : '게스트님 환영합니다.'}
           </div>
         </div>
 
@@ -113,6 +105,8 @@ const StBodyDiv = styled.div`
 
       img {
         width: 50px;
+        height: 50px;
+        border-radius: 100%;
       }
       .tip {
         position: relative;
@@ -146,13 +140,13 @@ const StBodyDiv = styled.div`
         visibility: hidden;
 
         color: #fff;
-        font-size: 13px;
+        font-size: 12px;
         line-height: 1.4;
         text-align: left;
 
         background-color: #0065b75d;
-        width: 140px;
-        padding: 10px;
+        width: 150px;
+        padding: 5px;
         border-radius: 3px;
         box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2),
           -1px -1px 3px rgba(0, 0, 0, 0.2);

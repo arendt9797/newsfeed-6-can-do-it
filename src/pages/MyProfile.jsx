@@ -1,37 +1,63 @@
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { supabase } from "../supabase/client";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthProvider";
 
 function MyProfile() {
 
+  const { isLogin } = useContext(AuthContext);
   const [profile, setProfile] = useState({
     image_url: "",
-    userId: "",
+    nickname: "",
     email: "",
-    pw: "",
+    password: "",
     github: "",
     blog: "",
   });
   const [image, setImage] = useState(null);
 
   useEffect(() => {
+    //로그인이 아닐시 실행안함
+    if (!isLogin) return;
+
     const fetchUserData = async () => {
+
       try {
-        const { data, error } = await supabase
-          .from("test_user_table")
-          .select("*");
+        // 1. 로그인한 사용자 정보 가져오기 (auth)
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        console.log(authData);
+        if (authError) throw authError;
+        const userId = authData.user.id;
 
-        if (error) throw error;
+        // 2. users 테이블에서 추가적인 유저정보 가져오기 (로그인한 유저)
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("nickname, github, blog, my_profile_image_url")
+          .eq("id", userId)
+          .single();
 
-        setProfile(data[0]); // test로 첫번째 유저 설정
+        if (userError) throw userError;
+
+        // 3. profile 상태 업데이트
+        setProfile({
+          id: userId,
+          nickname: userData.nickname,
+          email: authData.user.email,
+          password: "********",
+          github: userData.github,
+          blog: userData.blog,
+          my_profile_image_url: userData.my_profile_image_url,
+        });
+
+        console.log("updated profile =>", userData);
       } catch (error) {
         console.error(error);
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [isLogin]);
 
   // 수정 내용 입력 함수
   const handleChange = (e) => {
@@ -50,16 +76,17 @@ function MyProfile() {
     e.preventDefault();
 
     try {
-      const { error } = await supabase
-        .from("test_user_table")
+      const { data, error } = await supabase
+        .from("users")
         .update({
-          pw: profile.pw,
-          email: profile.email,
+          nickname: profile.nickname,
           github: profile.github,
           blog: profile.blog,
+          my_profile_image_url: profile.my_profile_image_url,
         })
-        .eq("userId", profile.userId).select("*");
-
+        .eq("id", profile.id).select();
+      console.log("profileId =>", profile.id);
+      console.log("data =>", data);
 
       if (error) throw error;
 
@@ -80,10 +107,12 @@ function MyProfile() {
     // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
     const filePath = `public/${Date.now()}_${image.name}`;
 
-
     if (!image) return;
-
-    const { data, error } = await supabase.storage.from("test-profile-images").upload(filePath, image);
+    // storage에 이미지 업로드
+    const { data, error } = await supabase
+      .storage
+      .from("profile-image")
+      .upload(filePath, image);
 
     if (error) {
       console.error("업로드실패", error.message);
@@ -91,17 +120,23 @@ function MyProfile() {
       console.log("업로드성공", data);
     }
 
-    //업로드된 이미지 URL 가져오기
-    const { data: publicUrl } = supabase.storage.from("test-profile-images").getPublicUrl(filePath);
+    //storage에 업로드된 이미지 URL 가져오기
+    const { data: publicUrl } = supabase
+      .storage
+      .from("profile-image")
+      .getPublicUrl(filePath);
 
-    //Table에 URL 저장
-    const { error: updateError } = await supabase.from("test_user_table").update({ image_url: publicUrl.publicUrl }).eq("userId", profile.userId);
+    //table에 URL 저장
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ my_profile_image_url: publicUrl.publicUrl })
+      .eq("id", profile.id);
 
     if (updateError) {
       console.error("URL업데이트 실패", updateError.message);
     } else {
       console.log("이미지 URL 업데이트 성공");
-      setProfile((prev) => ({ ...prev, image_url: publicUrl.publicUrl }));
+      setProfile((prev) => ({ ...prev, my_profile_image_url: publicUrl.publicUrl }));
     }
   };
 
@@ -111,7 +146,7 @@ function MyProfile() {
       <h2>My Profile</h2>
       {/* 왼쪽: 프로필 이미지 */}
       <StImageContainer>
-        <StProfileImage src={profile.image_url ? profile.image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
+        <StProfileImage src={profile.my_profile_image_url ? profile.my_profile_image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
         <input type="file" onChange={handleImageChange} />
         <button onClick={handleImageUpload}>이미지 수정</button>
       </StImageContainer>
@@ -119,14 +154,14 @@ function MyProfile() {
 
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
-          <label>아이디</label>
-          <StInput type="text" name="userId" value={profile.userId} readOnly />
+          <label>E-mail</label>
+          <StInput type="email" name="email" value={profile.email} readOnly />
+
+          <label>닉네임</label>
+          <StInput type="text" name="nickname" value={profile.nickname} onChange={handleChange} />
 
           <label>비밀번호</label>
-          <StInput type="password" name="pw" value={profile.pw || ""} onChange={handleChange} />
-
-          <label>E-mail</label>
-          <StInput type="email" name="email" value={profile.email || ""} onChange={handleChange} />
+          <StInput type="password" name="password" value={profile.password || ""} onChange={handleChange} />
 
           <label>GitHub</label>
           <StInput type="url" name="github" value={profile.github || ""} onChange={handleChange} />
