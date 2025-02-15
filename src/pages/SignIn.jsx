@@ -118,6 +118,7 @@ const StSignInContainer = styled.div`
     color: #21212e;
     font-size: 24px;
     cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
 
     &:hover {
       background-color: #46e4b5;
