@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../supabase/client';
 import categories from '../constants/categories';
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -12,7 +12,7 @@ const Signup = () => {
   const [myGithub, setMyGithub] = useState('');
   const [selectedInterests, setSelectedInterests] = useState([]);
 
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const toggleInterest = (category) => {
     setSelectedInterests((prev) => {
@@ -47,13 +47,13 @@ const Signup = () => {
       });
       if (signupError) throw signupError;
 
-      // 프로필 이미지 추가 정보 storage에 저장하기
+      // 프로필 이미지 추가 정보 storage에 저장
       const { error: storageError } = await supabase.storage
         .from('profile-image')
         .upload(`public/${myImage.name}`, myImage);
       if (storageError) throw storageError;
 
-      // 텍스트 추가 정보 public에 저장하기
+      // 텍스트 추가 정보 public users에 저장
       const { error: userError } = await supabase.from('users').insert({
         id: authUser.id,
         nickname: myNickname,
@@ -65,13 +65,9 @@ const Signup = () => {
       });
       if (userError) throw userError;
 
-      // my_interests 테이블에 카테고리 정보 삽입. 각 카테고리 당 하나의 행을 삽입해야함
-      // user_id 속성은 context에서 가져와야 한다... 가 아닌가? 로그인한 상태가 아니잖아.
-      // 위의 코드가 순서대로 실행되니까 현재 로그인한 유저 정보가 있다고 봐야하나?
-      // 로그인 실패해도 이미지 파일은 그대로 올라가는거 보면 그럴지도.
-      // 아니구나!! authUser.id를 사용하면 되네!!!!!!!!!!
+      // 내 관심 카테고리 정보 public user_interests에 저장
       const { error: categoryError } = await supabase
-        .from('my_interests')
+        .from('user_interests')
         .insert(
           selectedInterests.map((interest) => ({
             user_id: authUser.id,
@@ -80,8 +76,9 @@ const Signup = () => {
         );
       if (categoryError) throw categoryError;
 
-      // alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
-      // navigate("/sign-in");
+      // 완료되면 로그인 페이지로 이동
+      alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
+      navigate("/sign-in");
     } catch (error) {
       alert(error.message);
       console.error('회원가입 오류:', error);
