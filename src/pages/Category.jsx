@@ -14,34 +14,22 @@ function Category() {
   );
 
   const categoriesData = [
-    { className: 'one', loginValue: others[0], defaultValue: categories[0] },
-    {
-      className: 'two',
-      loginValue: myInterests[0],
-      defaultValue: categories[1],
-    },
-    {
-      className: 'three',
-      loginValue: myInterests[1],
-      defaultValue: categories[2],
-    },
-    { className: 'four', loginValue: others[1], defaultValue: categories[3] },
-    { className: 'five', loginValue: others[2], defaultValue: categories[4] },
-    {
-      className: 'six',
-      loginValue: myInterests[2],
-      defaultValue: categories[5],
-    },
-    { className: 'seven', loginValue: others[3], defaultValue: categories[6] },
-    { className: 'eight', loginValue: others[4], defaultValue: categories[7] },
-    { className: 'nine', loginValue: others[5], defaultValue: categories[8] },
+    { className: 'one', login: others[0], default: categories[0] },
+    { className: 'two', login: myInterests[0], default: categories[1] },
+    { className: 'three', login: myInterests[1], default: categories[2] },
+    { className: 'four', login: others[1], default: categories[3] },
+    { className: 'five', login: others[2], default: categories[4] },
+    { className: 'six', login: myInterests[2], default: categories[5] },
+    { className: 'seven', login: others[3], default: categories[6] },
+    { className: 'eight', login: others[4], default: categories[7] },
+    { className: 'nine', login: others[5], default: categories[8] },
   ];
 
   return (
     <StCategoriesSection>
       {categoriesData.map((c) => (
         <Link key={c.className} to="/" className={c.className}>
-          {isLogin ? c.loginValue : c.defaultValue}
+          {isLogin ? c.login : c.default}
         </Link>
       ))}
       {/* 기타는 고정 */}
