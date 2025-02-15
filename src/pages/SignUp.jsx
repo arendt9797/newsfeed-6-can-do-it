@@ -87,7 +87,7 @@ const Signup = () => {
       console.error('회원가입 오류:', error);
     }
   };
-
+  
   return (
     <div>
       <h2>회원가입 페이지</h2>
