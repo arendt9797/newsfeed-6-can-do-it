@@ -29,25 +29,22 @@ function MyProfile() {
         console.log(authData);
         if (authError) throw authError;
         const userId = authData.user.id;
-        const userEmail = authData.user.email;
-        console.log(userEmail);
-        console.log(userId)
 
         // 2. users 테이블에서 추가적인 유저정보 가져오기 (로그인한 유저)
         const { data: userData, error: userError } = await supabase
           .from("users")
           .select("nickname, github, blog, my_profile_image_url")
           .eq("id", userId)
-          .single()
+          .single();
 
         if (userError) throw userError;
 
         // 3. profile 상태 업데이트
         setProfile({
-          nickname: userData.nickname ,
-          email: userEmail,
-          password: "********", 
-          github: userData.github ,
+          nickname: userData.nickname,
+          email: authData.user.email,
+          password: "********",
+          github: userData.github,
           blog: userData.blog,
           my_profile_image_url: userData.my_profile_image_url,
         });
@@ -80,12 +77,12 @@ function MyProfile() {
       const { error } = await supabase
         .from("users")
         .update({
-          pw: profile.pw,
+          nickname: profile.nickname,
           email: profile.email,
           github: profile.github,
           blog: profile.blog,
         })
-        .eq("email", profile.email).select("*");
+        .eq("id", profile.id).select("*");
 
 
       if (error) throw error;
@@ -129,7 +126,7 @@ function MyProfile() {
     //table에 URL 저장
     const { error: updateError } = await supabase
       .from("users")
-      .update({ my_profile_image_url: publicUrl.publicUrl })
+      .update({ my_profile_image_url: publicUrl.publicUrl });
 
     if (updateError) {
       console.error("URL업데이트 실패", updateError.message);
