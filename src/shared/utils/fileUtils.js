@@ -1,3 +1,6 @@
+import { supabase } from "../../supabase/client";
+
+//파일 선택 호출 함수
 export const handleImageChange = (e, setImage) => {
   const file = e.target.files[0];
 
@@ -20,10 +23,11 @@ export const handleImageChange = (e, setImage) => {
     setImage(file);
   }
 };
-//파일 업로드 함수
-export const handleImageUpload = async (image, supabase, profileId) => {
 
-  if (!image) return;
+//파일 업로드 함수
+export const handleImageUpload = async (image, profile) => {
+
+
   // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
   const filePath = `public/${Date.now()}_${image.name}`;
 
@@ -40,21 +44,23 @@ export const handleImageUpload = async (image, supabase, profileId) => {
   }
 
   //storage에 업로드된 이미지 URL 가져오기
-  const { data: publicUrl } = supabase
+  const { data: publicUrlData } = supabase
     .storage
     .from("profile-image")
     .getPublicUrl(filePath);
 
+  const imageUrl = publicUrlData.publicUrl;
+
   //table에 URL 저장
   const { error: updateError } = await supabase
     .from("users")
-    .update({ my_profile_image_url: publicUrl.publicUrl })
-    .eq("id", profileId);
+    .update({ my_profile_image_url: imageUrl })
+    .eq("id", profile.id);
 
   if (updateError) {
-    console.error("URL업데이트 실패", updateError.message);
-  } else {
-    console.log(publicUrl)
-    return publicUrl.publicUrl;
+    console.error("URL 업데이트 실패", updateError.message);
+    throw new Error(updateError.message);  // URL 업데이트 에러 처리
   }
+
+  return imageUrl;  // imageUrl을 반환
 };

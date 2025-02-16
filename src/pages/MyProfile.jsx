@@ -121,9 +121,10 @@ function MyProfile() {
       return;
     }
 
+    if (!profile || !image) {
+      return;
+    }
     try {
-      const imageUrl = await handleImageUpload(image, supabase, profile.id);
-      setProfile((prev) => ({ ...prev, my_profile_image_url: imageUrl }));
 
       // 기존 관심사 삭제
       const { error: interestError } = await supabase
@@ -180,44 +181,44 @@ function MyProfile() {
     handleImageChange(e, setImage);
   };
 
-  // //파일 업로드 함수
-  // const handleImageUpload = async () => {
+  //파일 업로드 함수
+  const handleImageUpload = async () => {
 
-  //   // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
-  //   const filePath = `public/${Date.now()}_${image.name}`;
+    // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
+    const filePath = `public/${Date.now()}_${image.name}`;
 
-  //   if (!image) return;
-  //   // storage에 이미지 업로드
-  //   const { data, error } = await supabase
-  //     .storage
-  //     .from("profile-image")
-  //     .upload(filePath, image);
+    if (!image) return;
+    // storage에 이미지 업로드
+    const { data, error } = await supabase
+      .storage
+      .from("profile-image")
+      .upload(filePath, image);
 
-  //   if (error) {
-  //     console.error("업로드실패", error.message);
-  //   } else {
-  //     console.log("업로드성공", data);
-  //   }
+    if (error) {
+      console.error("업로드실패", error.message);
+    } else {
+      console.log("업로드성공", data);
+    }
 
-  //   //storage에 업로드된 이미지 URL 가져오기
-  //   const { data: publicUrl } = supabase
-  //     .storage
-  //     .from("profile-image")
-  //     .getPublicUrl(filePath);
+    //storage에 업로드된 이미지 URL 가져오기
+    const { data: publicUrl } = supabase
+      .storage
+      .from("profile-image")
+      .getPublicUrl(filePath);
 
-  //   //table에 URL 저장
-  //   const { error: updateError } = await supabase
-  //     .from("users")
-  //     .update({ my_profile_image_url: publicUrl.publicUrl })
-  //     .eq("id", profile.id);
+    //table에 URL 저장
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ my_profile_image_url: publicUrl.publicUrl })
+      .eq("id", profile.id);
 
-  //   if (updateError) {
-  //     console.error("URL업데이트 실패", updateError.message);
-  //   } else {
-  //     console.log("이미지 URL 업데이트 성공");
-  //     setProfile((prev) => ({ ...prev, my_profile_image_url: publicUrl.publicUrl }));
-  //   }
-  // };
+    if (updateError) {
+      console.error("URL업데이트 실패", updateError.message);
+    } else {
+      console.log("이미지 URL 업데이트 성공");
+      setProfile((prev) => ({ ...prev, my_profile_image_url: publicUrl.publicUrl }));
+    }
+  };
 
 
   // 내 관심 카테고리 선택
