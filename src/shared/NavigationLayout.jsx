@@ -74,6 +74,9 @@ const StBodyDiv = styled.div`
   display: flex;
   justify-content: left;
   align-items: center;
+  //[지은] height: 100vh; 추가
+  height: 100vh;
+  //------------------
 
   header {
     background-color: #211c1c;
@@ -83,6 +86,13 @@ const StBodyDiv = styled.div`
     align-items: center;
     width: 400px;
     height: 100vh;
+    //[지은] 아래 5가지 항목 추가, 좌측에 네비게이션 바 고정 및 스크롤 기능 추가
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    //------------------
 
     .home-link {
       text-decoration: none;
@@ -210,4 +220,8 @@ const StBodyDiv = styled.div`
 
 const StMain = styled.main`
   flex: 1;
+  //[지은] 아래 2가지 추가 margin-left, height 내비게이션 너비만큼 마진부여
+  margin-left: 400px;
+  height: 100vh;
+  //-------------------------
 `;
