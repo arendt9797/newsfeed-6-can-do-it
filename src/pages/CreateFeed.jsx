@@ -92,20 +92,25 @@ const CreateFeed = () => {
   const handleAddFeed = async () => {
     console.log('handleAddFeed 호출됨');
 
-    // const {
-    //   data: { users },
-    //   error: authError,
-    // } = await supabase.auth.getUser();
-    // //현재 로그인 한 사용자의 정보 불러오기
-    // //2025.02.14 기준 로그아웃 상태에서 콘솔에서 에러 확인
-    // if (authError) {
-    //   console.log('auth에러', authError);
-    // }
+    const {
+      data: { user: auth }, // 현재 로그인 한 사용자의 세션, auth 스키마 데이터이므로 불러오기만
+      error: authError,
+    } = await supabase.auth.getUser();
+    //현재 로그인 한 사용자의 정보 불러오기
+    //2025.02.14 기준 로그아웃 상태에서 콘솔에서 에러 확인
+    if (authError) {
+      console.log('auth에러', authError);
+    }
+
+    const { data: publicUser, error } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', auth.id);
 
     try {
       const { data, error } = await supabase
         .from('feeds')
-        .insert([{ title, content }]);
+        .insert([{ title, content, user_id: publicUser.id }]);
       //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id
       if (error) {
         console.log('error=>', error);
