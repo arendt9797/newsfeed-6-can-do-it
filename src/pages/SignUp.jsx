@@ -121,6 +121,7 @@ const Signup = () => {
               className="logo-img"
               src="/src/assets/test-logo.png"
               alt="site_logo"
+              onClick={() => navigate('/')}
             />
             {previewImage ? (
               <img className="preview-img" src={previewImage} alt="preview" />
@@ -254,6 +255,7 @@ const StSignUpContainer = styled.div`
     width: 130px;
     border-radius: 20px;
     margin-bottom: 50px;
+    cursor: pointer;
   }
 
   footer {
