@@ -88,6 +88,40 @@ function MyProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(profile.email)) {
+      alert("이메일 형식이 올바르지 않습니다.");
+      return;
+    }
+
+    // 닉네임 정규표현식
+    const nicknameRegex = /^[a-zA-Z]{2,8}$|^[가-힣]{2,8}$|^[a-zA-Z가-힣]{2,8}$/;
+    if (!nicknameRegex.test(profile.nickname)) {
+      alert("닉네임은 2자 이상 8자 이하의 한글, 영어, 숫자 조합만 가능합니다.");
+      return;
+    }
+
+    // // 비밀번호 정규표현식
+    // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
+    // if (profile.password && !passwordRegex.test(profile.password)) {
+    //   alert("비밀번호는 대소문자, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.");
+    //   return;
+    // }
+
+    // GitHub 정규표현식
+    const githubRegex = /^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9_-]+$/;
+    if (profile.github && !githubRegex.test(profile.github)) {
+      alert("GitHub URL 형식이 올바르지 않습니다.");
+      return;
+    }
+
+    // 블로그 정규표현식
+    const blogRegex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (profile.blog && !blogRegex.test(profile.blog)) {
+      alert("블로그 URL 형식이 올바르지 않습니다.");
+      return;
+    }
+
     try {
       // 기존 관심사 삭제
       const { error: interestError } = await supabase
@@ -141,7 +175,26 @@ function MyProfile() {
 
   //파일 선택 호출 함수
   const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+    const file = e.target.files[0];
+  
+    if (file) {
+      // 파일 확장자 검사
+      const validExtensions = ['image/jpeg', 'image/png']; // 허용되는 이미지 형식
+      if (!validExtensions.includes(file.type)) {
+        alert('이미지 파일은 jpg, jpeg, png만 가능합니다.');
+        return;
+      }
+  
+      // 파일 용량 검사 (5MB 이하)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert('이미지 파일 용량은 5MB 이하로 업로드 해주세요.');
+        return;
+      }
+  
+      // 유효성 검사 통과 후 파일 설정
+      setImage(file);
+    }
   };
 
   //파일 업로드 함수
@@ -207,8 +260,8 @@ function MyProfile() {
         <input type="file" onChange={handleImageChange} />
         <button onClick={handleImageUpload}>이미지 수정</button>
       </StImageContainer>
-      <StFormContainer onSubmit={handleSubmit}>
 
+      <StFormContainer onSubmit={handleSubmit}>
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
           <label>E-mail</label>
