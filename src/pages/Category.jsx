@@ -15,28 +15,46 @@ function Category() {
     (i) => !myInterests.includes(i) && i !== ETC,
   );
 
-  const categoriesData = [
-    { class: 'one', login: others[0], default: categories[0] },
-    { class: 'two', login: myInterests[0], default: categories[1] },
-    { class: 'three', login: myInterests[1], default: categories[2] },
-    { class: 'four', login: others[1], default: categories[3] },
-    { class: 'five', login: others[2], default: categories[4] },
-    { class: 'six', login: myInterests[2], default: categories[5] },
-    { class: 'seven', login: others[3], default: categories[6] },
-    { class: 'eight', login: others[4], default: categories[7] },
-    { class: 'nine', login: others[5], default: categories[8] },
+  const classNames = [
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
   ];
+  // 1, 2, 5는 myInterests에서 가져오고, 나머지는 others에서 가져옴
+  const myPick = [1, 2, 5];
+
+  const categoryArr = [];
+  for (let i = 0; i < 9; i++) {
+    const defaultCategory = categories[i];
+    let loginCategory;
+    if (myPick.includes(i)) {
+      loginCategory = myInterests.shift() || defaultCategory;
+    } else {
+      loginCategory = others.shift() || defaultCategory;
+    }
+    categoryArr.push({
+      className: classNames[i],
+      loginCategory,
+      defaultCategory,
+    });
+  }
 
   return (
     <StCategoriesSection>
-      {categoriesData.map((c, i) => (
-        <Link key={i} to="/" className={c.class}>
-          <p>{isLogin ? c.login : c.default}</p>
+      {categoryArr.map(({ className, loginCategory, defaultCategory }, i) => (
+        <Link key={i} to="/" className={className}>
+          <p>{isLogin ? loginCategory : defaultCategory}</p>
         </Link>
       ))}
-      {/* 기타는 고정 */}
+      {/* 기타(ETC)는 고정 */}
       <Link to="/" className="ten">
-        <p> {ETC} </p>
+        <p>{ETC}</p>
       </Link>
     </StCategoriesSection>
   );
