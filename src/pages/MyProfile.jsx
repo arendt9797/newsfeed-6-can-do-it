@@ -175,7 +175,26 @@ function MyProfile() {
 
   //파일 선택 호출 함수
   const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+    const file = e.target.files[0];
+  
+    if (file) {
+      // 파일 확장자 검사
+      const validExtensions = ['image/jpeg', 'image/png']; // 허용되는 이미지 형식
+      if (!validExtensions.includes(file.type)) {
+        alert('이미지 파일은 jpg, jpeg, png만 가능합니다.');
+        return;
+      }
+  
+      // 파일 용량 검사 (5MB 이하)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert('이미지 파일 용량은 5MB 이하로 업로드 해주세요.');
+        return;
+      }
+  
+      // 유효성 검사 통과 후 파일 설정
+      setImage(file);
+    }
   };
 
   //파일 업로드 함수
@@ -241,8 +260,8 @@ function MyProfile() {
         <input type="file" onChange={handleImageChange} />
         <button onClick={handleImageUpload}>이미지 수정</button>
       </StImageContainer>
-      <StFormContainer onSubmit={handleSubmit}>
 
+      <StFormContainer onSubmit={handleSubmit}>
         {/* 오른쪽: 입력 필드 및 버튼 */}
         <StForm>
           <label>E-mail</label>
