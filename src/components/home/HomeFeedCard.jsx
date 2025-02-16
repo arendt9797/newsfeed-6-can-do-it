@@ -11,7 +11,6 @@ const HomeFeedCard = ({ feed }) => {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
   const navigate = useNavigate();
-  console.log(user);
 
   const getComments = async () => {
     const { data } = await supabase
@@ -24,8 +23,6 @@ const HomeFeedCard = ({ feed }) => {
   useEffect(() => {
     getComments();
   }, [comment]);
-
-  console.log(user);
 
   const handleAddComment = async (feedId) => {
     if (!isLogin) {
