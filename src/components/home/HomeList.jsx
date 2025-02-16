@@ -15,7 +15,6 @@ const HomeList = () => {
   const { isLogin } = useContext(AuthContext);
   const [query] = useSearchParams();
   const userId = query.get('id');
-  console.log(userId);
 
   useEffect(() => {
     const getFeeds = async () => {
