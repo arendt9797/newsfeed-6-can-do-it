@@ -9,15 +9,15 @@ import logo from '../assets/test-logo.png';
 function Category() {
   const { isLogin, user } = useContext(AuthContext);
   //user의 관심사 카테고리 배열로 가져오기
-  //기타가 배열 안에 있을 경우 배열의 가장 마지막에 위치시키기
+  //기타(ETC)가 배열 안에 있을 경우 배열의 가장 마지막에 위치시키기
   const myInterests =
     user?.user_interests
       ?.map((i) => i.user_interest)
       .sort((a, b) => (a === ETC ? 1 : b === ETC ? -1 : 0)) || []; 
 
-  console.log(myInterests);
+  // console.log(myInterests);
 
-  //user의 관심사 및 기타를 제외한 카테고리
+  //user의 관심사 및 기타(ETC)를 제외한 카테고리
   const others = categories.filter(
     (i) => !myInterests.includes(i) && i !== ETC,
   );
@@ -41,7 +41,7 @@ function Category() {
         let loginCategory;
         if (myPickSet.has(i)) {
           const candidate = myInterests.shift() || defaultCategory;
-          // ETC가 myInterests에 있으면 others 배열의 마지막 요소로 대체
+          // 기타(ETC)가 myInterests에 있으면 others 배열의 마지막 요소로 대체
           loginCategory =
             candidate === ETC && others.length ? others.pop() : candidate;
         } else {
