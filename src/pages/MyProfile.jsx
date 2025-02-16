@@ -23,114 +23,87 @@ function MyProfile() {
   const [selectedInterests, setSelectedInterests] = useState([]);
 
   useEffect(() => {
-    //로그인이 아닐시 실행안함
     if (!isLogin) return;
-
-    const fetchUserData = async () => {
-
-      try {
-        // 1. 로그인한 사용자 정보 가져오기 (auth)
-        const { data: authData, error: authError } = await supabase.auth.getUser();
-        if (authError) throw authError;
-        const userId = authData.user.id;
-
-        // 2. users 테이블에서 추가적인 유저정보 가져오기 (로그인한 유저)
-        const { data: userData, error: userError } = await supabase
-          .from("users")
-          .select("nickname, github, blog, my_profile_image_url")
-          .eq("id", userId)
-          .single();
-
-        if (userError) throw userError;
-
-        // 3. user_interests 테이블에서 현재 사용자의 관심사 가져오기
-        const { data: interestData, error: interestError } = await supabase
-          .from("user_interests")
-          .select("user_interest")
-          .eq("user_id", userId);
-
-        if (interestError) throw interestError;
-
-        // 4. 관심사 배열을 selectedInterests에 설정
-        const userInterests = interestData.map((item) => item.user_interest);
-
-        // 5. profile 상태 업데이트
-        setProfile({
-          id: userId,
-          nickname: userData.nickname,
-          email: authData.user.email,
-          password: "",
-          github: userData.github,
-          blog: userData.blog,
-          my_profile_image_url: userData.my_profile_image_url,
-        });
-
-        // 6. selectedInterests 상태에 기존 관심사 설정
-        setSelectedInterests(userInterests);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchUserData();
+    fetchUserProfile();
+    fetchUserInterests();
   }, [isLogin]);
 
-  // 수정 내용 입력 함수
-  const handleChange = (e) => {
-    if (!profile) return;
+  //  1. 사용자 프로필 가져오는 함수
+  const fetchUserProfile = async () => {
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      const userId = authData.user.id;
 
-    const { name, value } = e.target;
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("nickname, github, blog, my_profile_image_url")
+        .eq("id", userId)
+        .single();
 
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      [name]: value,
-    }));
+      if (userError) throw userError;
+
+      setProfile((prev) => ({
+        ...prev,
+        id: userId,
+        nickname: userData.nickname,
+        email: authData.user.email,
+        github: userData.github,
+        blog: userData.blog,
+        my_profile_image_url: userData.my_profile_image_url,
+      }));
+    } catch (error) {
+      console.error("사용자 정보 불러오기 실패:", error);
+    }
   };
 
-  // 프로필 업데이트 핸들러
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // 검증 단계
-    if (!validateEmail(profile.email)) return alert("이메일 형식이 올바르지 않습니다.");
-    if (!validateNickname(profile.nickname)) return alert("닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.");
-    if (!validateGithub(profile.github)) return alert("GitHub URL 형식이 올바르지 않습니다.");
-    if (!validateBlog(profile.blog)) return alert("블로그 URL 형식이 올바르지 않습니다.");
-    // if (!validatePassword(profile.password)) return alert("비밀번호는 대소문자, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.");
-
+  //  2. 관심사 가져오는 함수
+  const fetchUserInterests = async () => {
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData.user.id;
 
-      // 기존 관심사 삭제
-      const { error: interestError } = await supabase
+      const { data: interestData, error: interestError } = await supabase
         .from("user_interests")
-        .delete()
-        .eq("user_id", profile.id);
+        .select("user_interest")
+        .eq("user_id", userId);
 
       if (interestError) throw interestError;
 
-      // 새로운 관심사 추가
-      const { error: selectInterestError } = await supabase
+      setSelectedInterests(interestData.map((item) => item.user_interest));
+    } catch (error) {
+      console.error("관심사 정보 불러오기 실패:", error);
+    }
+  };
+
+  //  3. 관심사 업데이트 함수
+  const updateUserInterests = async () => {
+    try {
+      await supabase.from("user_interests").delete().eq("user_id", profile.id);
+      await supabase
         .from("user_interests")
-        .insert(
-          selectedInterests.map((category) => ({
-            user_id: profile.id,
-            user_interest: category,
-          }))
-        );
+        .insert(selectedInterests.map((category) => ({ user_id: profile.id, user_interest: category })));
+    } catch (error) {
+      console.error("관심사 업데이트 실패:", error);
+      throw error;
+    }
+  };
 
-      if (selectInterestError) throw selectInterestError;
+  //  4. 비밀번호 업데이트 함수
+  const updateUserPassword = async () => {
+    if (!profile.password) return;
+    try {
+      await supabase.auth.updateUser({ password: profile.password });
+    } catch (error) {
+      console.error("비밀번호 업데이트 실패:", error);
+      throw error;
+    }
+  };
 
-      // 비밀번호 업데이트
-      if (profile.password) {
-        const { error: pwError } = await supabase.auth.updateUser({
-          password: profile.password,
-        });
-
-        if (pwError) throw pwError;
-      }
-
-      // 프로필 정보 업데이트
-      const { error: profileError } = await supabase
+  //  5. 프로필 정보 업데이트 함수
+  const updateUserProfile = async () => {
+    try {
+      await supabase
         .from("users")
         .update({
           nickname: profile.nickname,
@@ -139,21 +112,44 @@ function MyProfile() {
           my_profile_image_url: profile.my_profile_image_url,
         })
         .eq("id", profile.id);
-
-      if (profileError) throw profileError;
-
-      alert("신분세탁 완료!");
     } catch (error) {
-      console.error("Update error =>", error);
-      alert("프로필 업데이트에 실패했습니다.");
+      console.error("프로필 업데이트 실패:", error);
+      throw error;
     }
   };
 
+  //  6. 프로필 업데이트 핸들러 (최적화)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  //이미지 변경 및 업로드 핸들러
+    // 검증 단계
+    if (!validateEmail(profile.email)) return alert("이메일 형식이 올바르지 않습니다.");
+    if (!validateNickname(profile.nickname)) return alert("닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.");
+    if (!validateGithub(profile.github)) return alert("GitHub URL 형식이 올바르지 않습니다.");
+    if (!validateBlog(profile.blog)) return alert("블로그 URL 형식이 올바르지 않습니다.");
+    // if (!validatePassword(profile.password)) return alert("비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.")
+
+    try {
+      await Promise.all([updateUserProfile(), updateUserInterests(), updateUserPassword()]);
+      alert("프로필 업데이트 완료!");
+    } catch (error) {
+      console.error("프로필 업데이트에 실패", error);
+    }
+  };
+
+  //  수정 내용 입력 핸들러
+  const handleChange = (e) => {
+    setProfile((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  //  이미지 변경 및 업로드 핸들러
   const handleImageSelection = (e) => {
     handleImageChange(e, setImage);
   };
+
   const handleImageUpdate = async () => {
     try {
       const imageUrl = await handleImageUpload(image, profile);
@@ -161,9 +157,10 @@ function MyProfile() {
         setProfile((prev) => ({ ...prev, my_profile_image_url: imageUrl }));
       }
     } catch (error) {
-      console.log(error);
+      console.error("이미지 업로드 실패:", error);
     }
   };
+
 
   return (
     <StProfileContainer>
