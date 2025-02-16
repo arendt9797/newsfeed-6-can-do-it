@@ -117,81 +117,94 @@ const Signup = () => {
       <StSignUpContainer>
         <form onSubmit={handleSignup}>
           <div className="user-image">
-            <img src="/src/assets/test-logo.png" alt="site_logo" />
+            <img
+              className="logo-img"
+              src="/src/assets/test-logo.png"
+              alt="site_logo"
+            />
+            {previewImage ? (
+              <img className="preview-img" src={previewImage} alt="preview" />
+            ) : (
+              <div className="default-img">{'No Image'} </div>
+            )}
             <div className="file-wrapper">
-              <img src={previewImage} alt='preview'/>
               <input
                 type="file"
                 id="file-upload"
                 // onChange={(e) => setMyImage(e.target.files[0])}
                 onChange={handleFileChange}
               />
-              <StLabel htmlFor="file-upload">{'🔗'}</StLabel>
+              <StLabel htmlFor="file-upload">{'🧷'}</StLabel>
               <StFileName>{uploadedFileName}</StFileName>
             </div>
 
             <button type="submit">{'Sign up'}</button>
             <footer>
               {'Already a member? '}
-              <Link to={'/sign-up'}>{'Sign In'}</Link>
+              <Link to={'/sign-in'}>{'Sign In'}</Link>
             </footer>
           </div>
           <div className="user-info">
-            <input
-              type="text"
-              placeholder="이름"
-              value={myNickname}
-              onChange={(e) => setMyNickname(e.target.value)}
-              required
-            />
-            <input
-              type="email"
-              placeholder="이메일"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="비밀번호"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="깃헙"
-              value={myGithub}
-              onChange={(e) => setMyGithub(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="블로그"
-              value={myBlog}
-              onChange={(e) => setMyBlog(e.target.value)}
-            />
-            {/* 🔹 관심 카테고리 선택 버튼 */}
+            <div>
+              <p>{'Nickname'}</p>
+              <input
+                type="text"
+                placeholder="  닉네임을 입력해주세요"
+                value={myNickname}
+                onChange={(e) => setMyNickname(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <p>{'E-mail'}</p>
+              <input
+                type="email"
+                placeholder="  이메일을 입력해주세요"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <p>{'Password'}</p>
+              <input
+                type="password"
+                placeholder="  비밀번호를 입력해주세요"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <p>{'Github'}</p>
+              <input
+                type="text"
+                placeholder="  깃헙이 있다면 알려주세요"
+                value={myGithub}
+                onChange={(e) => setMyGithub(e.target.value)}
+              />
+            </div>
+            <div>
+              <p>{'Blog'}</p>
+              <input
+                type="text"
+                placeholder="  블로그가 있다면 알려주세요"
+                value={myBlog}
+                onChange={(e) => setMyBlog(e.target.value)}
+              />
+              {/* 🔹 관심 카테고리 선택 버튼 */}
+            </div>
             <div className="categories">
+              <p>{'⭐흥미있는 카테고리 3개를 골라주세요!'}</p>
               {categories.map((category) => (
-                <button
+                <StCategoryButton
                   key={category}
                   type="button"
                   onClick={() => toggleInterest(category)}
-                  style={{
-                    padding: '8px 12px',
-                    cursor: 'pointer',
-                    backgroundColor: selectedInterests.includes(category)
-                      ? '#007bff'
-                      : '#f0f0f0',
-                    color: selectedInterests.includes(category)
-                      ? 'white'
-                      : 'black',
-                    border: '1px solid #ccc',
-                    borderRadius: '5px',
-                  }}
+                  selected={selectedInterests.includes(category)}
                 >
                   {category}
-                </button>
+                </StCategoryButton>
               ))}
             </div>
           </div>
@@ -223,6 +236,10 @@ const StSignUpContainer = styled.div`
     /* gap: 20px; */
   }
 
+  form {
+    height: 800px;
+  }
+
   /* ========== 회원가입 왼쪽: 프로필 이미지 영역 =========== */
   .user-image {
     grid-area: image;
@@ -233,14 +250,15 @@ const StSignUpContainer = styled.div`
     position: relative;
   }
 
-  img {
+  .logo-img {
     width: 130px;
     border-radius: 20px;
+    margin-bottom: 50px;
   }
 
   footer {
     position: absolute;
-    bottom: 0px;
+    bottom: 10px;
     font-size: 20px;
     font-weight: bold;
     color: #2baa84;
@@ -251,7 +269,7 @@ const StSignUpContainer = styled.div`
     height: 50px;
     border: none;
     border-radius: 10px;
-    margin-top: 20px;
+    margin-top: 50px;
     background-color: #46d7ab;
     color: #21212e;
     font-size: 24px;
@@ -276,11 +294,33 @@ const StSignUpContainer = styled.div`
     padding: 5px;
     border: 1px solid #d1d1d1;
     border-radius: 5px;
-    width: 350px;
+    width: 300px;
     height: 40px;
   }
 
   /* 미리보기 기능 */
+  .preview-img {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #d1d1d1;
+  }
+
+  .default-img {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 2px solid #d1d1d1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: xx-large;
+    font-style: italic;
+    font-weight: bold;
+    color: #21212e;
+    background-color: #46d7ab;
+  }
 
   /* ========== 회원가입 오른쪽: 유저정보 영역 ========== */
   .user-info {
@@ -289,9 +329,10 @@ const StSignUpContainer = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 20px;
   }
 
-  .user-info > input {
+  .user-info input {
     font-size: 16px;
     height: 50px;
     width: 300px;
@@ -305,27 +346,48 @@ const StSignUpContainer = styled.div`
     }
   }
 
+  .user-info p {
+    height: 20px;
+  }
+
   .categories {
+    margin-top: 30px;
     display: flex;
     flex-wrap: wrap;
     width: 350px;
     gap: 5px;
   }
 
-  .categories > button {
-    width: 80px;
+  .categories > p {
+    font-size: large;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+`;
+
+const StCategoryButton = styled.button`
+  width: 80px;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: ${({ selected }) => (selected ? '#0d8b67' : 'transparent')};
+  color: ${({ selected }) => (selected ? 'white' : 'black')};
+  font-size: medium;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+
+  &:hover {
+    background-color: ${({ selected }) => (selected ? '#13ad82' : '#c6eee2')};
   }
 `;
 
 /* input file 커스터마이즈 */
 const StLabel = styled.label`
   background-color: #21212e;
-  color: #46d7ab;
   padding: 10px 16px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
 
   &:hover {
     background-color: #46d7ab;
@@ -334,7 +396,9 @@ const StLabel = styled.label`
 
 const StFileName = styled.span`
   font-size: 14px;
+  height: 20px;
   color: #21212e;
+  /* 파일명이 길 경우 말줄임표(...) 표시 */
   width: 280px;
   overflow: hidden;
   text-overflow: ellipsis;
