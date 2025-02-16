@@ -27,7 +27,6 @@ export const handleImageChange = (e, setImage) => {
 //파일 업로드 함수
 export const handleImageUpload = async (image, profile) => {
 
-
   // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
   const filePath = `public/${Date.now()}_${image.name}`;
 

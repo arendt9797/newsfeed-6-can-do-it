@@ -87,43 +87,17 @@ function MyProfile() {
     }));
   };
 
-  // 수정 제출 함수
+  // 프로필 업데이트 핸들러
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    //이메일 검증
-    if (!validateEmail(profile.email)) {
-      alert("이메일 형식이 올바르지 않습니다.");
-      return;
-    }
+    // 검증 단계
+    if (!validateEmail(profile.email)) return alert("이메일 형식이 올바르지 않습니다.");
+    if (!validateNickname(profile.nickname)) return alert("닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.");
+    if (!validateGithub(profile.github)) return alert("GitHub URL 형식이 올바르지 않습니다.");
+    if (!validateBlog(profile.blog)) return alert("블로그 URL 형식이 올바르지 않습니다.");
+    // if (!validatePassword(profile.password)) return alert("비밀번호는 대소문자, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.");
 
-    // 닉네임 검증
-    if (!validateNickname(profile.nickname)) {
-      alert("닉네임은 2자 이상 8자 이하의 한글, 영어, 숫자 조합만 가능합니다.");
-      return;
-    }
-
-    // // 비밀번호 검증
-    // if (!validatePassword(profile.password)) {
-    //   alert("비밀번호는 대소문자, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.");
-    //   return;
-    // }
-
-    // GitHub 검증
-    if (!validateGithub(profile.github)) {
-      alert("GitHub URL 형식이 올바르지 않습니다.");
-      return;
-    }
-
-    // 블로그 검증
-    if (!validateBlog(profile.blog)) {
-      alert("블로그 URL 형식이 올바르지 않습니다.");
-      return;
-    }
-
-    if (!profile || !image) {
-      return;
-    }
     try {
 
       // 기존 관심사 삭제
@@ -176,54 +150,19 @@ function MyProfile() {
   };
 
 
-  //파일 선택 호출 함수
+  //이미지 변경 및 업로드 핸들러
   const handleImageSelection = (e) => {
     handleImageChange(e, setImage);
   };
-
-  //파일 업로드 함수
-  const handleImageUpload = async () => {
-
-    // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
-    const filePath = `public/${Date.now()}_${image.name}`;
-
-    if (!image) return;
-    // storage에 이미지 업로드
-    const { data, error } = await supabase
-      .storage
-      .from("profile-image")
-      .upload(filePath, image);
-
-    if (error) {
-      console.error("업로드실패", error.message);
-    } else {
-      console.log("업로드성공", data);
+  const handleImageUpdate = async () => {
+    try {
+      const imageUrl = await handleImageUpload(image, profile);
+      if (imageUrl) {
+        setProfile((prev) => ({ ...prev, my_profile_image_url: imageUrl }));
+      }
+    } catch (error) {
+      console.log(error);
     }
-
-    //storage에 업로드된 이미지 URL 가져오기
-    const { data: publicUrl } = supabase
-      .storage
-      .from("profile-image")
-      .getPublicUrl(filePath);
-
-    //table에 URL 저장
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({ my_profile_image_url: publicUrl.publicUrl })
-      .eq("id", profile.id);
-
-    if (updateError) {
-      console.error("URL업데이트 실패", updateError.message);
-    } else {
-      console.log("이미지 URL 업데이트 성공");
-      setProfile((prev) => ({ ...prev, my_profile_image_url: publicUrl.publicUrl }));
-    }
-  };
-
-
-  // 내 관심 카테고리 선택
-  const handleToggleInterest = (category) => {
-    toggleInterest(category, setSelectedInterests);
   };
 
   return (
@@ -233,7 +172,7 @@ function MyProfile() {
       <StImageContainer>
         <StProfileImage src={profile.my_profile_image_url ? profile.my_profile_image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
         <input type="file" onChange={handleImageSelection} />
-        <button onClick={handleImageUpload}>이미지 수정</button>
+        <button onClick={handleImageUpdate}>이미지 수정</button>
       </StImageContainer>
 
       <StFormContainer onSubmit={handleSubmit}>
@@ -261,7 +200,8 @@ function MyProfile() {
               <button
                 key={category}
                 type="button"
-                onClick={() => handleToggleInterest(category)}
+                onClick={() =>
+                  toggleInterest(category, setSelectedInterests)}
                 style={{
                   padding: '8px 12px',
                   cursor: 'pointer',
