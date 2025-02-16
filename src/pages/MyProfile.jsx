@@ -26,7 +26,6 @@ function MyProfile() {
       try {
         // 1. 로그인한 사용자 정보 가져오기 (auth)
         const { data: authData, error: authError } = await supabase.auth.getUser();
-        console.log(authData);
         if (authError) throw authError;
         const userId = authData.user.id;
 
@@ -44,7 +43,7 @@ function MyProfile() {
           id: userId,
           nickname: userData.nickname,
           email: authData.user.email,
-          password: "********",
+          password: "",
           github: userData.github,
           blog: userData.blog,
           my_profile_image_url: userData.my_profile_image_url,
@@ -76,7 +75,13 @@ function MyProfile() {
     e.preventDefault();
 
     try {
-      const { data, error } = await supabase
+      const { pwError } = await supabase.auth.updateUser({
+        password: profile.pw,
+      })
+
+      if ( pwError ) throw pwError
+
+      const { error } = await supabase
         .from("users")
         .update({
           nickname: profile.nickname,
@@ -85,8 +90,6 @@ function MyProfile() {
           my_profile_image_url: profile.my_profile_image_url,
         })
         .eq("id", profile.id).select();
-      console.log("profileId =>", profile.id);
-      console.log("data =>", data);
 
       if (error) throw error;
 
