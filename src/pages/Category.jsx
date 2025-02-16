@@ -44,8 +44,7 @@ export default Category;
 const StCategoriesSection = styled.section`
   width: 50vw;
   height: 90vh;
-  margin: 0 auto;
-  margin-top: 2.5vw;
+  margin: 3vh auto;
   text-align: center;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
