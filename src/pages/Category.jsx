@@ -14,6 +14,7 @@ function Category() {
   const myInterests =
     user?.user_interests
       ?.map((i) => i.user_interest)
+      // 비교 함수에서 a === c.ETC이면 1을 리턴하여 a를 뒤로 보내고, b === c.ETC이면 -1을 리턴하여 b를 뒤로 보냄
       .sort((a, b) => (a === c.ETC ? 1 : b === c.ETC ? -1 : 0)) || [];
 
   const testImg = user?.my_profile_image_url || logo;
@@ -23,7 +24,9 @@ function Category() {
     (i) => !myInterests.includes(i) && i !== c.ETC,
   );
 
+  //그리드 위치에 사용자 관심사를 우선적으로 배치하기 위해 사용
   const myPickSet = new Set([1, 2, 5]);
+  //각 버튼에 부여할 CSS 클래스명
   const classNames = [
     'one',
     'two',
@@ -39,12 +42,14 @@ function Category() {
   return (
     <StCategoriesSection>
       {categories.slice(0, 9).map((defaultCategory, i) => {
-        let loginCategory;
+        let loginCategory = [];
         if (myPickSet.has(i)) {
           const candidate = myInterests.shift() || defaultCategory;
           // 기타(ETC)가 myInterests에 있으면 others 배열의 마지막 요소로 대체
           loginCategory =
-            candidate === c.ETC && others.length ? others.pop() : candidate;
+            candidate === c.ETC && others.length !== 0
+              ? others.pop()
+              : candidate;
         } else {
           loginCategory = others.shift() || defaultCategory;
         }
