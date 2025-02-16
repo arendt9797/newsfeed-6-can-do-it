@@ -10,12 +10,13 @@ function NavigationLayout() {
 
   // 로그아웃 기능
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error(error);
-      return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      alert('로그아웃 되었습니다');
+    } catch (error) {
+      console.log(error);
     }
-    alert('로그아웃 되었습니다');
   };
 
   return (
