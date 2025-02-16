@@ -16,7 +16,6 @@ const HomeFeedCard = ({ feed }) => {
   const getComments = async () => {
     const { data } = await supabase
       .from('comments')
-      // .select('*, users(*)')
       .select('*, comment_user: users(nickname, my_profile_image_url)')
       .eq('feed_id', feed.id);
     setComments(data);
@@ -86,7 +85,6 @@ const HomeFeedCard = ({ feed }) => {
             <br />
             <div>{feed.content}</div>
             <br />
-            {/* <div>comments({comments.length})</div> */}
             {!comments.length ? (
               <div></div>
             ) : (
@@ -100,8 +98,6 @@ const HomeFeedCard = ({ feed }) => {
               return (
                 <StCommentsContent key={comment.id}>
                   <StCommentContainer>
-                    {/* 이름과 닉네임이 현재 user 정보로 나옴 */}
-                    {/* feed.user 실패 user실패 */}
                     <StCommentProfileImg>
                       <img src={comment.comment_user.my_profile_image_url} />
                     </StCommentProfileImg>
