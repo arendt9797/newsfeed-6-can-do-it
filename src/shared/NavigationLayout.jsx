@@ -204,6 +204,8 @@ const StBodyDiv = styled.div`
         color: black;
         font-size: 20px;
         text-align: center;
+        transition-duration: 0.6s;
+        transition-timing-function: ease;
 
         &:hover {
           transform: scale(1.1, 1.1);
