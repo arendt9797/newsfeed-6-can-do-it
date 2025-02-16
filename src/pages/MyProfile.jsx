@@ -192,6 +192,7 @@ function MyProfile() {
       } else if (prev.length < 3) {
         return [...prev, category];
       } else {
+        alert("관심사는 최대 3개까지 선택할 수 있습니다.");
         return prev;
       }
     });
@@ -225,7 +226,7 @@ function MyProfile() {
           <label>Blog</label>
           <StInput type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
 
-          <label>관심사?</label>
+          <label>관심사</label>
           {/* 🔹 관심 카테고리 선택 버튼 */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
             {categories.map((category) => (
