@@ -6,12 +6,16 @@ import { useState } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthProvider';
 import { Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 const emtpyArr = Array(2).fill(0);
 
 const HomeList = () => {
   const [feeds, setFeeds] = useState([]);
   const { isLogin } = useContext(AuthContext);
+  const [query] = useSearchParams();
+  const userId = query.get('id');
+  console.log(userId);
 
   useEffect(() => {
     const getFeeds = async () => {
@@ -31,8 +35,17 @@ const HomeList = () => {
   return (
     <StHomeWrap>
       <div>
-        {feeds.map((feed) => {
+        {/* {feeds.map((feed) => {
           return <HomeFeedCard key={feed.id} feed={feed} />;
+        })} */}
+        {feeds.map((feed) => {
+          return !userId ? (
+            <HomeFeedCard key={feed.id} feed={feed} />
+          ) : (
+            userId === feed.user_id && (
+              <HomeFeedCard key={feed.id} feed={feed} />
+            )
+          );
         })}
       </div>
       <div>

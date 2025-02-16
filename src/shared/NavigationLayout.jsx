@@ -5,8 +5,11 @@ import profile from '../assets/test-profile.png';
 import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 function NavigationLayout() {
   const { isLogin, user } = useContext(AuthContext); 
+  const navigate = useNavigate();
 
   // 로그아웃 기능
   const handleLogout = async () => {
@@ -54,7 +57,7 @@ function NavigationLayout() {
           <Link to="/category">Categories</Link>
           <Link to={isLogin ? '/create-feed' : '/sign-in'}>Create Feed</Link>
           <Link to="/about-us">About Us</Link>
-          {isLogin && <Link to="/"> My Feed </Link>}
+          {isLogin && <button onClick={()=>{navigate(`/?id=${user.id}`)}} > My Feed </button>}
           {isLogin && <Link to="/"> My Like</Link>}
         </nav>
 
