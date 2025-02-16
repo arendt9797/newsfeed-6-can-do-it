@@ -60,16 +60,15 @@ const Signup = () => {
         .upload(`public/${uniqueImageName}`, myImage);
       if (storageError) throw storageError;
 
+      const {data: publicUrl} = supabase.storage.from('profile-image').getPublicUrl(`public/${uniqueImageName}`)
+      console.log('publicUrl =====>', publicUrl);
       // 텍스트 추가 정보 public users에 저장
       const { error: userError } = await supabase.from('users').insert({
         id: authUser.id,
         nickname: myNickname,
         github: myGithub,
         blog: myBlog,
-        my_profile_image_url: `${import.meta.env.VITE_APP_SUPABASE_URL}${
-          import.meta.env.VITE_APP_STORAGE_PATH
-        }${uniqueImageName}`,
-      });
+        my_profile_image_url: publicUrl.publicUrl});
       if (userError) throw userError;
 
       // 내 관심 카테고리 정보 public user_interests에 저장
@@ -98,10 +97,16 @@ const Signup = () => {
         <form onSubmit={handleSignup}>
           <div className="user-image">
             <img src="/src/assets/test-logo.png" alt="site_logo" />
-            <input
-              type="file"
-              onChange={(e) => setMyImage(e.target.files[0])}
-            />
+            <div className="file-wrap">
+              <input
+                type="file"
+                className="input-file"
+                onChange={(e) => setMyImage(e.target.files[0])}
+              />
+              {/* <label className='label-file' htmlFor='file'></label> */}
+              <span className='span-file'></span>
+            </div>
+
             <button type="submit">{'Sign up'}</button>
             <footer>
               {'Already a member? '}
