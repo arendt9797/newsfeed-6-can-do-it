@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { supabase } from "../supabase/client";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthProvider";
+import categories from "../constants/categories";
 
 function MyProfile() {
 
@@ -16,6 +17,7 @@ function MyProfile() {
     blog: "",
   });
   const [image, setImage] = useState(null);
+  const [selectedInterests, setSelectedInterests] = useState([]);
 
   useEffect(() => {
     //로그인이 아닐시 실행안함
@@ -169,6 +171,18 @@ function MyProfile() {
     }
   };
 
+  // 내 관심 카테고리 선택
+  const toggleInterest = (category) => {
+    setSelectedInterests((prev) => {
+      if (prev.includes(category)) {
+        return prev.filter((selected) => selected !== category);
+      } else if (prev.length < 3) {
+        return [...prev, category];
+      } else {
+        return prev;
+      }
+    });
+  };
 
   return (
     <StProfileContainer>
@@ -198,7 +212,29 @@ function MyProfile() {
           <label>Blog</label>
           <StInput type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
 
-          <label>관심사?</label>
+          <label>관심 카테고리</label>
+          {/* 🔹 관심 카테고리 선택 버튼 */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => toggleInterest(category)}
+                style={{
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  backgroundColor: selectedInterests.includes(category)
+                    ? '#007bff'
+                    : '#f0f0f0',
+                  color: selectedInterests.includes(category) ? 'white' : 'black',
+                  border: '1px solid #ccc',
+                  borderRadius: '5px',
+                }}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
 
           <StButton type="submit">수정완료</StButton>
         </StForm>
