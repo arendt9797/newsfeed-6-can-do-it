@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { supabase } from '../supabase/client';
 import categories from '../constants/categories';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import styled from 'styled-components';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ const Signup = () => {
   const [myGithub, setMyGithub] = useState('');
   const [selectedInterests, setSelectedInterests] = useState([]);
   const navigate = useNavigate();
-  
+
   // 내 관심 카테고리 선택
   const toggleInterest = (category) => {
     setSelectedInterests((prev) => {
@@ -65,9 +66,9 @@ const Signup = () => {
         nickname: myNickname,
         github: myGithub,
         blog: myBlog,
-        my_profile_image_url: `${
-          import.meta.env.VITE_APP_SUPABASE_URL
-        }${import.meta.env.VITE_APP_STORAGE_PATH}${uniqueImageName}`,
+        my_profile_image_url: `${import.meta.env.VITE_APP_SUPABASE_URL}${
+          import.meta.env.VITE_APP_STORAGE_PATH
+        }${uniqueImageName}`,
       });
       if (userError) throw userError;
 
@@ -83,81 +84,186 @@ const Signup = () => {
       if (categoryError) throw categoryError;
 
       // 완료되면 로그인 페이지로 이동
-      alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.");
-      navigate("/sign-in");
+      alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
+      navigate('/sign-in');
     } catch (error) {
       alert(error.message);
       console.error('회원가입 오류:', error);
     }
   };
-  
+
   return (
-    <div>
-      <h2>회원가입 페이지</h2>
-      <form
-        onSubmit={handleSignup}
-        style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
-      >
-        <input type="file" onChange={(e) => setMyImage(e.target.files[0])} />
-        <input
-          type="text"
-          placeholder="이름"
-          value={myNickname}
-          onChange={(e) => setMyNickname(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="깃헙"
-          value={myGithub}
-          onChange={(e) => setMyGithub(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="블로그"
-          value={myBlog}
-          onChange={(e) => setMyBlog(e.target.value)}
-        />
-        {/* 🔹 관심 카테고리 선택 버튼 */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-          {categories.map((category) => (
-            <button
-              key={category}
-              type="button"
-              onClick={() => toggleInterest(category)}
-              style={{
-                padding: '8px 12px',
-                cursor: 'pointer',
-                backgroundColor: selectedInterests.includes(category)
-                  ? '#007bff'
-                  : '#f0f0f0',
-                color: selectedInterests.includes(category) ? 'white' : 'black',
-                border: '1px solid #ccc',
-                borderRadius: '5px',
-              }}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
-        <button type="submit">회원가입</button>
-      </form>
-    </div>
+    <StSignUp>
+      <StSignUpContainer>
+        <form onSubmit={handleSignup}>
+          <div className="user-image">
+            <img src="/src/assets/test-logo.png" alt="site_logo" />
+            <input
+              type="file"
+              onChange={(e) => setMyImage(e.target.files[0])}
+            />
+            <button type="submit">{'Sign up'}</button>
+            <footer>
+              {'Already a member? '}
+              <Link to={'/sign-up'}>{'Sign In'}</Link>
+            </footer>
+          </div>
+          <div className="user-info">
+            <input
+              type="text"
+              placeholder="이름"
+              value={myNickname}
+              onChange={(e) => setMyNickname(e.target.value)}
+              required
+            />
+            <input
+              type="email"
+              placeholder="이메일"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="깃헙"
+              value={myGithub}
+              onChange={(e) => setMyGithub(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="블로그"
+              value={myBlog}
+              onChange={(e) => setMyBlog(e.target.value)}
+            />
+            {/* 🔹 관심 카테고리 선택 버튼 */}
+            <div className="categories">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => toggleInterest(category)}
+                  style={{
+                    padding: '8px 12px',
+                    cursor: 'pointer',
+                    backgroundColor: selectedInterests.includes(category)
+                      ? '#007bff'
+                      : '#f0f0f0',
+                    color: selectedInterests.includes(category)
+                      ? 'white'
+                      : 'black',
+                    border: '1px solid #ccc',
+                    borderRadius: '5px',
+                  }}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+        </form>
+      </StSignUpContainer>
+    </StSignUp>
   );
 };
 
 export default Signup;
+
+const StSignUp = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+`;
+
+const StSignUpContainer = styled.div`
+  width: 800px;
+  height: 800px;
+  border: 3px solid #d1d1d1;
+  border-radius: 20px;
+  form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 'image info';
+    /* gap: 20px; */
+  }
+
+  /* 회원가입 왼쪽: 프로필 이미지 영역 */
+  .user-image {
+    grid-area: image;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  img {
+    width: 130px;
+    border-radius: 20px;
+  }
+
+  footer {
+    position: absolute;
+    bottom: 0px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #2baa84;
+  }
+
+  .user-image > button {
+    width: 250px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    margin-top: 20px;
+    background-color: #46d7ab;
+    color: #21212e;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+      background-color: #46e4b5;
+    }
+  }
+
+  /* 회원가입 오른쪽: 유저정보 영역 */
+  .user-info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .user-info > input {
+    font-size: 16px;
+    height: 50px;
+    width: 300px;
+    border: none;
+    border-bottom: 3px solid #21212e;
+    outline: none;
+    transition: border-bottom 0.4s ease-in-out;
+
+    &:focus {
+      border-bottom: 3px solid #46d7ab;
+    }
+  }
+
+  .categories {
+    display: flex;
+    flex-wrap: wrap;
+    width: 350px;
+    gap: 5px;
+  }
+
+  .categories > button {
+    width: 80px;
+  }
+`;
