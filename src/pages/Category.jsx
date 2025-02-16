@@ -45,10 +45,11 @@ const StCategoriesSection = styled.section`
   width: 50vw;
   height: 90vh;
   margin: 0 auto;
+  margin-top: 2.5vw;
   text-align: center;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-gap: 5px;
+  grid-gap: 6px;
   grid-auto-rows: minmax(100px, auto);
 
   a {
