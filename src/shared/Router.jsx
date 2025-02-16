@@ -7,7 +7,7 @@ import MyProfile from '../pages/MyProfile';
 import SignIn from '../pages/SignIn';
 import SignUp from '../pages/SignUp';
 import NavigationLayout from './NavigationLayout';
-import ProtectedRoute from '../components/ProtectedRoute';
+import ProtectedRoute from './ProtectedRoute';
 
 const router = createBrowserRouter([
   {
