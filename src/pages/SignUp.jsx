@@ -60,9 +60,8 @@ const Signup = () => {
         .upload(`public/${uniqueImageName}`, myImage);
       if (storageError) throw storageError;
 
-      const {data: publicUrl} = supabase.storage.from('profile-image').getPublicUrl(`public/${uniqueImageName}`)
-      console.log('publicUrl =====>', publicUrl);
       // 텍스트 추가 정보 public users에 저장
+      const {data: publicUrl} = supabase.storage.from('profile-image').getPublicUrl(`public/${uniqueImageName}`)
       const { error: userError } = await supabase.from('users').insert({
         id: authUser.id,
         nickname: myNickname,
