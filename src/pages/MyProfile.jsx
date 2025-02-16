@@ -26,7 +26,6 @@ function MyProfile() {
       try {
         // 1. 로그인한 사용자 정보 가져오기 (auth)
         const { data: authData, error: authError } = await supabase.auth.getUser();
-        console.log(authData);
         if (authError) throw authError;
         const userId = authData.user.id;
 
@@ -44,13 +43,11 @@ function MyProfile() {
           id: userId,
           nickname: userData.nickname,
           email: authData.user.email,
-          password: "********",
+          password: "",
           github: userData.github,
           blog: userData.blog,
           my_profile_image_url: userData.my_profile_image_url,
         });
-
-        console.log("updated profile =>", userData);
       } catch (error) {
         console.error(error);
       }
@@ -76,7 +73,17 @@ function MyProfile() {
     e.preventDefault();
 
     try {
-      const { data, error } = await supabase
+      // 비밀번호 업데이트
+      if (profile.password) {
+        const { error: pwError } = await supabase.auth.updateUser({
+          password: profile.password,
+        });
+
+        if (pwError) throw pwError;
+      }
+
+      // 프로필 정보 업데이트
+      const { error: profileError } = await supabase
         .from("users")
         .update({
           nickname: profile.nickname,
@@ -84,17 +91,17 @@ function MyProfile() {
           blog: profile.blog,
           my_profile_image_url: profile.my_profile_image_url,
         })
-        .eq("id", profile.id).select();
-      console.log("profileId =>", profile.id);
-      console.log("data =>", data);
+        .eq("id", profile.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
       alert("신분세탁 완료!");
     } catch (error) {
       console.error("Update error =>", error);
+      alert("프로필 업데이트에 실패했습니다.");
     }
   };
+
 
   //파일 선택 호출 함수
   const handleImageChange = (e) => {
@@ -170,6 +177,7 @@ function MyProfile() {
           <StInput type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
 
           <label>관심사?</label>
+
 
           <StButton type="submit">수정완료</StButton>
         </StForm>
