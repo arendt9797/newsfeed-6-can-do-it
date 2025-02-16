@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react';
 import ImageEditor from 'tui-image-editor';
 import 'tui-image-editor/dist/tui-image-editor.css';
+import St from 'styled-components';
+
+const EditorContainer = St.div`
+  width:100%;
+  height:100%;
+`;
 
 const ToastImageEditor = () => {
   const editorRef = useRef(null);
@@ -15,29 +21,19 @@ const ToastImageEditor = () => {
             name: 'SampleImage',
           },
           theme: {}, // 기본 테마 사용 (원하면 커스터마이징 가능)
-          menu: [
-            'crop',
-            'flip',
-            'rotate',
-            'draw',
-            'shape',
-            'icon',
-            'text',
-            'mask',
-            'filter',
-          ],
-          initMenu: 'crop', // 처음 활성화될 메뉴
+          menu: ['crop', 'flip', 'shape', 'icon', 'text', 'mask', 'filter'],
+          initMenu: 'crop',
           uiSize: {
             width: '100%',
             height: '100%',
           },
-          menuBarPosition: 'top', // 메뉴 바 위치
+          menuBarPosition: 'left',
         },
-        cssMaxWidth: '700px',
-        cssMaxHeight: '500px',
+        cssMaxWidth: '100%',
+        cssMaxHeight: '100%',
         selectionStyle: {
-          cornerSize: 10,
-          rotatingPointOffset: 60,
+          cornerSize: 5,
+          rotatingPointOffset: 30,
         },
       });
 
@@ -51,10 +47,10 @@ const ToastImageEditor = () => {
   }, []);
 
   return (
-    <div
+    <EditorContainer
       id="tui-image-editor"
       ref={editorRef}
-      style={{ width: '700px', height: '500px' }} // 컨테이너 크기를 명시적으로 지정
+      // 컨테이너 크기
     />
   );
 };

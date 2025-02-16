@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import categories from '../constants/categories';
@@ -9,7 +9,7 @@ function Category() {
   const { isLogin, user } = useContext(AuthContext);
   const myInterests = user?.user_interests?.map((i) => i.user_interest) || [];
   const others = categories.filter(
-    (i) => !myInterests.includes(i) && i !== ETC
+    (i) => !myInterests.includes(i) && i !== ETC,
   );
 
   return (
