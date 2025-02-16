@@ -40,7 +40,18 @@ function MyProfile() {
 
         if (userError) throw userError;
 
-        // 3. profile 상태 업데이트
+        // 3. user_interests 테이블에서 현재 사용자의 관심사 가져오기
+        const { data: interestData, error: interestError } = await supabase
+          .from("user_interests")
+          .select("user_interest")
+          .eq("user_id", userId);
+
+        if (interestError) throw interestError;
+
+        // 4. 관심사 배열을 selectedInterests에 설정
+        const userInterests = interestData.map((item) => item.user_interest);
+
+        // 5. profile 상태 업데이트
         setProfile({
           id: userId,
           nickname: userData.nickname,
@@ -50,6 +61,9 @@ function MyProfile() {
           blog: userData.blog,
           my_profile_image_url: userData.my_profile_image_url,
         });
+
+        // 6. selectedInterests 상태에 기존 관심사 설정
+        setSelectedInterests(userInterests);
       } catch (error) {
         console.error(error);
       }
@@ -75,6 +89,26 @@ function MyProfile() {
     e.preventDefault();
 
     try {
+      // 기존 관심사 삭제
+      const { error: interestError } = await supabase
+        .from("user_interests")
+        .delete()
+        .eq("user_id", profile.id);
+
+      if (interestError) throw interestError;
+
+      // 새로운 관심사 추가
+      const { error: selectInterestError } = await supabase
+        .from("user_interests")
+        .insert(
+          selectedInterests.map((category) => ({
+            user_id: profile.id,
+            user_interest: category,
+          }))
+        );
+
+      if (selectInterestError) throw selectInterestError;
+
       // 비밀번호 업데이트
       if (profile.password) {
         const { error: pwError } = await supabase.auth.updateUser({
