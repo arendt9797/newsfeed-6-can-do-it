@@ -1,5 +1,16 @@
-const categories = [
-    "영화", "여행", "미술", "음악", "DIY", "운동", "게임", "요리", "동물", "기타"
-]
+import * as category from './categoryName';
 
-export default categories
+const categories = [
+  category.MOVIES,
+  category.TRAVEL,
+  category.ART,
+  category.MUSIC,
+  category.DIY,
+  category.EXERCISE,
+  category.GAMES,
+  category.COOKING,
+  category.ANIMALS,
+  category.ETC,
+];
+
+export default categories;
