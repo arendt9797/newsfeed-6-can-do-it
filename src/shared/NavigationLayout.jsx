@@ -6,9 +6,9 @@ import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import { useContext } from 'react';
 function NavigationLayout() {
-  const { isLogin, user } = useContext(AuthContext); // 로그인 여부에 따른 화면 변화 여부
+  const { isLogin, user } = useContext(AuthContext); 
 
-  // NOTE: 로그아웃
+  // 로그아웃 기능
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -204,6 +204,8 @@ const StBodyDiv = styled.div`
         color: black;
         font-size: 20px;
         text-align: center;
+        transition-duration: 0.6s;
+        transition-timing-function: ease;
 
         &:hover {
           transform: scale(1.1, 1.1);
