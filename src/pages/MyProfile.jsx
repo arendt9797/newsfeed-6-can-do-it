@@ -72,55 +72,33 @@ function MyProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 비밀번호가 입력되었을 때만 비밀번호 업데이트
-    if (profile.password) {
-      try {
+    try {
+      // 비밀번호 업데이트
+      if (profile.password) {
         const { error: pwError } = await supabase.auth.updateUser({
-          password: profile.password // 새로운 비밀번호
+          password: profile.password,
         });
 
         if (pwError) throw pwError;
-
-        // 비밀번호 업데이트 성공 후, 다른 프로필 정보 업데이트
-        const { error } = await supabase
-          .from("users")
-          .update({
-            nickname: profile.nickname,
-            github: profile.github,
-            blog: profile.blog,
-            my_profile_image_url: profile.my_profile_image_url,
-          })
-          .eq("id", profile.id)
-          .select();
-
-        if (error) throw error;
-
-        alert("신분세탁 완료!");
-      } catch (error) {
-        console.error("Update error =>", error);
-        alert("비밀번호 변경에 실패했습니다.");
       }
-    } else {
-      // 비밀번호를 입력하지 않았을 경우에는 그냥 프로필만 업데이트
-      try {
-        const { error } = await supabase
-          .from("users")
-          .update({
-            nickname: profile.nickname,
-            github: profile.github,
-            blog: profile.blog,
-            my_profile_image_url: profile.my_profile_image_url,
-          })
-          .eq("id", profile.id)
-          .select();
 
-        if (error) throw error;
+      // 프로필 정보 업데이트
+      const { error: profileError } = await supabase
+        .from("users")
+        .update({
+          nickname: profile.nickname,
+          github: profile.github,
+          blog: profile.blog,
+          my_profile_image_url: profile.my_profile_image_url,
+        })
+        .eq("id", profile.id);
 
-        alert("신분세탁 완료!");
-      } catch (error) {
-        console.error("Update error =>", error);
-        alert("프로필 업데이트에 실패했습니다.");
-      }
+      if (profileError) throw profileError;
+
+      alert("신분세탁 완료!");
+    } catch (error) {
+      console.error("Update error =>", error);
+      alert("프로필 업데이트에 실패했습니다.");
     }
   };
 
@@ -199,7 +177,7 @@ function MyProfile() {
           <StInput type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
 
           <label>관심사?</label>
-          
+
 
           <StButton type="submit">수정완료</StButton>
         </StForm>
