@@ -5,6 +5,8 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthProvider";
 import categories from "../constants/categories";
 import { validateBlog, validateEmail, validateGithub, validateNickname, validatePassword } from "../shared/utils/validationUtils";
+import { handleImageChange, handleImageUpload } from "../shared/utils/fileUtils";
+import { toggleInterest } from "../shared/utils/categoryUtils";
 
 function MyProfile() {
 
@@ -101,11 +103,11 @@ function MyProfile() {
       return;
     }
 
-    // 비밀번호 검증
-    if (!validatePassword(profile.password)) {
-      alert("비밀번호는 대소문자, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.");
-      return;
-    }
+    // // 비밀번호 검증
+    // if (!validatePassword(profile.password)) {
+    //   alert("비밀번호는 대소문자, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.");
+    //   return;
+    // }
 
     // GitHub 검증
     if (!validateGithub(profile.github)) {
@@ -120,6 +122,9 @@ function MyProfile() {
     }
 
     try {
+      const imageUrl = await handleImageUpload(image, supabase, profile.id);
+      setProfile((prev) => ({ ...prev, my_profile_image_url: imageUrl }));
+
       // 기존 관심사 삭제
       const { error: interestError } = await supabase
         .from("user_interests")
@@ -171,81 +176,53 @@ function MyProfile() {
 
 
   //파일 선택 호출 함수
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-  
-    if (file) {
-      // 파일 확장자 검사
-      const validExtensions = ['image/jpeg', 'image/png']; // 허용되는 이미지 형식
-      if (!validExtensions.includes(file.type)) {
-        alert('이미지 파일은 jpg, jpeg, png만 가능합니다.');
-        return;
-      }
-  
-      // 파일 용량 검사 (5MB 이하)
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      if (file.size > maxSize) {
-        alert('이미지 파일 용량은 5MB 이하로 업로드 해주세요.');
-        return;
-      }
-  
-      // 유효성 검사 통과 후 파일 설정
-      setImage(file);
-    }
+  const handleImageSelection = (e) => {
+    handleImageChange(e, setImage);
   };
 
-  //파일 업로드 함수
-  const handleImageUpload = async () => {
+  // //파일 업로드 함수
+  // const handleImageUpload = async () => {
 
-    // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
-    const filePath = `public/${Date.now()}_${image.name}`;
+  //   // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
+  //   const filePath = `public/${Date.now()}_${image.name}`;
 
-    if (!image) return;
-    // storage에 이미지 업로드
-    const { data, error } = await supabase
-      .storage
-      .from("profile-image")
-      .upload(filePath, image);
+  //   if (!image) return;
+  //   // storage에 이미지 업로드
+  //   const { data, error } = await supabase
+  //     .storage
+  //     .from("profile-image")
+  //     .upload(filePath, image);
 
-    if (error) {
-      console.error("업로드실패", error.message);
-    } else {
-      console.log("업로드성공", data);
-    }
+  //   if (error) {
+  //     console.error("업로드실패", error.message);
+  //   } else {
+  //     console.log("업로드성공", data);
+  //   }
 
-    //storage에 업로드된 이미지 URL 가져오기
-    const { data: publicUrl } = supabase
-      .storage
-      .from("profile-image")
-      .getPublicUrl(filePath);
+  //   //storage에 업로드된 이미지 URL 가져오기
+  //   const { data: publicUrl } = supabase
+  //     .storage
+  //     .from("profile-image")
+  //     .getPublicUrl(filePath);
 
-    //table에 URL 저장
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({ my_profile_image_url: publicUrl.publicUrl })
-      .eq("id", profile.id);
+  //   //table에 URL 저장
+  //   const { error: updateError } = await supabase
+  //     .from("users")
+  //     .update({ my_profile_image_url: publicUrl.publicUrl })
+  //     .eq("id", profile.id);
 
-    if (updateError) {
-      console.error("URL업데이트 실패", updateError.message);
-    } else {
-      console.log("이미지 URL 업데이트 성공");
-      setProfile((prev) => ({ ...prev, my_profile_image_url: publicUrl.publicUrl }));
-    }
-  };
+  //   if (updateError) {
+  //     console.error("URL업데이트 실패", updateError.message);
+  //   } else {
+  //     console.log("이미지 URL 업데이트 성공");
+  //     setProfile((prev) => ({ ...prev, my_profile_image_url: publicUrl.publicUrl }));
+  //   }
+  // };
 
 
   // 내 관심 카테고리 선택
-  const toggleInterest = (category) => {
-    setSelectedInterests((prev) => {
-      if (prev.includes(category)) {
-        return prev.filter((selected) => selected !== category);
-      } else if (prev.length < 3) {
-        return [...prev, category];
-      } else {
-        alert("관심사는 최대 3개까지 선택할 수 있습니다.");
-        return prev;
-      }
-    });
+  const handleToggleInterest = (category) => {
+    toggleInterest(category, setSelectedInterests);
   };
 
   return (
@@ -254,7 +231,7 @@ function MyProfile() {
       {/* 왼쪽: 프로필 이미지 */}
       <StImageContainer>
         <StProfileImage src={profile.my_profile_image_url ? profile.my_profile_image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
-        <input type="file" onChange={handleImageChange} />
+        <input type="file" onChange={handleImageSelection} />
         <button onClick={handleImageUpload}>이미지 수정</button>
       </StImageContainer>
 
@@ -283,7 +260,7 @@ function MyProfile() {
               <button
                 key={category}
                 type="button"
-                onClick={() => toggleInterest(category)}
+                onClick={() => handleToggleInterest(category)}
                 style={{
                   padding: '8px 12px',
                   cursor: 'pointer',
