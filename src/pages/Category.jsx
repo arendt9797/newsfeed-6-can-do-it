@@ -8,7 +8,9 @@ import logo from '../assets/test-logo.png';
 
 function Category() {
   const { isLogin, user } = useContext(AuthContext);
+  //user의 관심사 카테고리 배열로 가져오기
   const myInterests = user?.user_interests?.map((i) => i.user_interest) || [];
+  //user의 관심사 및 기타를 제외한 카테고리
   const others = categories.filter(
     (i) => !myInterests.includes(i) && i !== ETC,
   );
