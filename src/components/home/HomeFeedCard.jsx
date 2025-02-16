@@ -16,7 +16,8 @@ const HomeFeedCard = ({ feed }) => {
   const getComments = async () => {
     const { data } = await supabase
       .from('comments')
-      .select('*, users(*)')
+      // .select('*, users(*)')
+      .select('*, comment_user: users(nickname, my_profile_image_url)')
       .eq('feed_id', feed.id);
     setComments(data);
   };
@@ -85,7 +86,12 @@ const HomeFeedCard = ({ feed }) => {
             <br />
             <div>{feed.content}</div>
             <br />
-            <div>comments({comments.length})</div>
+            {/* <div>comments({comments.length})</div> */}
+            {!comments.length ? (
+              <div></div>
+            ) : (
+              <div>comments({comments.length})</div>
+            )}
           </div>
         </StFeedTop>
         {comments.length > 0 && (
@@ -97,17 +103,19 @@ const HomeFeedCard = ({ feed }) => {
                     {/* 이름과 닉네임이 현재 user 정보로 나옴 */}
                     {/* feed.user 실패 user실패 */}
                     <StCommentProfileImg>
-                      <img src={user?.my_profile_image_url} />
+                      <img src={comment.comment_user.my_profile_image_url} />
                     </StCommentProfileImg>
-                    <StH3>{user?.nickname}</StH3>
+                    <StH3>{comment.comment_user.nickname}</StH3>
                     <span>{comment.comment}</span>
                   </StCommentContainer>
                   <div>
                     <span>
                       {user?.id === comment.user_id && (
-                        <button onClick={() => handleDeleteFeed(comment.id)}>
-                          삭제
-                        </button>
+                        <StDeleteBtn
+                          onClick={() => handleDeleteFeed(comment.id)}
+                        >
+                          &times;
+                        </StDeleteBtn>
                       )}
                     </span>
                   </div>
@@ -258,4 +266,15 @@ const StFeedProfileImgContainer = styled.div`
 
 const StH3 = styled.h3`
   font-weight: 600;
+`;
+
+const StDeleteBtn = styled.button`
+  border: none;
+  font-size: 1.2rem;
+
+  &:hover {
+    color: red;
+    cursor: pointer;
+    scale: 1.3;
+  }
 `;
