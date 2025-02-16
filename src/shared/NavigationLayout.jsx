@@ -187,6 +187,10 @@ const StBodyDiv = styled.div`
 
       button {
         all: unset;
+
+        &:hover {
+          cursor: pointer;
+        }
       }
 
       a,
@@ -200,6 +204,13 @@ const StBodyDiv = styled.div`
         color: black;
         font-size: 20px;
         text-align: center;
+
+        &:hover {
+          transform: scale(1.1, 1.1);
+          -ms-transform: scale(1.1, 1.1);
+          -webkit-transform: scale(1.1, 1.1);
+          box-shadow: 0px 5px 5px -2px rgba(0, 0, 0, 0.25);
+        }
       }
 
       .sign {
