@@ -35,9 +35,6 @@ const HomeList = () => {
   return (
     <StHomeWrap>
       <div>
-        {/* {feeds.map((feed) => {
-          return <HomeFeedCard key={feed.id} feed={feed} />;
-        })} */}
         {feeds.map((feed) => {
           return !userId ? (
             <HomeFeedCard key={feed.id} feed={feed} />
