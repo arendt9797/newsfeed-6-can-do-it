@@ -4,6 +4,7 @@ import categories from '../constants/categories';
 import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
+import { useEffect } from 'react';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -13,7 +14,25 @@ const Signup = () => {
   const [myBlog, setMyBlog] = useState('');
   const [myGithub, setMyGithub] = useState('');
   const [selectedInterests, setSelectedInterests] = useState([]);
+  const [uploadedFileName, setUploadedFileName] =
+    useState('사진을 선택해주세요');
+  const [previewImage, setPreviewImage] = useState(null);
   const navigate = useNavigate();
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setMyImage(file);
+      setUploadedFileName(file.name);
+    }
+
+    // FileReader를 사용하여 이미지 미리보기 생성
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setPreviewImage(reader.result); // 변환된 data URL 저장
+    };
+  };
 
   // 내 관심 카테고리 선택
   const toggleInterest = (category) => {
@@ -61,13 +80,16 @@ const Signup = () => {
       if (storageError) throw storageError;
 
       // 텍스트 추가 정보 public users에 저장
-      const {data: publicUrl} = supabase.storage.from('profile-image').getPublicUrl(`public/${uniqueImageName}`)
+      const { data: publicUrl } = supabase.storage
+        .from('profile-image')
+        .getPublicUrl(`public/${uniqueImageName}`);
       const { error: userError } = await supabase.from('users').insert({
         id: authUser.id,
         nickname: myNickname,
         github: myGithub,
         blog: myBlog,
-        my_profile_image_url: publicUrl.publicUrl});
+        my_profile_image_url: publicUrl.publicUrl,
+      });
       if (userError) throw userError;
 
       // 내 관심 카테고리 정보 public user_interests에 저장
@@ -96,14 +118,16 @@ const Signup = () => {
         <form onSubmit={handleSignup}>
           <div className="user-image">
             <img src="/src/assets/test-logo.png" alt="site_logo" />
-            <div className="file-wrap">
+            <div className="file-wrapper">
+              <img src={previewImage} alt='preview'/>
               <input
                 type="file"
-                className="input-file"
-                onChange={(e) => setMyImage(e.target.files[0])}
+                id="file-upload"
+                // onChange={(e) => setMyImage(e.target.files[0])}
+                onChange={handleFileChange}
               />
-              {/* <label className='label-file' htmlFor='file'></label> */}
-              <span className='span-file'></span>
+              <StLabel htmlFor="file-upload">{'🔗'}</StLabel>
+              <StFileName>{uploadedFileName}</StFileName>
             </div>
 
             <button type="submit">{'Sign up'}</button>
@@ -199,11 +223,13 @@ const StSignUpContainer = styled.div`
     /* gap: 20px; */
   }
 
-  /* 회원가입 왼쪽: 프로필 이미지 영역 */
+  /* ========== 회원가입 왼쪽: 프로필 이미지 영역 =========== */
   .user-image {
     grid-area: image;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     position: relative;
   }
 
@@ -237,7 +263,26 @@ const StSignUpContainer = styled.div`
     }
   }
 
-  /* 회원가입 오른쪽: 유저정보 영역 */
+  /* input file 커스터마이즈 */
+  .file-wrapper > input {
+    display: none;
+  }
+
+  .file-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 5px;
+    border: 1px solid #d1d1d1;
+    border-radius: 5px;
+    width: 350px;
+    height: 40px;
+  }
+
+  /* 미리보기 기능 */
+
+  /* ========== 회원가입 오른쪽: 유저정보 영역 ========== */
   .user-info {
     grid-area: info;
     display: flex;
@@ -270,4 +315,27 @@ const StSignUpContainer = styled.div`
   .categories > button {
     width: 80px;
   }
+`;
+
+/* input file 커스터마이즈 */
+const StLabel = styled.label`
+  background-color: #21212e;
+  color: #46d7ab;
+  padding: 10px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #46d7ab;
+  }
+`;
+
+const StFileName = styled.span`
+  font-size: 14px;
+  color: #21212e;
+  width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
