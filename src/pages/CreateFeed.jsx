@@ -1,9 +1,9 @@
 import St from 'styled-components';
 import { supabase } from '../supabase/client';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import ToastImageEditor from '../components/ToastImageEditor';
 import Category from '../constants/categories';
-
+import { AuthContext } from '../context/AuthProvider';
 const PageContainer = St.div`
     display:flex;
     height:100% ;
@@ -88,24 +88,15 @@ const CategoryContainer = St.div`
 const CreateFeed = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-
+  const { user: authUser, isLogin } = useContext(AuthContext);
   const handleAddFeed = async () => {
     console.log('handleAddFeed 호출됨');
 
-    const {
-      data: { user: auth }, // 현재 로그인 한 사용자의 세션, auth 스키마 데이터이므로 불러오기만
-      error: authError,
-    } = await supabase.auth.getUser();
-    //현재 로그인 한 사용자의 정보 불러오기
-    //2025.02.14 기준 로그아웃 상태에서 콘솔에서 에러 확인
-    if (authError) {
-      console.log('auth에러', authError);
-    }
-
-    const { data: publicUser, error } = await supabase
+    const { data: publicUser } = await supabase
       .from('users')
-      .select('id')
-      .eq('id', auth.id);
+      .select('*')
+      .eq('id', authUser.id)
+      .maybeSingle();
 
     try {
       const { data, error } = await supabase
