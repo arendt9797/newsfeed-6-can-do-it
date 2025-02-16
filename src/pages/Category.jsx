@@ -15,6 +15,7 @@ function Category() {
     (i) => !myInterests.includes(i) && i !== ETC,
   );
 
+  const myPickSet = new Set([1, 2, 5]);
   const classNames = [
     'one',
     'two',
@@ -26,32 +27,25 @@ function Category() {
     'eight',
     'nine',
   ];
-  // 1, 2, 5는 myInterests에서 가져오고, 나머지는 others에서 가져옴
-  const myPick = [1, 2, 5];
-
-  const categoryArr = [];
-  for (let i = 0; i < 9; i++) {
-    const defaultCategory = categories[i];
-    let loginCategory;
-    if (myPick.includes(i)) {
-      loginCategory = myInterests.shift() || defaultCategory;
-    } else {
-      loginCategory = others.shift() || defaultCategory;
-    }
-    categoryArr.push({
-      className: classNames[i],
-      loginCategory,
-      defaultCategory,
-    });
-  }
 
   return (
     <StCategoriesSection>
-      {categoryArr.map(({ className, loginCategory, defaultCategory }, i) => (
-        <Link key={i} to="/" className={className}>
-          <p>{isLogin ? loginCategory : defaultCategory}</p>
-        </Link>
-      ))}
+      {categories.slice(0, 9).map((defaultCategory, i) => {
+        let loginCategory;
+        if (myPickSet.has(i)) {
+          const candidate = myInterests.shift() || defaultCategory;
+          // ETC가 myInterests에 있으면 others 배열의 마지막 요소로 대체
+          loginCategory =
+            candidate === ETC && others.length ? others.pop() : candidate;
+        } else {
+          loginCategory = others.shift() || defaultCategory;
+        }
+        return (
+          <Link key={i} to="/" className={classNames[i]}>
+            <p>{isLogin ? loginCategory : defaultCategory}</p>
+          </Link>
+        );
+      })}
       {/* 기타(ETC)는 고정 */}
       <Link to="/" className="ten">
         <p>{ETC}</p>
