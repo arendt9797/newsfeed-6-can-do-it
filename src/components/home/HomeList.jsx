@@ -16,9 +16,11 @@ const HomeList = () => {
   useEffect(() => {
     const getFeeds = async () => {
       try {
-        const { data } = await supabase.from('feeds').select('*');
+        const { data } = await supabase
+          .from('feeds')
+          .select('*, user: users(nickname, my_profile_image_url)');
         setFeeds(data);
-        console.log;
+        // console.log(data);
       } catch (error) {
         console.log(error);
       }
@@ -47,9 +49,11 @@ export default HomeList;
 const StHomeWrap = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  height: 100vh;
+  height: auto;
+  overflow-y: auto;
+  padding: 100px;
 `;
 
 const StButton = styled.button`
@@ -59,6 +63,11 @@ const StButton = styled.button`
   border: none;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   margin-left: 50px;
+  position: fixed; /* 고정 위치 */
+  right: 80px; /* 오른쪽 20px 여백 */
+  top: 80px; /* 아래쪽 20px 여백 */
+  z-index: 10; /* 버튼이 다른 요소들 위에 보이도록 설정 */
+
   &:hover {
     background-color: lightgrey;
   }

@@ -7,9 +7,9 @@ import { ETC } from '../constants/categoryName';
 
 function Category() {
   const { isLogin, user } = useContext(AuthContext);
-  const myInterests = user?.user_interests.map((i) => i.user_interest) || [];
+  const myInterests = user?.user_interests?.map((i) => i.user_interest) || [];
   const others = categories.filter(
-    (i) => !myInterests.includes(i) && i !== ETC,
+    (i) => !myInterests.includes(i) && i !== ETC
   );
 
   return (
@@ -35,7 +35,7 @@ function Category() {
       <Link to="/">{isLogin ? others[5] : categories[8]}</Link>
       {/* 기타는 고정 */}
       <Link to="/" className="ten">
-        기타
+        {ETC}
       </Link>
     </StCategoriesSection>
   );

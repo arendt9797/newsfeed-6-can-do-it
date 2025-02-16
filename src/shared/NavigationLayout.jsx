@@ -27,10 +27,10 @@ function NavigationLayout() {
 
         <div className="profile-div">
           <Link to={isLogin ? '/my-profile' : '/sign-in'}>
-            <img src={profile} alt="profile" />
+            <img src={user?.my_profile_image_url || profile} alt="profile" />
           </Link>
           <div className="tip">
-            <p>이미지를 클릭하면 My Profile로 이동합니다.</p>
+            <p>이미지를 클릭하면 sign in 혹은 My Profile로 이동합니다.</p>
           </div>
           <div>
             {isLogin
@@ -74,6 +74,9 @@ const StBodyDiv = styled.div`
   display: flex;
   justify-content: left;
   align-items: center;
+  //[지은] height: 100vh; 추가
+  height: 100vh;
+  //------------------
 
   header {
     background-color: #211c1c;
@@ -83,6 +86,13 @@ const StBodyDiv = styled.div`
     align-items: center;
     width: 400px;
     height: 100vh;
+    //[지은] 아래 5가지 항목 추가, 좌측에 네비게이션 바 고정 및 스크롤 기능 추가
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    //------------------
 
     .home-link {
       text-decoration: none;
@@ -105,6 +115,8 @@ const StBodyDiv = styled.div`
 
       img {
         width: 50px;
+        height: 50px;
+        border-radius: 100%;
       }
       .tip {
         position: relative;
@@ -138,13 +150,13 @@ const StBodyDiv = styled.div`
         visibility: hidden;
 
         color: #fff;
-        font-size: 13px;
+        font-size: 12px;
         line-height: 1.4;
         text-align: left;
 
         background-color: #0065b75d;
-        width: 140px;
-        padding: 10px;
+        width: 150px;
+        padding: 5px;
         border-radius: 3px;
         box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2),
           -1px -1px 3px rgba(0, 0, 0, 0.2);
@@ -208,4 +220,8 @@ const StBodyDiv = styled.div`
 
 const StMain = styled.main`
   flex: 1;
+  //[지은] 아래 2가지 추가 margin-left, height 내비게이션 너비만큼 마진부여
+  margin-left: 400px;
+  height: 100vh;
+  //-------------------------
 `;

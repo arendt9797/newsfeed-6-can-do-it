@@ -48,8 +48,6 @@ function MyProfile() {
           blog: userData.blog,
           my_profile_image_url: userData.my_profile_image_url,
         });
-
-        console.log("updated profile =>", userData);
       } catch (error) {
         console.error(error);
       }
@@ -74,30 +72,58 @@ function MyProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const { pwError } = await supabase.auth.updateUser({
-        password: profile.pw,
-      })
+    // 비밀번호가 입력되었을 때만 비밀번호 업데이트
+    if (profile.password) {
+      try {
+        const { error: pwError } = await supabase.auth.updateUser({
+          password: profile.password // 새로운 비밀번호
+        });
 
-      if ( pwError ) throw pwError
+        if (pwError) throw pwError;
 
-      const { error } = await supabase
-        .from("users")
-        .update({
-          nickname: profile.nickname,
-          github: profile.github,
-          blog: profile.blog,
-          my_profile_image_url: profile.my_profile_image_url,
-        })
-        .eq("id", profile.id).select();
+        // 비밀번호 업데이트 성공 후, 다른 프로필 정보 업데이트
+        const { error } = await supabase
+          .from("users")
+          .update({
+            nickname: profile.nickname,
+            github: profile.github,
+            blog: profile.blog,
+            my_profile_image_url: profile.my_profile_image_url,
+          })
+          .eq("id", profile.id)
+          .select();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      alert("신분세탁 완료!");
-    } catch (error) {
-      console.error("Update error =>", error);
+        alert("신분세탁 완료!");
+      } catch (error) {
+        console.error("Update error =>", error);
+        alert("비밀번호 변경에 실패했습니다.");
+      }
+    } else {
+      // 비밀번호를 입력하지 않았을 경우에는 그냥 프로필만 업데이트
+      try {
+        const { error } = await supabase
+          .from("users")
+          .update({
+            nickname: profile.nickname,
+            github: profile.github,
+            blog: profile.blog,
+            my_profile_image_url: profile.my_profile_image_url,
+          })
+          .eq("id", profile.id)
+          .select();
+
+        if (error) throw error;
+
+        alert("신분세탁 완료!");
+      } catch (error) {
+        console.error("Update error =>", error);
+        alert("프로필 업데이트에 실패했습니다.");
+      }
     }
   };
+
 
   //파일 선택 호출 함수
   const handleImageChange = (e) => {

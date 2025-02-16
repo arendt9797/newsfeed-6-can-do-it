@@ -2,15 +2,21 @@ import styled from 'styled-components';
 import { supabase } from '../../supabase/client';
 import { useState } from 'react';
 import { useEffect } from 'react';
+import { useContext } from 'react';
+import { AuthContext } from '../../context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 const HomeFeedCard = ({ feed }) => {
+  const { user, isLogin } = useContext(AuthContext);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
+  const navigate = useNavigate();
+  console.log(user);
 
   const getComments = async () => {
     const { data } = await supabase
       .from('comments')
-      .select('*')
+      .select('*, users(*)')
       .eq('feed_id', feed.id);
     setComments(data);
   };
@@ -19,41 +25,62 @@ const HomeFeedCard = ({ feed }) => {
     getComments();
   }, [comment]);
 
+  console.log(user);
+
   const handleAddComment = async (feedId) => {
+    if (!isLogin) {
+      alert('댓글을 입력하려면 로그인을 해주세요!');
+      navigate('/sign-in');
+      return;
+    }
+
     const { data } = await supabase.from('comments').insert({
       feed_id: feedId,
-      comments: comment,
+      comment: comment,
+      user_id: user?.id,
     });
     setComment('');
   };
 
-  //삭제 로직 AuthProvider에서 user를 전역으로 뿌려줘야 가능
-  // const handleDeleteFeed = async (id) => {
-  //   const isConfirm = window.confirm("정말 삭제하시겠습니까?");
-  //   if(isConfirm) {
-  //     const {error} = await supabase.from("comments").delete().eq("id", id);
+  const handleDeleteFeed = async (id) => {
+    const isConfirm = window.confirm('정말 삭제하시겠습니까?');
+    if (isConfirm) {
+      const { error } = await supabase.from('comments').delete().eq('id', id);
 
-  //     if(error) throw error;
-  //     setComments((prev)=> prev.filter((feed)=> feed.id !== id));
+      if (error) throw error;
+      getComments();
+    }
+  };
+
+  // const handleUpdateFeed = async (id) => {
+  //   const isConfirm = window.confirm('정말 수정하시겠습니까?');
+  //   if (isConfirm) {
+  //     const { data, error } = await supabase
+  //       .from('comments')
+  //       .update({ other_column: 'otherValue' })
+  //       .eq('some_column', 'someValue')
+  //       .select();
   //   }
   // };
 
   return (
     <>
+      <StFeedProfileImgContainer>
+        <StFeedProfileImg>
+          <img src={feed.user.my_profile_image_url} />
+        </StFeedProfileImg>
+        <span>{feed.user.nickname}</span>
+      </StFeedProfileImgContainer>
       <StFeedBox>
         <StFeedTop>
           <div>
+            {/* feed_img_url로 추후 교체 */}
             <img
               src="https://media.istockphoto.com/id/1497396873/ko/%EC%82%AC%EC%A7%84/%ED%95%B4%EB%B3%80-%ED%9C%B4%EA%B0%80%EB%A5%BC-%EC%8B%9C%EC%9E%91%ED%95%A0-%EC%A4%80%EB%B9%84%EA%B0%80-%EB%90%98%EC%97%88%EC%8A%B5%EB%8B%88%EB%8B%A4.jpg?s=612x612&w=0&k=20&c=okICg7-m2NXrvTnU4Jl2Vy3coHYd7DcjtyMMUA3Vg7E="
               width={250}
             />
           </div>
           <div>
-            <img
-              src="https://img.freepik.com/free-vector/isolated-young-handsome-man-different-poses-white-background-illustration_632498-859.jpg"
-              alt="이미지 에러"
-              width={80}
-            />
             <StH2>{feed.title}</StH2>
             <br />
             <div>{feed.content}</div>
@@ -65,23 +92,25 @@ const HomeFeedCard = ({ feed }) => {
           <StCommentsContainer>
             {comments.map((comment) => {
               return (
-                <StCommentsContent>
-                  <li>
+                <StCommentsContent key={comment.id}>
+                  <StCommentContainer>
+                    {/* 이름과 닉네임이 현재 user 정보로 나옴 */}
+                    {/* feed.user 실패 user실패 */}
+                    <StCommentProfileImg>
+                      <img src={user?.my_profile_image_url} />
+                    </StCommentProfileImg>
+                    <StH3>{user?.nickname}</StH3>
+                    <span>{comment.comment}</span>
+                  </StCommentContainer>
+                  <div>
                     <span>
-                      <span>
-                        <img src="#" />
-                      </span>
-                      <span>이름 : </span>
-                      <span>{comment.comments}</span>
+                      {user?.id === comment.user_id && (
+                        <button onClick={() => handleDeleteFeed(comment.id)}>
+                          삭제
+                        </button>
+                      )}
                     </span>
-                  </li>
-                  <span>
-                    {/* {user.id === comment.writer_id && (
-                      <button onClick={() => handleDeleteFeed(comment.id)}>
-                        삭제
-                      </button>
-                    )} */}
-                  </span>
+                  </div>
                 </StCommentsContent>
               );
             })}
@@ -173,7 +202,60 @@ const StCommentsContainer = styled.div`
   margin-bottom: 5px;
 `;
 
+const StCommentContainer = styled.div`
+  display: flex;
+  gap: 10px;
+`;
+
 const StCommentsContent = styled.ul`
   display: flex;
   justify-content: space-between;
+  align-items: center;
+`;
+
+const StCommentProfileImg = styled.div`
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #cccccc;
+  overflow: hidden;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const StFeedProfileImg = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1px solid #cccccc;
+  overflow: hidden;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const StFeedProfileImgContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  color: black;
+  font-weight: 800;
+  margin-top: 60px;
+`;
+
+const StH3 = styled.h3`
+  font-weight: 600;
 `;
