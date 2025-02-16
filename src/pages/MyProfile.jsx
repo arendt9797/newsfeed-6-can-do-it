@@ -88,6 +88,40 @@ function MyProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(profile.email)) {
+      alert("이메일 형식이 올바르지 않습니다.");
+      return;
+    }
+
+    // 닉네임 정규표현식
+    const nicknameRegex = /^[a-zA-Z]{2,8}$|^[가-힣]{2,8}$|^[a-zA-Z가-힣]{2,8}$/;
+    if (!nicknameRegex.test(profile.nickname)) {
+      alert("닉네임은 2자 이상 8자 이하의 한글, 영어, 숫자 조합만 가능합니다.");
+      return;
+    }
+
+    // // 비밀번호 정규표현식
+    // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
+    // if (profile.password && !passwordRegex.test(profile.password)) {
+    //   alert("비밀번호는 대소문자, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.");
+    //   return;
+    // }
+
+    // GitHub 정규표현식
+    const githubRegex = /^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9_-]+$/;
+    if (profile.github && !githubRegex.test(profile.github)) {
+      alert("GitHub URL 형식이 올바르지 않습니다.");
+      return;
+    }
+
+    // 블로그 정규표현식
+    const blogRegex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (profile.blog && !blogRegex.test(profile.blog)) {
+      alert("블로그 URL 형식이 올바르지 않습니다.");
+      return;
+    }
+
     try {
       // 기존 관심사 삭제
       const { error: interestError } = await supabase
