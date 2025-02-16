@@ -7,6 +7,7 @@ import MyProfile from '../pages/MyProfile';
 import SignIn from '../pages/SignIn';
 import SignUp from '../pages/SignUp';
 import NavigationLayout from './NavigationLayout';
+import LoginRouter from '../components/LoginRouter';
 
 const router = createBrowserRouter([
   {
@@ -19,8 +20,8 @@ const router = createBrowserRouter([
       { path: '/my-profile', element: <MyProfile /> },
     ],
   },
-  { path: '/sign-in', element: <SignIn /> },
-  { path: '/sign-up', element: <SignUp /> },
+  { path: '/sign-in', element: <LoginRouter element={<SignIn />} /> },
+  { path: '/sign-up', element: <LoginRouter element={<SignUp />} /> },
 ]);
 
 const Router = () => {
