@@ -64,7 +64,7 @@ const HomeFeedCard = ({ feed }) => {
     <>
       <StFeedProfileImgContainer>
         <StFeedProfileImg>
-          <img src={feed.user.my_profile_image_url} />
+          <img src={feed.user?.my_profile_image_url} />
         </StFeedProfileImg>
         <span>{feed.user.nickname}</span>
       </StFeedProfileImgContainer>
