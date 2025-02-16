@@ -27,34 +27,32 @@ const Login = () => {
   };
 
   return (
-    <>
-      <StSignIn>
-        <StSignInContainer>
-          <img src="/src/assets/test-logo.png" alt="site_logo" />
-          <form onSubmit={handleLogin}>
-            <input
-              type="email"
-              placeholder="  이메일 주소를 입력해주세요"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="  비밀번호를 입력해주세요"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button type="submit">{'Login'}</button>
-          </form>
-          <footer>
-            {'not a member yet? '}
-            <Link to={'/sign-up'}>{'Sign Up'}</Link>
-          </footer>
-        </StSignInContainer>
-      </StSignIn>
-    </>
+    <StSignIn>
+      <StSignInContainer>
+        <img src="/src/assets/test-logo.png" alt="site_logo" />
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="  이메일 주소를 입력해주세요"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="  비밀번호를 입력해주세요"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit">{'Login'}</button>
+        </form>
+        <footer>
+          {'not a member yet? '}
+          <Link to={'/sign-up'}>{'Sign Up'}</Link>
+        </footer>
+      </StSignInContainer>
+    </StSignIn>
   );
 };
 
