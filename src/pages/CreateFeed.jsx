@@ -2,8 +2,9 @@ import St from 'styled-components';
 import { supabase } from '../supabase/client';
 import { useState, useContext } from 'react';
 import ToastImageEditor from '../components/ToastImageEditor';
-
 import { AuthContext } from '../context/AuthProvider';
+import categories from '../constants/categories';
+
 const PageContainer = St.div`
     display:flex;
     height:100% ;
@@ -91,16 +92,28 @@ const UserFeedContainer = St.div`
 
 const CategoryContainer = St.div`
   display:grid;
+  grid-template-columns:repeat(3,60px);
+  grid-auto-rows:36px;
+  gap:5px;
   width:25vw;
   height:20vh;
   margin-top:20px;
   background-color:red;
+  
+  button:last-child{
+  grid-column:1/-1;
+    background-color:white;
+  }
 `;
 
 const CreateFeed = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [imgUrl, setImgUrl] = useState('');
+  const [category, setCategory] = useState('');
   const { user: authUser } = useContext(AuthContext);
+
+
   const handleAddFeed = async () => {
     console.log('handleAddFeed 호출됨');
 
@@ -156,7 +169,11 @@ const CreateFeed = () => {
             onChange={(e) => setContent(e.target.value)}
           />
         </div>
-        <CategoryContainer></CategoryContainer>
+        <CategoryContainer>
+          {categories.map((category, index) => {
+            return <button key={index}>{category}</button>;
+          })}
+        </CategoryContainer>
       </UserFeedContainer>
     </PageContainer>
   );
