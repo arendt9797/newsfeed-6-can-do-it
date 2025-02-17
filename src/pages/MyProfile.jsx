@@ -165,9 +165,9 @@ function MyProfile() {
         <form onSubmit={handleSubmit} >
           {/* 왼쪽: 프로필 이미지 */}
           <div className="user-image">
-            <img className="logo-img" src="/src/assets/test-logo.png" alt="site_logo" />
+            <img className="logo-img" src="/public/doitLogo.png" alt="site_logo" />
             <img className="preview-img" 
-            src={profile.my_profile_image_url ? profile.my_profile_image_url : "/src/assets/test-logo.png"} 
+            src={profile.my_profile_image_url ? profile.my_profile_image_url : "/public/doitLogo.png"} 
             alt="프로필 이미지"
             onClick={() => document.getElementById("file-upload").click()} 
             />
