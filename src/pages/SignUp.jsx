@@ -5,11 +5,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import { toggleInterest } from '../shared/utils/categoryUtils';
-import { validateBlog, validateEmail, validateGithub, validateNickname, validatePassword } from '../shared/utils/validationUtils';
+import {
+  validateBlog,
+  validateEmail,
+  validateGithub,
+  validateNickname,
+  validatePassword,
+} from '../shared/utils/validationUtils';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPW, setShowPW] = useState(false);
   const [myImage, setMyImage] = useState(null);
   const [myNickname, setMyNickname] = useState('');
   const [myBlog, setMyBlog] = useState('');
@@ -36,8 +43,9 @@ const Signup = () => {
   };
 
   // 내 관심 카테고리 선택
-  const toggleInterestHandler = (category) => toggleInterest(category, setSelectedInterests, selectedInterests)
-  
+  const toggleInterestHandler = (category) =>
+    toggleInterest(category, setSelectedInterests, selectedInterests);
+
   const handleSignup = async (e) => {
     e.preventDefault();
 
@@ -50,11 +58,17 @@ const Signup = () => {
       alert('카테고리 3개를 선택해주세요.');
       return;
     }
-    if (!validateEmail(email)) return alert("이메일 형식이 올바르지 않습니다.");
-    if (!validatePassword(password)) return alert("비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.")
-    if (!validateNickname(myNickname)) return alert("닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.");
-    if (!validateGithub(myGithub)) return alert("GitHub URL 형식이 올바르지 않습니다.");
-    if (!validateBlog(myBlog)) return alert("블로그 URL 형식이 올바르지 않습니다.");
+    if (!validateEmail(email)) return alert('이메일 형식이 올바르지 않습니다.');
+    if (!validatePassword(password))
+      return alert(
+        '비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.',
+      );
+    if (!validateNickname(myNickname))
+      return alert('닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.');
+    if (!validateGithub(myGithub))
+      return alert('GitHub URL 형식이 올바르지 않습니다.');
+    if (!validateBlog(myBlog))
+      return alert('블로그 URL 형식이 올바르지 않습니다.');
 
     try {
       const {
@@ -98,7 +112,6 @@ const Signup = () => {
           })),
         );
       if (categoryError) throw categoryError;
-
     } catch (error) {
       alert(error.message);
       console.error('회원가입 오류:', error);
@@ -159,15 +172,20 @@ const Signup = () => {
                 required
               />
             </div>
-            <div>
+            <div className="password-wrapper">
               <p>{'Password'}</p>
               <input
-                type="password"
+                type={showPW ? 'text' : 'password'}
                 placeholder="  비밀번호를 입력해주세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              {showPW ? (
+                <span onClick={() => setShowPW(false)}>🙉</span>
+              ) : (
+                <span onClick={() => setShowPW(true)}>🙈</span>
+              )}
             </div>
             <div>
               <p>{'Github (선택)'}</p>
@@ -338,6 +356,21 @@ const StSignUpContainer = styled.div`
 
     &:focus {
       border-bottom: 3px solid #46d7ab;
+    }
+  }
+
+  .password-wrapper {
+    position: relative;
+
+    span {
+      position: absolute;
+      font-size: large;
+      top: 35px;
+      cursor: pointer;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
   }
 
