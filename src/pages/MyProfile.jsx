@@ -21,6 +21,9 @@ function MyProfile() {
   });
   const [image, setImage] = useState(null);
   const [selectedInterests, setSelectedInterests] = useState([]);
+  const [preview, setPreview] = useState(null);
+
+
   useEffect(() => {
     if (!isLogin) return;
     fetchUserProfile();
@@ -51,6 +54,8 @@ function MyProfile() {
         blog: userData.blog,
         my_profile_image_url: userData.my_profile_image_url,
       }));
+
+      setPreview(userData.my_profile_image_url);
 
     } catch (error) {
       console.error("사용자 정보 불러오기 실패:", error);
@@ -133,6 +138,7 @@ function MyProfile() {
       const imageUrl = await handleImageUpload(image, profile);
       if (imageUrl) {
         setProfile((prev) => ({ ...prev, my_profile_image_url: imageUrl }));
+        setPreview(imageUrl);
       }
 
       await Promise.all([updateUserProfile(imageUrl), updateUserInterests(), updateUserPassword()]);
@@ -159,11 +165,15 @@ function MyProfile() {
           <div className="user-image">
             <img className="logo-img" src="/public/doitLogo.png" alt="site_logo" />
             <img className="preview-img"
-              src={profile.my_profile_image_url ? profile.my_profile_image_url : "/public/doitLogo.png"}
+              src={preview || "/public/doitLogo.png"}
               alt="프로필 이미지"
               onClick={() => document.getElementById("file-upload").click()}
             />
-            <input type="file" id="file-upload" onChange={(e) => handleImageChange(e, setImage)} style={{ display: "none" }} />
+            <input type="file" id="file-upload" 
+              onChange={
+              (e) => handleImageChange(e, setImage, setPreview)
+            }
+              style={{ display: "none" }} />
           </div>
 
           {/* 오른쪽: 입력 필드 및 버튼 */}

@@ -2,7 +2,7 @@ import { supabase } from "../../supabase/client";
 import { v4 as uuidv4 } from "uuid";
 
 //파일 선택 호출 함수
-export const handleImageChange = (e, setImage) => {
+export const handleImageChange = (e, setImage, setPreview) => {
   const file = e.target.files[0];
 
   if (file) {
@@ -22,6 +22,8 @@ export const handleImageChange = (e, setImage) => {
 
     // 유효성 검사 통과 후 파일 설정
     setImage(file);
+
+    setPreview(URL.createObjectURL(file));
   }
 };
 
@@ -53,7 +55,7 @@ export const handleImageUpload = async (image, profile) => {
   if (publicError) {
     console.log("이미지가져오기 실패", publicError);
   }
-  
+
   const imageUrl = publicUrlData.publicUrl;
 
   // 3.table에 URL 저장
