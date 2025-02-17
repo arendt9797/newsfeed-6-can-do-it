@@ -7,7 +7,6 @@ import HomeFeedCard from './home/HomeFeedCard';
 
 const CategoryFeed = () => {
   const [feeds, setFeeds] = useState([]);
-  const [feedInterests, setFeedInterests] = useState([]);
   const { isLogin } = useContext(AuthContext);
   const [query] = useSearchParams();
   const categoryId = query.get('id');
@@ -15,43 +14,32 @@ const CategoryFeed = () => {
   console.log('카테고리 ID:', categoryId);
 
   useEffect(() => {
-    const getFeeds = async () => {
-      try {
-        const { data = [] } = await supabase
-          .from('feed_interests')
-          .select('feed:feeds(*, user:users(nickname, my_profile_image_url))')
-          .eq('interest_name', categoryId); 
+    const getFeed = async () => {
+      if (!categoryId) return;
 
-        const filteredFeeds = data.map((item) => item.feed).filter(Boolean);
+      try {
+        const { data, error } = await supabase
+          .from('feed_interests')
+          .select('feed:feeds(*,user:users(nickname, my_profile_image_url))')
+          .eq('interest_name', categoryId);
+        if (error) {
+          console.error('오류:', error);
+          return;
+        }
+        const filteredFeeds = data.map((i) => i.feed).filter(Boolean);
         setFeeds(filteredFeeds);
       } catch (error) {
-        console.error('피드 불러오기 오류:', error);
+        console.error('예상치 못한 오류:', error);
+        alert('예상치 못한 오류가 발생했습니다.');
       }
     };
-
-    if (categoryId) getFeeds(); // categoryId 유효성 확인
-  }, [categoryId]); // categoryId 변경 시 재요청
-
-  useEffect(() => {
-    const getFeedInterests = async () => {
-      try {
-        const { data = [] } = await supabase.from('feed_interests').select('*');
-        setFeedInterests(data);
-        // console.log(
-        //   '관심사 데이터:',
-        //   data.map((i) => i.interest_name),
-        // ); // ["영화","기타"]
-      } catch (error) {
-        console.error('관심사 불러오기 오류:', error);
-      }
-    };
-    getFeedInterests();
-  }, []);
+    getFeed();
+  }, [categoryId]);
 
   return (
     <StHomeWrap>
       <div>
-        <div style={{ textAlign: 'center' }}>{categoryId} 카테고리!!!</div>
+        <div style={{ textAlign: 'center' }}>{categoryId} 카테고리 입니다!!</div>
         {feeds
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
           .map((feed) => (
