@@ -10,6 +10,7 @@ import DeveloperPage from '../pages/DeveloperPage';
 import NavigationLayout from './NavigationLayout';
 import ProtectedRoute from './ProtectedRoute';
 import MyFeed from '../components/MyFeed';
+import CategoryFeed from '../components/CategoryFeed';
 
 const router = createBrowserRouter([
   {
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
       { path: '/about-us', element: <AboutUs /> },
       { path: '/my-profile', element: <MyProfile /> },
       { path: '/my-feed', element: <MyFeed /> },
+      { path: '/category-feed', element: <CategoryFeed /> },
       { path: '/developer-page', element: <DeveloperPage /> },
     ],
   },
