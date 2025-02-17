@@ -165,13 +165,13 @@ const StCreateFeed = () => {
           />
         </div>
         <StImageInputContainer>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
-        {previewImage ? (
-          <img className="preview-img" src={previewImage} alt="preview" />
-        ) : (
-          <div className="default-img">{'No Image'} </div>
-        )}
-      </StImageInputContainer>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
+          {previewImage ? (
+            <img className="preview-img" src={previewImage} alt="preview" />
+          ) : (
+            <div className="default-img">{'No Image'} </div>
+          )}
+        </StImageInputContainer>
         <div className="button-container">
           <button id="upload-button" onClick={handleAddFeed}>
             포스팅하기
@@ -362,6 +362,6 @@ const StCategoryButton = styled.button`
   }
 
   &:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
   }
 `;
