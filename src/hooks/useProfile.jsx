@@ -180,8 +180,9 @@ export const useProfile = () => {
         return validateGithub(value) ? "" : "GitHub URL 형식이 올바르지 않습니다.";
       case "blog":
         return validateBlog(value) ? "" : "블로그 URL 형식이 올바르지 않습니다.";
-      // case "password":
-      //   return validatePassword(value) ? "" : "비밀번호는 대소문자, 숫자, 특수문자 포함하여 8자 이상";
+      case "password":
+        if(!value) return "";
+        return validatePassword(value) ? "" : "비밀번호는 소문자, 숫자, 특수문자 포함하여 8자 이상";
       default:
         return "";
     }
