@@ -5,42 +5,62 @@ import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import HomeFeedCard from './home/HomeFeedCard';
 
-const MyFeed = () => {
-  const [feeds, setFeeds] = useState([]);
+const MyLike = () => {
+  const [likedFeeds, setLikedFeeds] = useState([]);
   const { user, isLogin } = useContext(AuthContext);
 
   useEffect(() => {
-    const getFeeds = async () => {
-      if (!user || !user.id) return;
+    const fetchLikedFeeds = async () => {
+      if (!user?.id) return;
+      
       try {
-        const { data, error } = await supabase
+        // 1. 사용자의 좋아요 목록 조회
+        const { data: likesData, error: likesError } = await supabase
+          .from('likes')
+          .select('feed_id')
+          .eq('user_id', user.id)
+          .eq('is_like', true);
+
+          if (likesError) {
+            console.error('좋아요 가져오기 실패:', likesError);
+            return;
+          }
+
+        // 2. 좋아요한 피드 id 찾기
+        const feedIds = likesData.map(like => like.feed_id);
+        if (feedIds.length === 0) return setLikedFeeds([]);
+
+        // 3. 피드 정보 얻기
+        const { data: feedsData, error: feedsError } = await supabase
           .from('feeds')
-          .select('*, user: users(nickname, my_profile_image_url)')
-          .eq('user_id', user.id);
-        // console.log(data);
-  
-        if (error) {
-          console.error('오류:', error);
-          return;
-        }
-        setFeeds(data || []);
+          .select('*')
+          .in('id', feedIds)
+          .order('created_at', { ascending: false });
+
+          if (feedsError) {
+            console.error('피드 가져오기 실패:', feedsError);
+            return;
+          }
+
+        setLikedFeeds(feedsData);
       } catch (error) {
-        console.log(error);
+        console.error('에러가 났네 에러가 났어', error);
       }
     };
-    getFeeds();
-  }, [user]);
+
+    fetchLikedFeeds();
+  }, [user?.id]);
 
   return (
     <StHomeWrap>
       <div>
-        <div className="my-feed-title"> My feed List</div>
-        {feeds.length === 0 ? (
-          <div className="empty-feed"> 아직 아무런 피드도 없습니다. </div>
+        <div className="my-feed-title">My Like List</div>
+        {likedFeeds.length === 0 ? (
+          <div className="empty-feed">아직 좋아요한 게시물이 없습니다.</div>
         ) : (
-          feeds
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .map((feed) => <HomeFeedCard key={feed.id} feed={feed} />)
+          likedFeeds.map(feed => (
+            <HomeFeedCard key={feed.id} feed={feed} />
+          ))
         )}
       </div>
 
@@ -57,7 +77,7 @@ const MyFeed = () => {
   );
 };
 
-export default MyFeed;
+export default MyLike;
 
 const StHomeWrap = styled.div`
   display: flex;
