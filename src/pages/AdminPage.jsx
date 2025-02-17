@@ -21,7 +21,7 @@ function DeveloperPage() {
 
   // 개발자가 아닌 계정은 / 으로 리다이렉트
   useEffect(() => {
-    if (user?.role !== 'developer') {
+    if (user?.role !== 'admin') {
       naviagte('/');
     }
   }, [user]);
