@@ -4,11 +4,19 @@ import categories from '../constants/categories';
 import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
-import { useEffect } from 'react';
+import { toggleInterest } from '../shared/utils/categoryUtils';
+import {
+  validateBlog,
+  validateEmail,
+  validateGithub,
+  validateNickname,
+  validatePassword,
+} from '../shared/utils/validationUtils';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPW, setShowPW] = useState(false);
   const [myImage, setMyImage] = useState(null);
   const [myNickname, setMyNickname] = useState('');
   const [myBlog, setMyBlog] = useState('');
@@ -35,30 +43,32 @@ const Signup = () => {
   };
 
   // 내 관심 카테고리 선택
-  const toggleInterest = (category) => {
-    setSelectedInterests((prev) => {
-      if (prev.includes(category)) {
-        return prev.filter((selected) => selected !== category);
-      } else if (prev.length < 3) {
-        return [...prev, category];
-      } else {
-        return prev;
-      }
-    });
-  };
+  const toggleInterestHandler = (category) =>
+    toggleInterest(category, setSelectedInterests, selectedInterests);
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    // 프로필 사진 필수 업로드
+
+    // 검증단계
     if (!myImage) {
-      console.error('프로필 사진을 올려주세요!');
+      alert('프로필 이미지를 선택해주세요.');
       return;
     }
-    // 카테고리 필수 3개 선택
     if (selectedInterests.length < 3) {
-      console.error('3개를 선택해주세요!');
+      alert('카테고리 3개를 선택해주세요.');
       return;
     }
+    if (!validateEmail(email)) return alert('이메일 형식이 올바르지 않습니다.');
+    if (!validatePassword(password))
+      return alert(
+        '비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.',
+      );
+    if (!validateNickname(myNickname))
+      return alert('닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.');
+    if (!validateGithub(myGithub))
+      return alert('GitHub URL 형식이 올바르지 않습니다.');
+    if (!validateBlog(myBlog))
+      return alert('블로그 URL 형식이 올바르지 않습니다.');
 
     try {
       const {
@@ -102,10 +112,6 @@ const Signup = () => {
           })),
         );
       if (categoryError) throw categoryError;
-
-      // 완료되면 로그인 페이지로 이동
-      alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
-      navigate('/sign-in');
     } catch (error) {
       alert(error.message);
       console.error('회원가입 오류:', error);
@@ -121,6 +127,7 @@ const Signup = () => {
               className="logo-img"
               src="/src/assets/test-logo.png"
               alt="site_logo"
+              onClick={() => navigate('/')}
             />
             {previewImage ? (
               <img className="preview-img" src={previewImage} alt="preview" />
@@ -165,18 +172,23 @@ const Signup = () => {
                 required
               />
             </div>
-            <div>
+            <div className="password-wrapper">
               <p>{'Password'}</p>
               <input
-                type="password"
+                type={showPW ? 'text' : 'password'}
                 placeholder="  비밀번호를 입력해주세요"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              {showPW ? (
+                <span onClick={() => setShowPW(false)}>🙉</span>
+              ) : (
+                <span onClick={() => setShowPW(true)}>🙈</span>
+              )}
             </div>
             <div>
-              <p>{'Github'}</p>
+              <p>{'Github (선택)'}</p>
               <input
                 type="text"
                 placeholder="  깃헙이 있다면 알려주세요"
@@ -185,7 +197,7 @@ const Signup = () => {
               />
             </div>
             <div>
-              <p>{'Blog'}</p>
+              <p>{'Blog (선택)'}</p>
               <input
                 type="text"
                 placeholder="  블로그가 있다면 알려주세요"
@@ -200,7 +212,7 @@ const Signup = () => {
                 <StCategoryButton
                   key={category}
                   type="button"
-                  onClick={() => toggleInterest(category)}
+                  onClick={() => toggleInterestHandler(category)}
                   selected={selectedInterests.includes(category)}
                 >
                   {category}
@@ -254,6 +266,7 @@ const StSignUpContainer = styled.div`
     width: 130px;
     border-radius: 20px;
     margin-bottom: 50px;
+    cursor: pointer;
   }
 
   footer {
@@ -343,6 +356,22 @@ const StSignUpContainer = styled.div`
 
     &:focus {
       border-bottom: 3px solid #46d7ab;
+    }
+  }
+
+  .password-wrapper {
+    position: relative;
+
+    span {
+      position: absolute;
+      font-size: large;
+      top: 35px;
+      cursor: pointer;
+      // 드래그 방지
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
   }
 

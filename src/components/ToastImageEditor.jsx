@@ -1,26 +1,23 @@
 import { useEffect, useRef } from 'react';
 import ImageEditor from 'tui-image-editor';
 import 'tui-image-editor/dist/tui-image-editor.css';
-import St from 'styled-components';
+import styled from 'styled-components';
 
-const EditorContainer = St.div`
-  width:100%;
-  height:100%;
+const EditorContainer = styled.div`
+  width: 100%;
+  height: 500px;
+  border: 1px solid #ddd;
 `;
 
-const ToastImageEditor = () => {
-  const editorRef = useRef(null);
+const MyImageEditor = () => {
+  const editorRef = useRef(null); // 에디터 인스턴스를 위한 useRef
+  const imageEditorInstance = useRef(null); // 로드한 이미지를 위한 useRef
 
   useEffect(() => {
     if (editorRef.current) {
-      // includeUI 옵션 사항 추가하기
       const instance = new ImageEditor(editorRef.current, {
         includeUI: {
-          loadImage: {
-            path: '', //store에서 이미지 불러오기
-            name: 'SampleImage',
-          },
-          theme: {}, // 기본 테마 사용 (원하면 커스터마이징 가능)
+          theme: {},
           menu: ['crop', 'flip', 'shape', 'icon', 'text', 'mask', 'filter'],
           initMenu: 'crop',
           uiSize: {
@@ -29,30 +26,25 @@ const ToastImageEditor = () => {
           },
           menuBarPosition: 'left',
         },
-        cssMaxWidth: '100%',
-        cssMaxHeight: '100%',
+        cssMaxWidth: 1000,
+        cssMaxHeight: 800,
         selectionStyle: {
           cornerSize: 5,
           rotatingPointOffset: 30,
         },
       });
 
-      // 컴포넌트 언마운트 시 에디터 인스턴스 정리
-      return () => {
-        if (instance) {
-          instance.destroy();
-        }
-      };
+      imageEditorInstance.current = instance;
     }
+
+    return () => {
+      if (imageEditorInstance.current) {
+        imageEditorInstance.current.destroy();
+      }
+    };
   }, []);
 
-  return (
-    <EditorContainer
-      id="tui-image-editor"
-      ref={editorRef}
-      // 컨테이너 크기
-    />
-  );
+  return <EditorContainer id="tui-image-editor" ref={editorRef} />;
 };
 
-export default ToastImageEditor;
+export default MyImageEditor;

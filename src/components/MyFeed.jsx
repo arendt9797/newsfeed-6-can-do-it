@@ -1,15 +1,13 @@
-import styled from 'styled-components';
-import HomeFeedCard from './HomeFeedCard';
-import { useEffect } from 'react';
-import { supabase } from '../../supabase/client';
-import { useState } from 'react';
-import { useContext } from 'react';
-import { AuthContext } from '../../context/AuthProvider';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import { AuthContext } from '../context/AuthProvider';
+import { supabase } from '../supabase/client';
+import HomeFeedCard from './home/HomeFeedCard';
 
-const HomeList = () => {
+const MyFeed = () => {
   const [feeds, setFeeds] = useState([]);
-  const { isLogin } = useContext(AuthContext);
+  const { user, isLogin } = useContext(AuthContext);
 
   useEffect(() => {
     const getFeeds = async () => {
@@ -28,16 +26,18 @@ const HomeList = () => {
   return (
     <StHomeWrap>
       <div>
+        <div style={{ textAlign: 'center'}}>임시로 기능만 구현했습니다.</div>
         {feeds
-          //new Date : 문자열을 날짜 객체로 변환
-          //supabase의 created_at은 날짜 문자열
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
           .map((feed) => {
             return (
-              <HomeFeedCard key={feed.id} feed={feed} setFeeds={setFeeds} />
+              user.id === feed.user_id && (
+                <HomeFeedCard key={feed.id} feed={feed} />
+              )
             );
           })}
       </div>
+
       <div>
         <Link to={isLogin ? '/create-feed' : '/sign-in'}>
           <StButton>+</StButton>
@@ -47,7 +47,7 @@ const HomeList = () => {
   );
 };
 
-export default HomeList;
+export default MyFeed;
 
 const StHomeWrap = styled.div`
   display: flex;
