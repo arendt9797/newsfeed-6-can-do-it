@@ -68,7 +68,11 @@ function AboutUs() {
               <p>등록된 사용자가 없습니다.</p>
             )}
           </StyledTeamMemberList>
-          {user?.role === 'developer' && <button>개발자 전용 버튼</button>}
+          {user?.role === 'developer' && (
+            <button onClick={() => navigate('/developer-page')}>
+              개발자 전용 버튼
+            </button>
+          )}
         </div>
       </StyledAboutUsContainer>
     </>
