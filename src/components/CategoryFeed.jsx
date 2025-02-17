@@ -45,7 +45,7 @@ const CategoryFeed = () => {
     <StHomeWrap>
       <div>
         <div className="feed-box">
-          <img src={categoryImgTest.img} alt="카테고리 이미지" />
+          <img className='category-img' src={categoryImgTest.img} alt="카테고리 이미지" />
           <div className="category-name">{categoryId} 카테고리</div>
         </div>
 
@@ -96,7 +96,7 @@ const StHomeWrap = styled.div`
     color: #999;
   }
 
-  img {
+  .category-img {
     width: 150px;
     height: 100px;
     margin-right: 20px;
