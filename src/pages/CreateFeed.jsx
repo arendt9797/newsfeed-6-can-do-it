@@ -5,6 +5,99 @@ import ToastImageEditor from '../components/ToastImageEditor';
 import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
 
+const StCreateFeed = () => {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [imgUrl, setImgUrl] = useState('');
+  const [feedCategory, setFeedCategory] = useState([]);
+  const { user: authUser } = useContext(AuthContext);
+
+  const handleFeedCategory = (hobby) => {
+    if (feedCategory.includes(hobby)) {
+      setFeedCategory((prev) => prev.filter((item) => item !== hobby));
+    } else {
+      if (feedCategory.length < 1) {
+        setFeedCategory((prev) => [...prev, hobby]);
+      } else {
+        alert('1개의 카테고리만 선택해주세요');
+      }
+    }
+  };
+  const handleAddFeed = async () => {
+    console.log('handleAddFeed 호출됨');
+
+    const { data: publicUser } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', authUser.id)
+      .maybeSingle();
+
+    try {
+      const { data, error } = await supabase.from('feeds').insert([
+        { title, content, user_id: publicUser.id, category: feedCategory[0] }, //2025년 2월 17일 기준 현재 1개의 카테고리만 데이터에 등록
+      ]);
+      //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id
+      if (error) {
+        console.log('error=>', error);
+      } else {
+        alert('데이터 입력 성공');
+        console.log(data);
+      }
+    } catch (error) {
+      console.error('error=>', error);
+    }
+  };
+
+  return (
+    <PageContainer>
+      <ToastImageEditorContainer>
+        <ToastImageEditor />
+      </ToastImageEditorContainer>
+      <StUserFeedContainer>
+        <div className="button-container">
+          <button id="upload-button" onClick={handleAddFeed}>
+            포스팅하기
+          </button>
+          <button id="save-button">임시저장</button>
+          <button id="cancle-button">돌아가기</button>
+        </div>
+        <div className="titleInput-container">
+          <label>Title</label>
+          <input
+            type="text"
+            className="titleInput"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </div>
+        <div className="contextInput-container">
+          <label>Context</label>
+          <textarea
+            className="contextInput"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          />
+        </div>
+        <StCategoryContainer>
+          {categories.map((category, index) => {
+            return (
+              <StCategoryButton
+                key={index}
+                onClick={() => handleFeedCategory(category)} //현재 string으로 선택됨
+                selected={feedCategory.includes(category)}
+              >
+                {category}
+              </StCategoryButton>
+            );
+          })}
+        </StCategoryContainer>
+      </StUserFeedContainer>
+    </PageContainer>
+  );
+};
+
+export default StCreateFeed;
+
 const PageContainer = St.div`
     display:flex;
     height:100% ;
@@ -18,7 +111,7 @@ const ToastImageEditorContainer = St.div`
     
 `;
 
-const UserFeedContainer = St.div`
+const StUserFeedContainer = St.div`
     display:flex;
     flex:0.8;
     width:100%;
@@ -87,7 +180,7 @@ const UserFeedContainer = St.div`
     }
 `;
 
-const CategoryContainer = St.div`
+const StCategoryContainer = St.div`
   display:grid;
   grid-template-columns:repeat(3,80px);
   grid-auto-rows:36px;
@@ -97,7 +190,7 @@ const CategoryContainer = St.div`
   margin-top:20px;
   
 `;
-const CategoryButton = St.button`
+const StCategoryButton = St.button`
     background-color:${(props) => (props.selected ? 'red' : 'white')};
     cursor:pointer;
     border-radius:16px;
@@ -106,98 +199,3 @@ const CategoryButton = St.button`
       background-color:red;
     }
 `;
-
-const CreateFeed = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [imgUrl, setImgUrl] = useState('');
-  const [feedCategory, setFeedCategory] = useState([]);
-  const { user: authUser } = useContext(AuthContext);
-
-  const handleFeedCategory = (hobby) => {
-    if (feedCategory.includes(hobby)) {
-      setFeedCategory((prev) => prev.filter((item) => item !== hobby));
-    } else {
-      if (feedCategory.length < 1) {
-        setFeedCategory((prev) => [...prev, hobby]);
-      } else {
-        alert('1개의 카테고리만 선택해주세요');
-      }
-    }
-  };
-  const handleAddFeed = async () => {
-    console.log('handleAddFeed 호출됨');
-
-    const { data: publicUser } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', authUser.id)
-      .maybeSingle();
-
-    try {
-      const { data, error } = await supabase
-        .from('feeds')
-        .insert([
-          { title, content, user_id: publicUser.id, category: feedCategory[0] },
-        ]);
-      //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id
-      if (error) {
-        console.log('error=>', error);
-      } else {
-        alert('데이터 입력 성공');
-        console.log(data);
-      }
-    } catch (error) {
-      console.error('error=>', error);
-    }
-  };
-
-  return (
-    <PageContainer>
-      <ToastImageEditorContainer>
-        <ToastImageEditor />
-      </ToastImageEditorContainer>
-      <UserFeedContainer>
-        <div className="button-container">
-          <button id="upload-button" onClick={handleAddFeed}>
-            포스팅하기
-          </button>
-          <button id="save-button">임시저장</button>
-          <button id="cancle-button">돌아가기</button>
-        </div>
-        <div className="titleInput-container">
-          <label>Title</label>
-          <input
-            type="text"
-            className="titleInput"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
-        <div className="contextInput-container">
-          <label>Context</label>
-          <textarea
-            className="contextInput"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-        </div>
-        <CategoryContainer>
-          {categories.map((category, index) => {
-            return (
-              <CategoryButton
-                key={index}
-                onClick={() => handleFeedCategory(category)} //현재 string으로 선택됨
-                selected={feedCategory.includes(category)}
-              >
-                {category}
-              </CategoryButton>
-            );
-          })}
-        </CategoryContainer>
-      </UserFeedContainer>
-    </PageContainer>
-  );
-};
-
-export default CreateFeed;
