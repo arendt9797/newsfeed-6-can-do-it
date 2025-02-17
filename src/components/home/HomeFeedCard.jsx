@@ -11,8 +11,10 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
   const [isLike, setIsLike] = useState(false);
+  const [likeNumber, setLikeNumber] = useState(0);
   const navigate = useNavigate();
 
+  // 모든 댓글 가져오기
   const getComments = async () => {
     const { data } = await supabase
       .from('comments')
@@ -25,6 +27,7 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
     getComments();
   }, [comment]);
 
+  // 댓글 추가 핸들러
   const handleAddComment = async (feedId) => {
     if (!isLogin) {
       alert('댓글을 입력하려면 로그인을 해주세요!');
@@ -40,7 +43,8 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
     setComment('');
   };
 
-  const handleDeleteComment = async (id, image) => {
+  // 댓글 삭제 핸들러
+  const handleDeleteComment = async (id) => {
     const isConfirm = window.confirm('정말 삭제하시겠습니까?');
     if (isConfirm) {
       const { error } = await supabase.from('comments').delete().eq('id', id);
@@ -49,9 +53,8 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
       getComments();
     }
   };
-  //[*]피드 이미지 url 주소 콘솔창으로 확인!!
-  // console.log(feed.feed_image_url);
 
+  // 이미지 삭제 핸들러
   const handleDeleteFeed = async (id) => {
     // [1]feeds 테이블에서 피드 삭제 _ 작동확인!OK
     const isConfirm = window.confirm('정말 삭제하시겠습니까?');
@@ -106,10 +109,88 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
   };
 
   // [좋아요] 토클 버튼
-  const handleLikeToggle = async (id) => {
-    alert('좋아요 버튼 클릭!');
-    console.log(id);
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      if (!user?.id) return;
+      
+      // 현재 로그인한 유저가 해당 피드에 좋아요를 눌렀는지 확인, 상태 저장
+      const { data, error } = await supabase
+        .from('likes')
+        .select('is_like')
+        .eq('feed_id', feed.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('좋아요 상태 가져오기 실패:', error);
+        return;
+      }
+
+      setIsLike(data?.is_like || false); // 데이터가 없으면 false로 설정
+
+      // 해당 feed_id의 좋아요 개수 가져오기
+      const { count, error: countError } = await supabase
+        .from('likes')
+        .select('*', { count: 'exact', head: true }) // COUNT로 특정 피드의 좋아요 true인 행 개수 가져오기
+        .eq('feed_id', feed.id);
+
+      if (countError) {
+        console.error('좋아요 개수 가져오기 실패:', countError);
+        return;
+      }
+
+      setLikeNumber(count); // 좋아요 개수 상태 업데이트
+    };
+
+    fetchLikeStatus();
+  }, [feed.id, user?.id]);
+
+  const handleLikeToggle = async (feedId) => {
+    if (!user?.id) {
+      alert('로그인이 필요합니다!');
+      return;
+    }
+
+    try {
+      // 현재 좋아요 상태 확인
+      const { data: existingLike, error: fetchError } = await supabase
+        .from('likes')
+        .select('is_like')
+        .eq('feed_id', feedId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        console.error('좋아요 상태 확인 오류:', fetchError);
+        return;
+      }
+
+      const newIsLike = existingLike ? !existingLike.is_like : true;
+
+      // 좋아요 정보 삽입 또는 업데이트
+      const { error: upsertError } = await supabase.from('likes').upsert(
+        [
+          {
+            feed_id: feedId,
+            user_id: user.id,
+            is_like: newIsLike, // 기존 데이터 기반으로 반전된 값 적용
+          },
+        ],
+        { onConflict: ['feed_id', 'user_id'] },
+      );
+
+      if (upsertError) {
+        console.error('좋아요 업서트 오류:', upsertError);
+        return;
+      }
+
+      setIsLike(newIsLike); // 상태 업데이트
+      fetchLikeStatus(); // 좋아요 상태가 업데이트되었으므로 좋아요 개수 다시 가져오기
+    } catch (error) {
+      console.error('좋아요 토글 오류:', error);
+    }
   };
+
   //------------------댓글 수정 보류----------
   // const handleUpdateFeed = async (id) => {
   //   const isConfirm = window.confirm('정말 수정하시겠습니까?');
@@ -158,9 +239,10 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
               <StComment>comments({comments.length})</StComment>
             )}
             {/* 좋아요 하트 */}
-            <StLikeBtn onClick={() => handleLikeToggle(user.id)}>
+            <StLikeBtn onClick={() => handleLikeToggle(feed.id)}>
               <StLikes>
-                <img src={isLike ? '/heart.png' : '/like.png'} />
+                <span>{likeNumber}</span>
+                <img src={isLike ? '/heart.png' : '/no_heart.png'} />
               </StLikes>
             </StLikeBtn>
           </div>
