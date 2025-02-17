@@ -11,7 +11,7 @@ const CategoryFeed = () => {
   const [query] = useSearchParams();
   const categoryId = query.get('id');
 
-  console.log('카테고리 ID:', categoryId);
+  // console.log('카테고리 ID:', categoryId);
 
   useEffect(() => {
     const getFeed = async () => {
