@@ -79,41 +79,52 @@ const UserFeedContainer = St.div`
       background-color:red;
       color:white;
     }
-
-
     .button-container button{
         border-radius:20px;
         border:none;
         padding:8px 16px;
         cursor:pointer;
-        
     }
 `;
 
 const CategoryContainer = St.div`
   display:grid;
-  grid-template-columns:repeat(3,60px);
+  grid-template-columns:repeat(3,80px);
   grid-auto-rows:36px;
   gap:5px;
   width:25vw;
   height:20vh;
   margin-top:20px;
-  background-color:red;
   
-  button:last-child{
-  grid-column:1/-1;
-    background-color:white;
-  }
+`;
+const CategoryButton = St.button`
+    background-color:${(props) => (props.selected ? 'red' : 'white')};
+    cursor:pointer;
+    border-radius:16px;
+
+    &hover{
+      background-color:red;
+    }
 `;
 
 const CreateFeed = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [imgUrl, setImgUrl] = useState('');
-  const [category, setCategory] = useState('');
+  const [feedCategory, setFeedCategory] = useState([]);
   const { user: authUser } = useContext(AuthContext);
 
-
+  const handleFeedCategory = (hobby) => {
+    if (feedCategory.includes(hobby)) {
+      setFeedCategory((prev) => prev.filter((item) => item !== hobby));
+    } else {
+      if (feedCategory.length < 3) {
+        setFeedCategory((prev) => [...prev, hobby]);
+      } else {
+        alert('최대 3개까지 고를 수 있습니다');
+      }
+    }
+  };
   const handleAddFeed = async () => {
     console.log('handleAddFeed 호출됨');
 
@@ -171,7 +182,15 @@ const CreateFeed = () => {
         </div>
         <CategoryContainer>
           {categories.map((category, index) => {
-            return <button key={index}>{category}</button>;
+            return (
+              <CategoryButton
+                key={index}
+                onClick={() => handleFeedCategory(category)} //현재 string으로 선택됨
+                selected={feedCategory.includes(category)}
+              >
+                {category}
+              </CategoryButton>
+            );
           })}
         </CategoryContainer>
       </UserFeedContainer>
