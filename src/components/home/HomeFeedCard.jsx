@@ -109,39 +109,40 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
   };
 
   // [좋아요] 토클 버튼
+  const fetchLikeStatus = async () => {
+    if (!user?.id) return;
+
+    // 현재 로그인한 유저의 좋아요 상태 가져오기
+    const { data, error } = await supabase
+      .from('likes')
+      .select('is_like')
+      .eq('feed_id', feed.id)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('좋아요 상태 가져오기 실패:', error);
+      return;
+    }
+
+    setIsLike(data?.is_like || false); // 데이터 없으면 false로 설정
+
+    // 특정 feed_id의 좋아요 개수 가져오기
+    const { count, error: countError } = await supabase
+      .from('likes')
+      .select('*', { count: 'exact', head: true }) // 데이터 반환 없이 개수만 세기 위한 옵션
+      .eq('feed_id', feed.id)
+      .eq('is_like', true);
+
+    if (countError) {
+      console.error('좋아요 개수 가져오기 실패:', countError);
+      return;
+    }
+
+    setLikeNumber(count); // 좋아요 개수 업데이트
+  };
+
   useEffect(() => {
-    const fetchLikeStatus = async () => {
-      if (!user?.id) return;
-      
-      // 현재 로그인한 유저가 해당 피드에 좋아요를 눌렀는지 확인, 상태 저장
-      const { data, error } = await supabase
-        .from('likes')
-        .select('is_like')
-        .eq('feed_id', feed.id)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('좋아요 상태 가져오기 실패:', error);
-        return;
-      }
-
-      setIsLike(data?.is_like || false); // 데이터가 없으면 false로 설정
-
-      // 해당 feed_id의 좋아요 개수 가져오기
-      const { count, error: countError } = await supabase
-        .from('likes')
-        .select('*', { count: 'exact', head: true }) // COUNT로 특정 피드의 좋아요 true인 행 개수 가져오기
-        .eq('feed_id', feed.id);
-
-      if (countError) {
-        console.error('좋아요 개수 가져오기 실패:', countError);
-        return;
-      }
-
-      setLikeNumber(count); // 좋아요 개수 상태 업데이트
-    };
-
     fetchLikeStatus();
   }, [feed.id, user?.id]);
 
@@ -167,13 +168,13 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
 
       const newIsLike = existingLike ? !existingLike.is_like : true;
 
-      // 좋아요 정보 삽입 또는 업데이트
+      // 좋아요 상태 삽입/업데이트
       const { error: upsertError } = await supabase.from('likes').upsert(
         [
           {
             feed_id: feedId,
             user_id: user.id,
-            is_like: newIsLike, // 기존 데이터 기반으로 반전된 값 적용
+            is_like: newIsLike,
           },
         ],
         { onConflict: ['feed_id', 'user_id'] },
@@ -185,7 +186,7 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
       }
 
       setIsLike(newIsLike); // 상태 업데이트
-      fetchLikeStatus(); // 좋아요 상태가 업데이트되었으므로 좋아요 개수 다시 가져오기
+      fetchLikeStatus();
     } catch (error) {
       console.error('좋아요 토글 오류:', error);
     }
@@ -241,8 +242,8 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
             {/* 좋아요 하트 */}
             <StLikeBtn onClick={() => handleLikeToggle(feed.id)}>
               <StLikes>
-                <span>{likeNumber}</span>
                 <img src={isLike ? '/heart.png' : '/no_heart.png'} />
+                <span className="like-number"> ({likeNumber})</span>
               </StLikes>
             </StLikeBtn>
           </div>
@@ -485,6 +486,11 @@ const StLikes = styled.div`
     width: 30px;
     height: 30px;
     object-fit: contain;
+  }
+
+  .like-number {
+    color: grey;
+    margin-left: 3px;
   }
 `;
 
