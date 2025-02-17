@@ -17,11 +17,10 @@ const CategoryFeed = () => {
   useEffect(() => {
     const getFeeds = async () => {
       try {
-        // 관심사와 조인하여 데이터 가져오기
         const { data = [] } = await supabase
           .from('feed_interests')
           .select('feed:feeds(*, user:users(nickname, my_profile_image_url))')
-          .eq('interest_name', categoryId); // 카테고리 ID 필터링
+          .eq('interest_name', categoryId); 
 
         const filteredFeeds = data.map((item) => item.feed).filter(Boolean);
         setFeeds(filteredFeeds);
@@ -38,10 +37,10 @@ const CategoryFeed = () => {
       try {
         const { data = [] } = await supabase.from('feed_interests').select('*');
         setFeedInterests(data);
-        console.log(
-          '관심사 데이터:',
-          data.map((i) => i.interest_name),
-        ); // ["영화","기타"]
+        // console.log(
+        //   '관심사 데이터:',
+        //   data.map((i) => i.interest_name),
+        // ); // ["영화","기타"]
       } catch (error) {
         console.error('관심사 불러오기 오류:', error);
       }
