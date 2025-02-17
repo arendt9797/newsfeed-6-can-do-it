@@ -15,11 +15,13 @@ export const validatePassword = (password) => {
 };
 
 export const validateGithub = (github) => {
+  if (!github) return true;
   const githubRegex = /^(https?:\/\/)?(www\.)?github\.com\/[a-zA-Z0-9_-]+$/;
   return githubRegex.test(github);
 };
 
 export const validateBlog = (blog) => {
+  if (!blog) return true;
   const blogRegex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   return blogRegex.test(blog);
 };
