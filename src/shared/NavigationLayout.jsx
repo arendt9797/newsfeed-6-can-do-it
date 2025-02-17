@@ -54,7 +54,7 @@ function NavigationLayout() {
           <Link to="/category">Categories</Link>
           <Link to={isLogin ? '/create-feed' : '/sign-in'}>Create Feed</Link>
           <Link to="/about-us">About Us</Link>
-          {isLogin && <Link to="/"> My Feed </Link>}
+          {isLogin && <Link to="/my-feed"> My Feed </Link>}
           {isLogin && <Link to="/"> My Like</Link>}
         </nav>
 
