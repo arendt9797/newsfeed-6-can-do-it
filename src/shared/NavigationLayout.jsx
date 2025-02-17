@@ -1,7 +1,6 @@
 import { Link, Outlet } from 'react-router-dom';
 import styled from 'styled-components';
-import logo from '../assets/test-logo.png';
-import profile from '../assets/test-profile.png';
+import profile from '../../public/test_profile.png';
 import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import { useContext } from 'react';
@@ -32,7 +31,7 @@ function NavigationLayout() {
     <StBodyDiv>
       <header>
         <Link className="home-link" to="/">
-          <img className="logo-img" src={logo} alt="logo" />
+          <img className="logo-img" src='/team_logo.png' alt="logo" />
         </Link>
 
         <div className="profile-div">

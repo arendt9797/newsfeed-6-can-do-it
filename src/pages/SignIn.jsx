@@ -39,7 +39,7 @@ const Login = () => {
     <StSignIn>
       <StSignInContainer>
         <img
-          src="/src/assets/test-logo.png"
+          src="/team_logo.png"
           alt="site_logo"
           onClick={() => navigate('/')}
         />
