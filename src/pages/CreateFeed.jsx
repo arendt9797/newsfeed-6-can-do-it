@@ -1,18 +1,33 @@
-import St from 'styled-components';
+
 import { supabase } from '../supabase/client';
 import { useEffect, useState, useContext } from 'react';
 // import ToastImageEditor from '../components/ToastImageEditor';
 import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
 const StCreateFeed = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [imgFile, setImgFile] = useState(null);
   const [feedCategory, setFeedCategory] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
   const { user: authUser } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImgFile(file);
+    }
+    // FileReader를 사용하여 이미지 미리보기 생성
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setPreviewImage(reader.result); // 변환된 data URL 저장
+    };
+  };
 
   const handleSaveTemp = () => {
     const temp = { title, content };
@@ -120,22 +135,18 @@ const StCreateFeed = () => {
 
   return (
     <StPageContainer>
-      <StImageInputContainer>
-        <input type="file" accept="image/*" onChange={handleImgFile} />
-      </StImageInputContainer>
       <StUserFeedContainer>
-        <div className="button-container">
-          <button id="upload-button" onClick={handleAddFeed}>
-            포스팅하기
-          </button>
-          <button id="save-button" onClick={handleSaveTemp}>
-            임시저장
-          </button>
-          <button id="cancle-button" onClick={gotoCategory}>
-            돌아가기
-          </button>
-        </div>
-
+        <StCategoryContainer>
+          {categories.map((category, index) => (
+            <StCategoryButton
+              key={index}
+              onClick={() => handleFeedCategory(category)}
+              selected={feedCategory.includes(category)}
+            >
+              {category}
+            </StCategoryButton>
+          ))}
+        </StCategoryContainer>
         <div className="titleInput-container">
           <label>Title</label>
           <input
@@ -153,17 +164,25 @@ const StCreateFeed = () => {
             onChange={(e) => setContent(e.target.value)}
           />
         </div>
-        <StCategoryContainer>
-          {categories.map((category, index) => (
-            <StCategoryButton
-              key={index}
-              onClick={() => handleFeedCategory(category)}
-              selected={feedCategory.includes(category)}
-            >
-              {category}
-            </StCategoryButton>
-          ))}
-        </StCategoryContainer>
+        <StImageInputContainer>
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+        {previewImage ? (
+          <img className="preview-img" src={previewImage} alt="preview" />
+        ) : (
+          <div className="default-img">{'No Image'} </div>
+        )}
+      </StImageInputContainer>
+        <div className="button-container">
+          <button id="upload-button" onClick={handleAddFeed}>
+            포스팅하기
+          </button>
+          <button id="save-button" onClick={handleSaveTemp}>
+            임시저장
+          </button>
+          <button id="cancle-button" onClick={gotoCategory}>
+            돌아가기
+          </button>
+        </div>
       </StUserFeedContainer>
     </StPageContainer>
   );
@@ -171,133 +190,155 @@ const StCreateFeed = () => {
 
 export default StCreateFeed;
 
-const StPageContainer = St.div`
-    display: flex;
-    height: 100%;
-    width: 100%;
+const StPageContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  border: 3px solid lightgray;
+  border-radius: 25px;
+  padding: 30px;
+  background-color: #F4F7FC; /* 💡 부드러운 파스텔톤 배경 적용 */
+  position: absolute;
+  top: 20%;
+  left: 30%;
+
+  @media (max-width: 900px) {
+    width: 90%;
+    padding: 20px;
+  }
 `;
 
-const StImageInputContainer = St.div`
-    display: flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    background-color:#EDECE7;
-    flex: 1.3;
- 
-
-
+const StImageInputContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 20px;
 `;
 
-const StUserFeedContainer = St.div`
+const StUserFeedContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #FFFFFF; /* 💡 흰색 배경으로 변경 */
+  width: 100%;
+  border-radius: 15px;
+  padding: 20px;
+  gap: 20px;
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.1); /* 💡 부드러운 그림자 추가 */
+  .titleInput-container,
+  .contextInput-container {
     display: flex;
-    flex: 0.8;
-    width: 100%;
     flex-direction: column;
-    background-color: #EDECE7;
-    align-items: center;
-    
-    .titleInput, .contextInput {
-        display: flex;
-        width: 350px;
-    }
-    
-    label {
-        font-size: 22px;
-    }
-    
-    .titleInput {
-        width: 360px;
-        height: 30px;
-        border-radius: 8px;
-        border: none;
-    }
-    
-    .titleInput-container {
-        display: flex;
-        position:relative;
-        top:40px;
-        flex-direction: column;
-        gap: 15px;
-        margin-bottom: 10px;
-    }
-    
-    .contextInput-container {
-        display: flex;
-        flex-direction: column;
-        width: 380px;
-        height: 330px;
-        position:relative;
-        top:50px;
-        gap: 15px;
-    }
-    
-    .contextInput {
-        width: 100%;
-        height: 60%;
-        border-radius: 12px;
-        line-height: normal;
-        border:transparent;
-    }
-    
-    .button-container {
-        display: flex;
-        position:relative;
-        top:25px;
-        gap: 15px;
-    }
-    
-    #upload-button, #save-button {
-        background-color: #46D7AB;
-        color: black;
-        font-size:16px;
-        &:hover{
-          color:white;
-        }
-    }
-    
-    #cancle-button {
-        background-color: red;
-        color: white;
-        font-size:16px;
-        &:hover{
-          opacity:0.5;
-          
-        }
-    }
-    
-    .button-container button {
-        border-radius: 20px;
-        border: none;
-        padding: 12px 20px;
-        cursor: pointer;
-        
-    }
-`;
+    gap: 10px;
+    width: 100%;
+    max-width: 450px;
+  }
 
-const StCategoryContainer = St.div`
-  display: grid;
-  align-content:center;
-  justify-content:center;
-  grid-template-columns: repeat(3, 120px);
-  grid-auto-rows: 40px;
-  gap: 15px;
-  width: 25vw;
-  height: 25vh;
+  .titleInput,
+  .contextInput {
+    width: 100%;
+    max-width: 450px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
 
+  .contextInput {
+    height: 150px;
+    resize: none;
+  }
 
-`;
+  .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    width: 100%;
+  }
 
-const StCategoryButton = St.button`
-    background-color: ${(props) => (props.selected ? '#3CB0A0' : '#46D7AB')};
+  .button-container button {
+    border-radius: 20px;
+    border: 2px solid transparent;
+    padding: 14px 22px;
     cursor: pointer;
-    border-radius: 16px;
-    border:transparent;
-    box-shadow:2px 2px rgba(170,150,220,0);
-    position:relative;
-    top:30px;
-    transition:all 0.2s ease-in-out;
-    &:hover {
-      transform:translateY(-5px);
-    }
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  #upload-button, #save-button {
+  background-color: #46D7AB;
+  color: white;
+  border: 2px solid #3CB0A0;
+
+  &:hover {
+    background-color: #3CB0A0;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+#cancle-button {
+  background-color: #FF4D4D;
+  color: white;
+  border: 2px solid #D93636;
+
+  &:hover {
+    background-color: #D93636;
+    transform: scale(1.05);
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+`;
+
+const StCategoryContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 450px;
+  padding: 10px;
+`;
+
+const StCategoryButton = styled.button`
+  background-color: ${(props) => (props.selected ? '#005BBB' : '#5A67D8')}; 
+  color: white;
+  font-size: 18px; 
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 20px;
+  border: 3px solid ${(props) => (props.selected ? '#003F7F' : '#4C51BF')}; 
+  padding: 14px 20px; 
+  transition: all 0.3s ease-in-out;
+  box-shadow: ${(props) =>
+    props.selected ? '4px 4px 10px rgba(0, 0, 0, 0.25)' : '3px 3px 8px rgba(0, 0, 0, 0.15)'};
+
+  &:hover {
+    transform: scale(1.1);
+    background-color: ${(props) => (props.selected ? '#004080' : '#4C51BF')};
+    box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 `;
