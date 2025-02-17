@@ -49,10 +49,10 @@ const StCreateFeed = () => {
   };
 
   return (
-    <PageContainer>
-      <ToastImageEditorContainer>
+    <StPageContainer>
+      <StToastImageEditorContainer>
         <ToastImageEditor />
-      </ToastImageEditorContainer>
+      </StToastImageEditorContainer>
       <StUserFeedContainer>
         <div className="button-container">
           <button id="upload-button" onClick={handleAddFeed}>
@@ -92,19 +92,19 @@ const StCreateFeed = () => {
           })}
         </StCategoryContainer>
       </StUserFeedContainer>
-    </PageContainer>
+    </StPageContainer>
   );
 };
 
 export default StCreateFeed;
 
-const PageContainer = St.div`
+const StPageContainer = St.div`
     display:flex;
     height:100% ;
     width:100%;
 `;
 
-const ToastImageEditorContainer = St.div`
+const StToastImageEditorContainer = St.div`
     display:flex;
     flex:1.3;
     height:100%; 
