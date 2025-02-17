@@ -1,7 +1,6 @@
 // DeveloperPage.jsx
 import { useState, useEffect, useContext } from 'react';
 import { supabase } from '../supabase/client';
-import { useNavigate } from 'react-router-dom';
 
 import {
   StyledAboutUsContainer,
@@ -29,6 +28,27 @@ function DeveloperPage() {
     fetchAllUsers();
   }, []);
 
+  // 삭제 버튼 핸들러
+  const handleDeleteUser = async (userId) => {
+    // 확인 메시지 생성
+    const confirmDelete = window.confirm('정말 이 계정을 삭제하시겠습니까?');
+    if (!confirmDelete) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+      // supabase 에러 확인
+      if (error) {
+        throw error;
+      }
+      setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
+    } catch (error) {
+      console.log('계정 삭제 오류 : ', error);
+      alert('계정 삭제에 실패했습니다.');
+    }
+  };
   return (
     <>
       <StyledAboutUsContainer>
@@ -44,9 +64,10 @@ function DeveloperPage() {
                   />
                   <StyledMemberInfo>
                     <h3>{user.nickname}</h3>
-                    {/* 필요하다면 role, email, etc. 추가 */}
-                    <StyledH2>{user.role}</StyledH2>
                   </StyledMemberInfo>
+                  <StDeleteButton onClick={() => handleDeleteUser(user.id)}>
+                    계정 삭제
+                  </StDeleteButton>
                 </StyledTeamMemberCard>
               ))
             ) : (
@@ -58,8 +79,21 @@ function DeveloperPage() {
     </>
   );
 }
-const StyledH2 = styled.h2`
-  font-size: large;
-  font-weight: bold;
+const StDeleteButton = styled.button`
+  width: 200px;
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  margin-top: 20px;
+  background-color: #46d7ab;
+  color: #21212e;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #46e4b5;
+    /* color: white; */
+  }
 `;
 export default DeveloperPage;
