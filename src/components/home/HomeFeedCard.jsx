@@ -6,7 +6,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 
-const HomeFeedCard = ({ feed, setFeeds }) => {
+const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const { user, isLogin } = useContext(AuthContext);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
@@ -14,6 +14,7 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
   const [likeNumber, setLikeNumber] = useState(0);
   const navigate = useNavigate();
 
+  console.log(interests);
   // 모든 댓글 가져오기
   const getComments = async () => {
     const { data } = await supabase
@@ -192,21 +193,9 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
     }
   };
 
-  //------------------댓글 수정 보류----------
-  // const handleUpdateFeed = async (id) => {
-  //   const isConfirm = window.confirm('정말 수정하시겠습니까?');
-  //   if (isConfirm) {
-  //     const { data, error } = await supabase
-  //       .from('comments')
-  //       .update({ other_column: 'otherValue' })
-  //       .eq('some_column', 'someValue')
-  //       .select();
-  //   }
-  // };
-  //-------------------------------------
-
   return (
     <>
+      {/* 가져온 피드 보여주는 부분 */}
       <StFeedProfileImgContainer>
         <StFeedProfileImg>
           <img src={feed.user?.my_profile_image_url} />
@@ -230,24 +219,35 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
             <div>{feed.content}</div>
           </StFeedContentRight>
         </StFeedTop>
+        {/* 선택한 관심사 보여줌*/}
         <StCommentsInterestContainer>
-          <div>체크한 관심사 : #DIY</div>
-          {/* 스타일컴포넌트 하나 만들어야함 */}
-          <div style={{ display: 'flex' }}>
+          <div>
+            관심사 :{' '}
+            {interests && interests.length > 0
+              ? interests
+                  .filter((interest) => interest.id === feed.id)
+                  .map((interest) => `#${interest.interest_name}`)
+                  .join(', ')
+              : '없음'}
+          </div>
+          {/* 댓글 개수 */}
+          <StCommentPosition>
             {!comments.length ? (
               <div></div>
             ) : (
               <StComment>comments({comments.length})</StComment>
             )}
-            {/* 좋아요 하트 */}
+            {/* 좋아요 */}
             <StLikeBtn onClick={() => handleLikeToggle(feed.id)}>
               <StLikes>
                 <img src={isLike ? '/heart.png' : '/no_heart.png'} />
                 <span className="like-number"> ({likeNumber})</span>
               </StLikes>
             </StLikeBtn>
-          </div>
+          </StCommentPosition>
         </StCommentsInterestContainer>
+
+        {/* 댓글 컨테이너 _ 사용자들이 작성한 댓글 보여줌 */}
         {comments.length > 0 && (
           <StCommentsContainer>
             {comments.map((comment) => {
@@ -276,6 +276,7 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
             })}
           </StCommentsContainer>
         )}
+        {/* 댓글 입력란 및 추가 버튼 */}
         <div>
           <StCommentBox
             type="text"
@@ -510,4 +511,8 @@ const StLikeBtn = styled.button`
     scale: 1.1;
     cursor: pointer;
   }
+`;
+
+const StCommentPosition = styled.div`
+  display: flex;
 `;
