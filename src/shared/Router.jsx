@@ -11,6 +11,7 @@ import NavigationLayout from './NavigationLayout';
 import ProtectedRoute from './ProtectedRoute';
 import MyFeed from '../components/MyFeed';
 import CategoryFeed from '../components/CategoryFeed';
+import MyLike from '../components/MyLike';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
       { path: '/my-feed', element: <MyFeed /> },
       { path: '/admin-page', element: <AdminPage /> },
       { path: '/category-feed', element: <CategoryFeed /> },
+      { path: '/my-like', element: <MyLike /> },
     ],
   },
   { path: '/sign-in', element: <ProtectedRoute element={<SignIn />} /> },

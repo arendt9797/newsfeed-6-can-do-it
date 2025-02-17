@@ -21,8 +21,8 @@ function NavigationLayout() {
       alert('로그아웃 되었습니다.');
       navigate('/'); 
     } catch (error) {
-      console.error('예상치 못한 오류:', error);
-      alert('예상치 못한 오류가 발생했습니다.');
+      console.error('오류:', error);
+      alert('오류가 발생했습니다.');
     }
   };
 
@@ -62,7 +62,7 @@ function NavigationLayout() {
           <Link to={isLogin ? '/create-feed' : '/sign-in'}>Create Feed</Link>
           <Link to="/about-us">About Us</Link>
           {isLogin && <Link to="/my-feed"> My Feed </Link>}
-          {isLogin && <Link to="/"> My Like</Link>}
+          {isLogin && <Link to="/my-like"> My Like</Link>}
         </nav>
 
         <footer>
