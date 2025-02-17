@@ -2,9 +2,14 @@
 import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase/client';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 function AboutUs() {
   const [users, setUsers] = useState([]); // 사용자 데이터 저장
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -50,7 +55,7 @@ function AboutUs() {
                       {user.blog && (
                         <StyledLink href={user.blog} target="_blank">
                           <img
-                            src="https://cdn-icons-png.flaticon.com/128/3669/3669981.png"
+                            src="https://cdn-icons-png.flaticon.com/128/1187/1187595.png"
                             alt="Blog"
                           />
                         </StyledLink>
@@ -63,6 +68,7 @@ function AboutUs() {
               <p>등록된 사용자가 없습니다.</p>
             )}
           </StyledTeamMemberList>
+          {user?.role === 'developer' && <button>개발자 전용 버튼</button>}
         </div>
       </StyledAboutUsContainer>
     </>
