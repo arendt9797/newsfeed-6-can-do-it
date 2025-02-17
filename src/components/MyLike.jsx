@@ -14,7 +14,7 @@ const MyLike = () => {
       if (!user?.id) return;
       
       try {
-        // 1. 사용자의 좋아요 목록 조회
+        // 1. 사용자의 좋아요 가져오기
         const { data: likesData, error: likesError } = await supabase
           .from('likes')
           .select('feed_id')
