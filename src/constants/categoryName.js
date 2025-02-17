@@ -17,8 +17,8 @@ export const categoryArr = [
   { name: MUSIC, img: '/music.png' },
   { name: DIY, img: '/diy.png' },
   { name: EXERCISE, img: '/exercise.png' },
-  { name: GAMES, img: '/games.png' },
+  { name: GAMES, img: '/game.png' },
   { name: COOKING, img: '/cooking.png' },
-  { name: ANIMALS, img: '/animals.png' },
+  { name: ANIMALS, img: '/animal.png' },
   { name: ETC, img: '/etc.png' },
 ];
