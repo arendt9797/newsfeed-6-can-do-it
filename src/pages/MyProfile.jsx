@@ -101,7 +101,7 @@ function MyProfile() {
   };
 
   //  5. 프로필 정보 업데이트 함수
-  const updateUserProfile = async () => {
+  const updateUserProfile = async (imageUrl) => {
     try {
       await supabase
         .from("users")
@@ -109,7 +109,7 @@ function MyProfile() {
           nickname: profile.nickname,
           github: profile.github,
           blog: profile.blog,
-          my_profile_image_url: profile.my_profile_image_url,
+          my_profile_image_url: imageUrl,
         })
         .eq("id", profile.id);
     } catch (error) {
@@ -130,8 +130,12 @@ function MyProfile() {
     // if (!validatePassword(profile.password)) return alert("비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.")
 
     try {
+      const imageUrl = await handleImageUpload(image, profile);
+      if (imageUrl) {
+        setProfile((prev) => ({ ...prev, my_profile_image_url: imageUrl }));
+      }
 
-      await Promise.all([updateUserProfile(), updateUserInterests(), updateUserPassword()]);
+      await Promise.all([updateUserProfile(imageUrl), updateUserInterests(), updateUserPassword()]);
       alert("프로필 업데이트 완료!");
     } catch (error) {
       console.error("프로필 업데이트에 실패", error);
@@ -146,18 +150,6 @@ function MyProfile() {
     }));
   };
 
-  const handleImageUpdate = async () => {
-    try {
-      const imageUrl = await handleImageUpload(image, profile);
-      if (imageUrl) {
-        setProfile((prev) => ({ ...prev, my_profile_image_url: imageUrl }));
-      }
-    } catch (error) {
-      console.error("이미지 업로드 실패:", error);
-    }
-  };
-
-
 
   return (
     <StMyProfile>
@@ -166,13 +158,12 @@ function MyProfile() {
           {/* 왼쪽: 프로필 이미지 */}
           <div className="user-image">
             <img className="logo-img" src="/public/doitLogo.png" alt="site_logo" />
-            <img className="preview-img" 
-            src={profile.my_profile_image_url ? profile.my_profile_image_url : "/public/doitLogo.png"} 
-            alt="프로필 이미지"
-            onClick={() => document.getElementById("file-upload").click()} 
+            <img className="preview-img"
+              src={profile.my_profile_image_url ? profile.my_profile_image_url : "/public/doitLogo.png"}
+              alt="프로필 이미지"
+              onClick={() => document.getElementById("file-upload").click()}
             />
             <input type="file" id="file-upload" onChange={(e) => handleImageChange(e, setImage)} style={{ display: "none" }} />
-            <button onClick={handleImageUpdate}>프로필 이미지 변경</button>
           </div>
 
           {/* 오른쪽: 입력 필드 및 버튼 */}
@@ -260,23 +251,6 @@ const StMyProfileContainer = styled.div`
     margin-bottom: 50px;
   }
 
-  .user-image > button {
-    width: 150px;
-    height: 50px;
-    border: none;
-    border-radius: 10px;
-    margin-top: 50px;
-    background-color: #46d7ab;
-    color: #21212e;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease-in-out;
-
-    &:hover {
-      background-color: #46e4b5;
-    }
-  }
 
   /* input file 커스터마이즈 */
   .file-wrapper > input {

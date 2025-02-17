@@ -53,6 +53,7 @@ export const handleImageUpload = async (image, profile) => {
   if (publicError) {
     console.log("이미지가져오기 실패", publicError);
   }
+  
   const imageUrl = publicUrlData.publicUrl;
 
   // 3.table에 URL 저장
