@@ -17,7 +17,7 @@ function AboutUs() {
       const { data, error } = await supabase
         .from('users')
         .select('*')
-        .eq('role', 'developer'); // role 값이 developer인 사용자만
+        .eq('role', 'admin'); // role 값이 developer인 사용자만
       if (error) {
         console.error('개발자 정보 가져오기 오류:', error);
       } else {
@@ -69,7 +69,7 @@ function AboutUs() {
             )}
           </StyledTeamMemberList>
         </div>
-        {user?.role === 'developer' && (
+        {user?.role === 'admin' && (
           <StyledHandleButton onClick={() => navigate('/admin-page')}>
             <StyledButtonImg
               src="https://cdn-icons-png.flaticon.com/128/10337/10337203.png"

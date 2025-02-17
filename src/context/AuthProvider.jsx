@@ -7,7 +7,7 @@ function AuthProvider({ children }) {
   // 현재 로그인 중인지 확인하는 상태 'isLogin'
   const [isLogin, setIsLogin] = useState(false);
   // 현재 로그인한 유저의 auth스키마 정보를 저장하는 상태 'user'
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(null);
 
   const getUserInfo = async (session) => {
     // 로그아웃 됐을 경우
@@ -55,7 +55,7 @@ function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLogin, user }}>
+    <AuthContext.Provider value={{ isLogin, user, setUser }}>
       {children}
     </AuthContext.Provider>
   );
