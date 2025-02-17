@@ -33,7 +33,9 @@ const HomeList = () => {
           //supabase의 created_at은 날짜 문자열
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
           .map((feed) => {
-            return <HomeFeedCard key={feed.id} feed={feed} />;
+            return (
+              <HomeFeedCard key={feed.id} feed={feed} setFeeds={setFeeds} />
+            );
           })}
       </div>
       <div>
