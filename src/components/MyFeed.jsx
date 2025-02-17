@@ -8,6 +8,7 @@ import HomeFeedCard from './home/HomeFeedCard';
 const MyFeed = () => {
   const [feeds, setFeeds] = useState([]);
   const { user, isLogin } = useContext(AuthContext);
+  const [interests, setInterests] = useState([]);
 
   useEffect(() => {
     const getFeeds = async () => {
@@ -18,7 +19,6 @@ const MyFeed = () => {
           .select('*, user: users(nickname, my_profile_image_url)')
           .eq('user_id', user.id);
         // console.log(data);
-
         if (error) {
           console.error('오류:', error);
           return;
@@ -31,6 +31,24 @@ const MyFeed = () => {
     getFeeds();
   }, [user]);
 
+  useEffect(() => {
+    const getFeedsInterests = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('feed_interests')
+          .select('*');
+        if (error) {
+          console.error('오류:', error);
+          return;
+        }
+        setInterests(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getFeedsInterests();
+  }, []);
+
   return (
     <StHomeWrap>
       <div>
@@ -40,7 +58,9 @@ const MyFeed = () => {
         ) : (
           feeds
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .map((feed) => <HomeFeedCard key={feed.id} feed={feed} />)
+            .map((feed) => (
+              <HomeFeedCard key={feed.id} feed={feed} interests={interests} />
+            ))
         )}
       </div>
 

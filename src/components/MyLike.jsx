@@ -8,11 +8,12 @@ import HomeFeedCard from './home/HomeFeedCard';
 const MyLike = () => {
   const [likedFeeds, setLikedFeeds] = useState([]);
   const { user, isLogin } = useContext(AuthContext);
+  const [interests, setInterests] = useState([]);
 
   useEffect(() => {
     const fetchLikedFeeds = async () => {
       if (!user?.id) return;
-      
+
       try {
         // 1. 사용자의 좋아요 가져오기
         const { data: likesData, error: likesError } = await supabase
@@ -21,13 +22,13 @@ const MyLike = () => {
           .eq('user_id', user.id)
           .eq('is_like', true);
 
-          if (likesError) {
-            console.error('좋아요 가져오기 실패:', likesError);
-            return;
-          }
+        if (likesError) {
+          console.error('좋아요 가져오기 실패:', likesError);
+          return;
+        }
 
         // 2. 좋아요한 피드 id 찾기
-        const feedIds = likesData.map(like => like.feed_id);
+        const feedIds = likesData.map((like) => like.feed_id);
         if (feedIds.length === 0) return setLikedFeeds([]);
 
         // 3. 피드 정보 얻기
@@ -37,10 +38,10 @@ const MyLike = () => {
           .in('id', feedIds)
           .order('created_at', { ascending: false });
 
-          if (feedsError) {
-            console.error('피드 가져오기 실패:', feedsError);
-            return;
-          }
+        if (feedsError) {
+          console.error('피드 가져오기 실패:', feedsError);
+          return;
+        }
 
         setLikedFeeds(feedsData);
       } catch (error) {
@@ -51,6 +52,24 @@ const MyLike = () => {
     fetchLikedFeeds();
   }, [user?.id]);
 
+  useEffect(() => {
+    const getFeedsInterests = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('feed_interests')
+          .select('*');
+        if (error) {
+          console.error('오류:', error);
+          return;
+        }
+        setInterests(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getFeedsInterests();
+  }, []);
+
   return (
     <StHomeWrap>
       <div>
@@ -58,8 +77,8 @@ const MyLike = () => {
         {likedFeeds.length === 0 ? (
           <div className="empty-feed">아직 좋아요한 게시물이 없습니다.</div>
         ) : (
-          likedFeeds.map(feed => (
-            <HomeFeedCard key={feed.id} feed={feed} />
+          likedFeeds.map((feed) => (
+            <HomeFeedCard key={feed.id} feed={feed} interests={interests} />
           ))
         )}
       </div>
