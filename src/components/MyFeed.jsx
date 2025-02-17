@@ -18,7 +18,7 @@ const MyFeed = () => {
           .select('*, user: users(nickname, my_profile_image_url)')
           .eq('user_id', user.id);
         // console.log(data);
-  
+
         if (error) {
           console.error('오류:', error);
           return;

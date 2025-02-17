@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 
 const HomeList = () => {
   const [feeds, setFeeds] = useState([]);
+  const [interests, setInterests] = useState([]);
   const { isLogin } = useContext(AuthContext);
 
   useEffect(() => {
@@ -16,13 +17,27 @@ const HomeList = () => {
       try {
         const { data } = await supabase
           .from('feeds')
-          .select('*, user: users(nickname, my_profile_image_url)');
+          .select(
+            '*, user: users(nickname, my_profile_image_url), feed_interests(interest_name, id)',
+          );
         setFeeds(data);
       } catch (error) {
         console.log(error);
       }
     };
     getFeeds();
+  }, []);
+
+  useEffect(() => {
+    const getFeedsInterests = async () => {
+      try {
+        const { data } = await supabase.from('feed_interests').select('*');
+        setInterests(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getFeedsInterests();
   }, []);
 
   return (
@@ -34,7 +49,12 @@ const HomeList = () => {
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
           .map((feed) => {
             return (
-              <HomeFeedCard key={feed.id} feed={feed} setFeeds={setFeeds} />
+              <HomeFeedCard
+                key={feed.id}
+                feed={feed}
+                setFeeds={setFeeds}
+                interests={interests}
+              />
             );
           })}
       </div>
