@@ -15,7 +15,7 @@ function MyProfile() {
     image_url: "",
     nickname: "",
     email: "",
-    password: "********",
+    password: "",
     github: "",
     blog: "",
   });
@@ -177,8 +177,8 @@ function MyProfile() {
         return validateGithub(value) ? "" : "GitHub URL 형식이 올바르지 않습니다.";
       case "blog":
         return validateBlog(value) ? "" : "블로그 URL 형식이 올바르지 않습니다.";
-      // case "password":
-      //   return validatePassword(value) ? "" : "비밀번호는 대소문자, 숫자, 특수문자 포함하여 8자 이상";
+      case "password":
+        return validatePassword(value) ? "" : "비밀번호는 대소문자, 숫자, 특수문자 포함하여 8자 이상";
       default:
         return "";
     }
@@ -230,7 +230,7 @@ function MyProfile() {
 
             <div>
               <p>{'Password'}</p>
-              <input type="password" name="password" value={profile.password || ""} onChange={handleChange} />
+              <input type="password" name="password" value={profile.password || ""} placeholder="비밀번호를 변경할 경우에만 입력하세요" onChange={handleChange} />
               {errors.password && <span className="error-message">{errors.password}</span>}
             </div>
 
@@ -389,6 +389,7 @@ const StMyProfileContainer = styled.div`
 
   .user-info p {
     height: 20px;
+    font-weight: bold;
   }
   .error-message{
     color: red;
