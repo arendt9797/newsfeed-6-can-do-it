@@ -12,6 +12,7 @@ const CategoryFeed = () => {
   const [query] = useSearchParams();
   const categoryId = query.get('id');
   const categoryImgTest = [...c.categoryArr].find((i) => i.name === categoryId);
+  const [interests, setInterests] = useState([]);
 
   // console.log(categoryImgTest.img);
 
@@ -41,11 +42,33 @@ const CategoryFeed = () => {
     getFeed();
   }, [categoryId]);
 
+  useEffect(() => {
+    const getFeedsInterests = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('feed_interests')
+          .select('*');
+        if (error) {
+          console.error('오류:', error);
+          return;
+        }
+        setInterests(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getFeedsInterests();
+  }, []);
+
   return (
     <StHomeWrap>
       <div>
         <div className="feed-box">
-          <img className='category-img' src={categoryImgTest.img} alt="카테고리 이미지" />
+          <img
+            className="category-img"
+            src={categoryImgTest.img}
+            alt="카테고리 이미지"
+          />
           <div className="category-name">{categoryId} 카테고리</div>
         </div>
 
@@ -54,7 +77,9 @@ const CategoryFeed = () => {
         ) : (
           feeds
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            .map((feed) => <HomeFeedCard key={feed.id} feed={feed} />)
+            .map((feed) => (
+              <HomeFeedCard key={feed.id} feed={feed} interests={interests} />
+            ))
         )}
       </div>
 
