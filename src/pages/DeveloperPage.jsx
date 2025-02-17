@@ -35,10 +35,7 @@ function DeveloperPage() {
     if (!confirmDelete) return;
 
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
+      const { error } = await supabase.from('users').delete().eq('id', userId);
       // supabase 에러 확인
       if (error) {
         throw error;
@@ -66,7 +63,7 @@ function DeveloperPage() {
                     <h3>{user.nickname}</h3>
                   </StyledMemberInfo>
                   <StDeleteButton onClick={() => handleDeleteUser(user.id)}>
-                    계정 삭제
+                    삭제
                   </StDeleteButton>
                 </StyledTeamMemberCard>
               ))
@@ -80,8 +77,8 @@ function DeveloperPage() {
   );
 }
 const StDeleteButton = styled.button`
-  width: 200px;
-  height: 50px;
+  width: 90px;
+  height: 40px;
   border: none;
   border-radius: 10px;
   margin-top: 20px;
