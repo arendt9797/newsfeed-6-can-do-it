@@ -33,15 +33,34 @@ const StCreateFeed = () => {
       .maybeSingle();
 
     try {
-      const { data, error } = await supabase.from('feeds').insert([
-        { title, content, user_id: publicUser.id, category: feedCategory[0] }, //2025년 2월 17일 기준 현재 1개의 카테고리만 데이터에 등록
-      ]);
+      const { data: feedData, error: feedError } = await supabase
+        .from('feeds')
+        .upsert([
+          { title, content, user_id: publicUser.id }, //2025년 2월 17일 기준 현재 1개의 카테고리만 데이터에 등록
+        ])
+        .select();
+      console.log(feedData);
       //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id
-      if (error) {
-        console.log('error=>', error);
+      if (feedError) {
+        console.log('error=>', feedError);
       } else {
         alert('데이터 입력 성공');
-        console.log(data);
+        console.log(feedData);
+      }
+
+      const { data: categoryData, error: categoryError } = await supabase
+        .from('feed_interests')
+        .insert([
+          {
+            id: feedData[0].id,
+            interest_name: feedCategory[0],
+          },
+        ]);
+
+      if (categoryError) {
+        console.log(categoryError);
+      } else {
+        console.log(categoryData);
       }
     } catch (error) {
       console.error('error=>', error);
