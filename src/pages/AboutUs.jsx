@@ -68,18 +68,21 @@ function AboutUs() {
               <p>등록된 사용자가 없습니다.</p>
             )}
           </StyledTeamMemberList>
-          {user?.role === 'developer' && (
-            <button onClick={() => navigate('/developer-page')}>
-              개발자 전용 버튼
-            </button>
-          )}
         </div>
+        {user?.role === 'developer' && (
+          <StyledHandleButton onClick={() => navigate('/developer-page')}>
+            <StyledButtonImg
+              src="https://cdn-icons-png.flaticon.com/128/10337/10337203.png"
+              alt="개발자 전용 아이콘"
+            />
+          </StyledHandleButton>
+        )}
       </StyledAboutUsContainer>
     </>
   );
 }
 
-const StyledAboutUsContainer = styled.div`
+export const StyledAboutUsContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -88,14 +91,14 @@ const StyledAboutUsContainer = styled.div`
   min-height: 100vh;
 `;
 
-const StyledAboutUsTitle = styled.h1`
+export const StyledAboutUsTitle = styled.h1`
   text-align: center;
   font-size: 3.5rem;
   color: #333;
   margin-bottom: 2rem;
 `;
 
-const StyledTeamMemberList = styled.ul`
+export const StyledTeamMemberList = styled.ul`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2.5rem;
@@ -105,9 +108,10 @@ const StyledTeamMemberList = styled.ul`
   max-width: 1200px;
 `;
 
-const StyledTeamMemberCard = styled.li`
+export const StyledTeamMemberCard = styled.li`
   background: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -118,7 +122,7 @@ const StyledTeamMemberCard = styled.li`
   }
 `;
 
-const StyledMemberPhoto = styled.img`
+export const StyledMemberPhoto = styled.img`
   width: 120px;
   height: 120px;
   object-fit: cover;
@@ -127,7 +131,7 @@ const StyledMemberPhoto = styled.img`
   margin-bottom: 1rem;
 `;
 
-const StyledMemberInfo = styled.div`
+export const StyledMemberInfo = styled.div`
   text-align: center;
   h3 {
     margin-bottom: 1rem;
@@ -151,6 +155,21 @@ const StyledLink = styled.a`
   &:hover img {
     transform: scale(1.1);
   }
+`;
+
+const StyledHandleButton = styled.button`
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+`;
+
+const StyledButtonImg = styled.img`
+  width: 70px;
+  height: 70px;
 `;
 
 export default AboutUs;
