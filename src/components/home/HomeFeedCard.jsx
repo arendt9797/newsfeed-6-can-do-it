@@ -13,9 +13,10 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const [comments, setComments] = useState([]);
   const [isLike, setIsLike] = useState(false);
   const [likeNumber, setLikeNumber] = useState(0);
+  const [isEditing, setIsEditing] = useState(null); // 수정 중인 댓글 ID 저장
+  const [editComment, setEditComment] = useState(""); // 수정할 댓글 내용
   const navigate = useNavigate();
 
-  console.log(interests);
   // 모든 댓글 가져오기
   const getComments = async () => {
     const { data } = await supabase
@@ -27,7 +28,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   useEffect(() => {
     getComments();
-  }, [comment]);
+  }, []);
 
   // 댓글 추가 핸들러
   const handleAddComment = async (feedId) => {
@@ -37,22 +38,56 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
       return;
     }
 
-    const { data } = await supabase.from('comments').insert({
+    await supabase.from('comments').insert({
       feed_id: feedId,
       comment: comment,
       user_id: user?.id,
     });
     setComment('');
+    getComments();
   };
 
   // 댓글 삭제 핸들러
   const handleDeleteComment = async (id) => {
     const isConfirm = window.confirm('정말 삭제하시겠습니까?');
     if (isConfirm) {
-      const { error } = await supabase.from('comments').delete().eq('id', id);
+      await supabase.from('comments').delete().eq('id', id);
 
-      if (error) throw error;
       getComments();
+    }
+  };
+
+  //  댓글 수정 아이콘 클릭 시
+  const handleEditClick = (comment) => {
+    setIsEditing(comment.id);
+    setEditComment(comment.comment);
+  };
+
+  //  댓글 수정 완료 핸들러
+  const handleEditComment = async (commentId) => {
+    try {
+      const { error, data } = await supabase
+        .from("comments")
+        .update({ comment: editComment })
+        .eq("id", commentId);
+
+      if (error) {
+        console.error("댓글 수정 오류:", error);
+        alert("댓글 수정에 실패했습니다.");
+        return;
+      }
+
+      console.log("수정된 데이터 =>", data);
+      //  최신 댓글 목록 가져와서 반영
+      await getComments();
+      //  수정 완료 후 상태 초기화
+      setIsEditing(null);
+      setEditComment("");
+
+      console.log("수정", isEditing);
+      console.log("수정 댓글", editComment);
+    } catch (error) {
+      console.error("댓글 수정 처리 중 오류:", error);
     }
   };
 
@@ -88,7 +123,6 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
       const filePath = feed.feed_image_url.slice(secondPublicIndex);
 
-      console.log(filePath);
       // const testfilename = `public/1739770165223_test02.webp`;
       const { data, FileDeleteError } = await supabase.storage
         .from('feed-image')
@@ -103,7 +137,6 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
         alert('이미지 삭제 실패');
       }
 
-      console.log(data);
 
       // [3]보이는 화면 상태에도 반영 _ 작동확인!OK
       setFeeds((prev) => prev.filter((item) => item.id !== feed.id));
@@ -226,9 +259,9 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
             관심사 :{' '}
             {interests && interests.length > 0
               ? interests
-                  .filter((interest) => interest.id === feed.id)
-                  .map((interest) => `#${interest.interest_name}`)
-                  .join(', ')
+                .filter((interest) => interest.id === feed.id)
+                .map((interest) => `#${interest.interest_name}`)
+                .join(', ')
               : '없음'}
           </div>
           {/* 댓글 개수 */}
@@ -259,19 +292,38 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
                       <img src={comment.comment_user.my_profile_image_url} />
                     </StCommentProfileImg>
                     <StH3>{comment.comment_user.nickname}</StH3>
-                    <span>{comment.comment}</span>
+
+                    {/* 댓글 수정 모드일 때 인풋창 표시 */}
+                    {isEditing === comment.id ? (
+                      <input
+                        type="text"
+                        value={editComment}
+                        onChange={(e) => setEditComment(e.target.value)}
+                      />
+                    ) : (
+                      <span>{comment.comment}</span>
+                    )}
                   </StCommentContainer>
-                  <div>
-                    <span>
-                      {user?.id === comment.user_id && (
-                        <StCommentDeleteBtn
-                          onClick={() => handleDeleteComment(comment.id)}
-                        >
-                          &times;
-                        </StCommentDeleteBtn>
-                      )}
-                    </span>
-                  </div>
+                  {/* 댓글 수정 및 삭제 */}
+                  {user?.id === comment.user_id && (
+                    <div>
+                      {/* ✏️ 수정 모드 전환 및 완료 버튼 */}
+                      <StCommentEditBtn
+                        onClick={() => {
+                          if (isEditing === comment.id) {
+                            handleEditComment(comment.id); // 수정 완료
+                          } else {
+                            handleEditClick(comment); // 수정 모드로 변경
+                          }
+                        }}
+                      >
+                        {isEditing === comment.id ? "✔️" : "✏️"}
+                      </StCommentEditBtn>
+                      <StCommentDeleteBtn onClick={() => handleDeleteComment(comment.id)}>
+                        &times;
+                      </StCommentDeleteBtn>
+                    </div>
+                  )}
                 </StCommentsContent>
               );
             })}
@@ -516,4 +568,18 @@ const StLikeBtn = styled.button`
 
 const StCommentPosition = styled.div`
   display: flex;
+`;
+
+const StCommentEditBtn = styled.button`
+  border: none;
+  font-size: 1.2rem;
+  background-color: transparent;
+  color: gray;
+  margin-left: 8px;
+  cursor: pointer;
+
+  &:hover {
+    color: #007bff;
+    scale: 1.2;
+  }
 `;
