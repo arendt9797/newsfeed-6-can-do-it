@@ -28,7 +28,7 @@ function DeveloperPage() {
     };
     fetchAllUsers();
   }, []);
-
+  const handleDeleteUser = async () => {};
   return (
     <>
       <StyledAboutUsContainer>
@@ -44,9 +44,11 @@ function DeveloperPage() {
                   />
                   <StyledMemberInfo>
                     <h3>{user.nickname}</h3>
-                    {/* 필요하다면 role, email, etc. 추가 */}
                     <StyledH2>{user.role}</StyledH2>
                   </StyledMemberInfo>
+                  <StDeleteButton onClick={handleDeleteUser}>
+                    계정 삭제
+                  </StDeleteButton>
                 </StyledTeamMemberCard>
               ))
             ) : (
@@ -61,5 +63,23 @@ function DeveloperPage() {
 const StyledH2 = styled.h2`
   font-size: large;
   font-weight: bold;
+`;
+
+const StDeleteButton = styled.button`
+  width: 200px;
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  margin-top: 20px;
+  background-color: #46d7ab;
+  color: #21212e;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #46e4b5;
+    /* color: white; */
+  }
 `;
 export default DeveloperPage;
