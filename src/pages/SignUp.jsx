@@ -367,6 +367,7 @@ const StSignUpContainer = styled.div`
       font-size: large;
       top: 35px;
       cursor: pointer;
+      // 드래그 방지
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
