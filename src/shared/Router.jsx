@@ -8,6 +8,7 @@ import SignIn from '../pages/SignIn';
 import SignUp from '../pages/SignUp';
 import NavigationLayout from './NavigationLayout';
 import ProtectedRoute from './ProtectedRoute';
+import MyFeed from '../components/MyFeed';
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { path: '/create-feed', element: <CreateFeed /> },
       { path: '/about-us', element: <AboutUs /> },
       { path: '/my-profile', element: <MyProfile /> },
+      { path: '/my-feed', element: <MyFeed /> },
     ],
   },
   { path: '/sign-in', element: <ProtectedRoute element={<SignIn />} /> },
