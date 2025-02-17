@@ -5,11 +5,7 @@ export const StMyProfile = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-left: 100px;
-  margin-top: 50px;
-  position: relative;
-  overflow: auto;
-
+  height: 100vh;
 `;
 
 export const StMyProfileContainer = styled.div`
@@ -17,9 +13,8 @@ export const StMyProfileContainer = styled.div`
   height: 1000px;
   border: 3px solid #d1d1d1;
   border-radius: 20px;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   padding: 10px;
-
+  
   form {
     display: grid;
     grid-template-columns: 1fr 1fr;
