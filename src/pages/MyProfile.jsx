@@ -177,8 +177,8 @@ function MyProfile() {
         return validateGithub(value) ? "" : "GitHub URL 형식이 올바르지 않습니다.";
       case "blog":
         return validateBlog(value) ? "" : "블로그 URL 형식이 올바르지 않습니다.";
-      case "password":
-        return validatePassword(value) ? "" : "비밀번호는 대소문자, 숫자, 특수문자 포함하여 8자 이상";
+      // case "password":
+      //   return validatePassword(value) ? "" : "비밀번호는 대소문자, 숫자, 특수문자 포함하여 8자 이상";
       default:
         return "";
     }
@@ -245,20 +245,20 @@ function MyProfile() {
               <input type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
               {errors.blog && <span className="error-message">{errors.blog}</span>}
             </div>
-            {/* 🔹 관심 카테고리 선택 버튼 */}
-            <div className="categories">
-              <p>{'⭐ 관심 카테고리 (최대 3개 선택)'}</p>
-              {categories.map((category) => (
-                <StCategoryButton
-                  key={category}
-                  type="button"
-                  onClick={() => toggleInterest(category, setSelectedInterests, selectedInterests)}
-                  selected={selectedInterests.includes(category)}
-                >
-                  {category}
-                </StCategoryButton>
-              ))}
-            </div>
+          </div>
+          {/* 🔹 관심 카테고리 선택 버튼 */}
+          <div className="categories">
+            <p>{'⭐ 관심 카테고리 (최대 3개 선택)'}</p>
+            {categories.map((category) => (
+              <StCategoryButton
+                key={category}
+                type="button"
+                onClick={() => toggleInterest(category, setSelectedInterests, selectedInterests)}
+                selected={selectedInterests.includes(category)}
+              >
+                {category}
+              </StCategoryButton>
+            ))}
           </div>
           <StSubmitButton type="submit">수정완료</StSubmitButton>
         </form>
@@ -279,7 +279,7 @@ const StMyProfile = styled.div`
 
 const StMyProfileContainer = styled.div`
   width: 900px;
-  height: 900px;
+  height: 1000px;
   border: 3px solid #d1d1d1;
   border-radius: 20px;
   padding: 10px;
@@ -287,7 +287,7 @@ const StMyProfileContainer = styled.div`
   form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-areas: 'image info';
+    grid-template-areas: 'image info' 'image categories';;
     height: 800px;
   }
     /* ========== 왼쪽: 프로필 이미지 영역 =========== */
@@ -362,19 +362,21 @@ const StMyProfileContainer = styled.div`
     gap: 20px;
     min-height: 600px;
     margin-top: 50px;
+    padding-right: 20px;
   }
   .user-info div {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  min-height: 90px; /* 필드 + 에러 메시지를 포함하는 최소 높이 설정 */
-  margin-bottom: 10px; /* 입력 필드 간 일정한 간격 유지 */
-}
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    min-height: 95px; /* 필드 + 에러 메시지를 포함하는 최소 높이 설정 */
+    margin-bottom: 10px; 
+  }
   .user-info input {
     font-size: 16px;
     height: 50px;
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     border: none;
     border-bottom: 3px solid #21212e;
     outline: none;
@@ -396,22 +398,27 @@ const StMyProfileContainer = styled.div`
     min-height: 18px;
   }
   .categories {
+    grid-area: categories;
     display: flex;
     flex-wrap: wrap;
-    width: 450px;
+    gap: 8px;
+    width: 100%;
+    max-width: 400px;
+    align-self: start;
     margin-top: 30px;
-    gap: 5px;
   }
 
   .categories > p {
-    font-size: large;
-    font-weight: bold;
-    margin-bottom: 10px;
-    width: 100%;
+  font-size: large;
+  font-weight: bold;
+  margin-bottom: 10px;
+  width: 100%; 
+  flex-basis: 100%; 
   }
 `;
 const StCategoryButton = styled.button`
-  width: 80px;
+  width: auto;
+  min-width: 80px;
   padding: 8px 12px;
   cursor: pointer;
   background-color: ${({ selected }) => (selected ? '#0d8b67' : 'transparent')};
@@ -425,18 +432,21 @@ const StCategoryButton = styled.button`
   }
 `;
 const StSubmitButton = styled.button`
-    width: 150px;
-    height: 50px;
-    border: none;
-    border-radius: 10px;
-    background-color: #46d7ab;
-    color: #21212e;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease-in-out;
+  grid-column: 1 / -1; 
+  justify-self: center; 
+  margin-top: 50px;
+  width: 200px;
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  background-color: #46d7ab;
+  color: #21212e;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
 
-    &:hover {
-      background-color: #46e4b5;
-    }
+  &:hover {
+    background-color: #46e4b5;
+  }
 `;
