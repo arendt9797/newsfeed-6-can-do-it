@@ -3,6 +3,7 @@ import { supabase } from '../supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { validateEmail, validatePassword } from '../shared/utils/validationUtils';
+import { NO_MATHCING_USER } from '../constants/errorMesseges';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -30,7 +31,9 @@ const Login = () => {
       alert('로그인 성공!');
       navigate('/');
     } catch (error) {
-      alert(error.message);
+      error.message === NO_MATHCING_USER
+      ? alert('유저 정보가 없습니다!')
+      : alert(error.message)
       console.error('로그인 오류:', error);
     }
   };
