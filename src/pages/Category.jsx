@@ -16,7 +16,7 @@ function Category() {
       // 비교 함수에서 a === c.ETC이면 1을 리턴하여 a를 뒤로 보내고, b === c.ETC이면 -1을 리턴하여 b를 뒤로 보냄
       .sort((a, b) => (a === c.ETC ? 1 : b === c.ETC ? -1 : 0)) || [];
 
-  const testImg = user?.my_profile_image_url || logo;
+  // const testImg = user?.my_profile_image_url || logo;
 
   //user의 관심사 및 기타(ETC)를 제외한 카테고리
   const others = c.categoryArr
@@ -83,7 +83,7 @@ function Category() {
           navigate(`/`);
         }}
         className="ten"
-        $img={testImg}
+        $img={c.categoryArr[9].img}
       >
         <p>{c.ETC}</p>
       </StButton>
