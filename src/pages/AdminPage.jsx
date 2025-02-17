@@ -11,9 +11,20 @@ import {
   StyledMemberInfo,
 } from './AboutUs';
 import styled from 'styled-components';
+import { AuthContext } from '../context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 function DeveloperPage() {
   const [users, setUsers] = useState([]);
+  const { user } = useContext(AuthContext);
+  const naviagte = useNavigate();
+
+  // 개발자가 아닌 계정은 / 으로 리다이렉트
+  useEffect(() => {
+    if (user?.role !== 'developer') {
+      naviagte('/');
+    }
+  }, [user]);
 
   // 모든 사용자 정보 가져오기
   useEffect(() => {
@@ -35,10 +46,7 @@ function DeveloperPage() {
     if (!confirmDelete) return;
 
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
+      const { error } = await supabase.from('users').delete().eq('id', userId);
       // supabase 에러 확인
       if (error) {
         throw error;
@@ -66,7 +74,7 @@ function DeveloperPage() {
                     <h3>{user.nickname}</h3>
                   </StyledMemberInfo>
                   <StDeleteButton onClick={() => handleDeleteUser(user.id)}>
-                    계정 삭제
+                    삭제
                   </StDeleteButton>
                 </StyledTeamMemberCard>
               ))
@@ -80,8 +88,8 @@ function DeveloperPage() {
   );
 }
 const StDeleteButton = styled.button`
-  width: 200px;
-  height: 50px;
+  width: 90px;
+  height: 40px;
   border: none;
   border-radius: 10px;
   margin-top: 20px;
