@@ -2,7 +2,6 @@ import { useContext } from 'react';
 import styled from 'styled-components';
 import { AuthContext } from '../context/AuthProvider';
 import * as c from '../constants/categoryName';
-// import logo from '../assets/test-logo.png';
 import { useNavigate } from 'react-router-dom';
 
 function Category() {
@@ -15,8 +14,6 @@ function Category() {
       ?.map((i) => i.user_interest)
       // 비교 함수에서 a === c.ETC이면 1을 리턴하여 a를 뒤로 보내고, b === c.ETC이면 -1을 리턴하여 b를 뒤로 보냄
       .sort((a, b) => (a === c.ETC ? 1 : b === c.ETC ? -1 : 0)) || [];
-
-  // const testImg = user?.my_profile_image_url || logo;
 
   //user의 관심사 및 기타(ETC)를 제외한 카테고리
   const others = [...c.categoryArr]
@@ -39,55 +36,59 @@ function Category() {
   ];
 
   return (
-    <StCategoriesSection>
-      {[...c.categoryArr].slice(0, 9).map((defaultCategory, i) => {
-        let loginCategoryName = '';
-        let loginCategoryImg = defaultCategory.img;
-        if (myPick.includes(i)) {
-          const candidate = myInterests.shift() || defaultCategory.name;
-          // 기타(ETC)가 myInterests에 있으면 others 배열의 마지막 요소로 대체
+    <>
+      <StCategoriesSection>
+        {[...c.categoryArr].slice(0, 9).map((defaultCategory, i) => {
+          let loginCategoryName = '';
+          let loginCategoryImg = defaultCategory.img;
+          if (myPick.includes(i)) {
+            const candidate = myInterests.shift() || defaultCategory.name;
+            // 기타(ETC)가 myInterests에 있으면 others 배열의 마지막 요소로 대체
 
-          if (candidate === c.ETC && others.length !== 0) {
-            const replaced = others.pop();
-            loginCategoryName = replaced.name;
-            loginCategoryImg = replaced.img;
+            if (candidate === c.ETC && others.length !== 0) {
+              const replaced = others.pop();
+              loginCategoryName = replaced.name;
+              loginCategoryImg = replaced.img;
+            } else {
+              const candidateObj =
+                c.categoryArr.find((c) => c.name === candidate) ||
+                defaultCategory;
+              loginCategoryName = candidateObj.name;
+              loginCategoryImg = candidateObj.img;
+            }
           } else {
-            const candidateObj =
-              c.categoryArr.find((c) => c.name === candidate) ||
-              defaultCategory;
-            loginCategoryName = candidateObj.name;
-            loginCategoryImg = candidateObj.img;
+            const other = others.shift() || defaultCategory;
+            loginCategoryName = other.name;
+            loginCategoryImg = other.img;
           }
-        } else {
-          const other = others.shift() || defaultCategory;
-          loginCategoryName = other.name;
-          loginCategoryImg = other.img;
-        }
 
-        return (
-          <StButton
-            onClick={() => {
-              navigate(`/`);
-            }}
-            key={i}
-            className={classNames[i]}
-            $img={loginCategoryImg}
-          >
-            <p>{isLogin ? loginCategoryName : defaultCategory.name}</p>
-          </StButton>
-        );
-      })}
-      {/* 기타(ETC)는 고정 */}
-      <StButton
-        onClick={() => {
-          navigate(`/`);
-        }}
-        className="ten"
-        $img={c.categoryArr[9].img}
-      >
-        <p>{c.ETC}</p>
-      </StButton>
-    </StCategoriesSection>
+          return (
+            <StButton
+              onClick={() => {
+                navigate(
+                  `/category-feed?id=${isLogin ? loginCategoryName : defaultCategory.name}`,
+                );
+              }}
+              key={i}
+              className={classNames[i]}
+              $img={loginCategoryImg}
+            >
+              <p>{isLogin ? loginCategoryName : defaultCategory.name}</p>
+            </StButton>
+          );
+        })}
+        {/* 기타(ETC)는 고정 */}
+        <StButton
+          onClick={() => {
+            navigate(`/category-feed?id=기타`);
+          }}
+          className="ten"
+          $img={c.categoryArr[9].img}
+        >
+          <p>{c.ETC}</p>
+        </StButton>
+      </StCategoriesSection>
+    </>
   );
 }
 

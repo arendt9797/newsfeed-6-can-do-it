@@ -10,6 +10,7 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
   const { user, isLogin } = useContext(AuthContext);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
+  const [isLike, setIsLike] = useState(false);
   const navigate = useNavigate();
 
   const getComments = async () => {
@@ -104,8 +105,12 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
     }
   };
 
-  // console.log(feed.feed_image_url);
-
+  // [좋아요] 토클 버튼
+  const handleLikeToggle = async (id) => {
+    alert('좋아요 버튼 클릭!');
+    console.log(id);
+  };
+  //------------------댓글 수정 보류----------
   // const handleUpdateFeed = async (id) => {
   //   const isConfirm = window.confirm('정말 수정하시겠습니까?');
   //   if (isConfirm) {
@@ -116,6 +121,7 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
   //       .select();
   //   }
   // };
+  //-------------------------------------
 
   return (
     <>
@@ -144,12 +150,19 @@ const HomeFeedCard = ({ feed, setFeeds }) => {
         </StFeedTop>
         <StCommentsInterestContainer>
           <div>체크한 관심사 : #DIY</div>
-          <div>
+          {/* 스타일컴포넌트 하나 만들어야함 */}
+          <div style={{ display: 'flex' }}>
             {!comments.length ? (
               <div></div>
             ) : (
-              <div>comments({comments.length})</div>
+              <StComment>comments({comments.length})</StComment>
             )}
+            {/* 좋아요 하트 */}
+            <StLikeBtn onClick={() => handleLikeToggle(user.id)}>
+              <StLikes>
+                <img src={isLike ? '/heart.png' : '/like.png'} />
+              </StLikes>
+            </StLikeBtn>
           </div>
         </StCommentsInterestContainer>
         {comments.length > 0 && (
@@ -377,4 +390,36 @@ const StCommentsInterestContainer = styled.div`
   color: grey;
   margin-left: 40px;
   margin-bottom: 5px;
+  align-items: center;
+`;
+
+const StLikes = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 30px;
+
+  img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
+`;
+
+const StComment = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-right: 10px;
+`;
+
+const StLikeBtn = styled.button`
+  background-color: transparent;
+  border: none;
+
+  &:hover {
+    scale: 1.1;
+    cursor: pointer;
+  }
 `;
