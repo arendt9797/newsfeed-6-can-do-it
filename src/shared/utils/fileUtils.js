@@ -1,7 +1,9 @@
 import { supabase } from "../../supabase/client";
+import { v4 as uuidv4 } from "uuid";
 
 //파일 선택 호출 함수
-export const handleImageChange = (e, setImage) => {
+export const handleImageChange = (e, setImage, setPreview) => {
+
   const file = e.target.files[0];
 
   if (file) {
@@ -21,14 +23,19 @@ export const handleImageChange = (e, setImage) => {
 
     // 유효성 검사 통과 후 파일 설정
     setImage(file);
+
+    setPreview(URL.createObjectURL(file));
   }
 };
 
 //파일 업로드 함수
 export const handleImageUpload = async (image, profile) => {
 
-  // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
-  const filePath = `public/${Date.now()}_${image.name}`;
+  if (!image) return profile.my_profile_image_url;
+
+  const fileExtension = image.name.split('.').pop(); // 확장자 추출
+  const newFileName = `${uuidv4()}.${fileExtension}`; // UUID + 확장자로 파일명 생성
+  const filePath = `profile-image/${newFileName}`; // 프로필 이미지 저장 경로
 
   // 1.storage에 이미지 업로드
   const { data, error } = await supabase
@@ -47,9 +54,10 @@ export const handleImageUpload = async (image, profile) => {
     .storage
     .from("profile-image")
     .getPublicUrl(filePath);
-  if(publicError){
-    console.log("이미지가져오기 실패", publicError)
+  if (publicError) {
+    console.log("이미지가져오기 실패", publicError);
   }
+
   const imageUrl = publicUrlData.publicUrl;
 
   // 3.table에 URL 저장
