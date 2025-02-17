@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import { toggleInterest } from '../shared/utils/categoryUtils';
+import { validateBlog, validateEmail, validateGithub, validateNickname, validatePassword } from '../shared/utils/validationUtils';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -39,16 +40,21 @@ const Signup = () => {
   
   const handleSignup = async (e) => {
     e.preventDefault();
-    // 프로필 사진 필수 업로드
+
+    // 검증단계
     if (!myImage) {
-      alert('프로필 이미지를 선택해주세요!');
+      alert('프로필 이미지를 선택해주세요.');
       return;
     }
-    // 카테고리 필수 3개 선택
     if (selectedInterests.length < 3) {
-      alert('카테고리 3개를 선택해주세요!');
+      alert('카테고리 3개를 선택해주세요.');
       return;
     }
+    if (!validateEmail(email)) return alert("이메일 형식이 올바르지 않습니다.");
+    if (!validatePassword(password)) return alert("비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.")
+    if (!validateNickname(myNickname)) return alert("닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.");
+    if (!validateGithub(myGithub)) return alert("GitHub URL 형식이 올바르지 않습니다.");
+    if (!validateBlog(myBlog)) return alert("블로그 URL 형식이 올바르지 않습니다.");
 
     try {
       const {
