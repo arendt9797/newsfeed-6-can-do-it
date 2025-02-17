@@ -1,16 +1,24 @@
 import St from 'styled-components';
 import { supabase } from '../supabase/client';
 import { useState, useContext } from 'react';
-import ToastImageEditor from '../components/ToastImageEditor';
+// import ToastImageEditor from '../components/ToastImageEditor';
 import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
 
 const StCreateFeed = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [imgUrl, setImgUrl] = useState('');
+  const [imgFile, setImgFile] = useState(null);
   const [feedCategory, setFeedCategory] = useState([]);
   const { user: authUser } = useContext(AuthContext);
+
+  const handleImgFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImgFile(file);
+      console.log(file);
+    }
+  };
 
   const handleFeedCategory = (hobby) => {
     if (feedCategory.includes(hobby)) {
@@ -62,6 +70,13 @@ const StCreateFeed = () => {
       } else {
         console.log(categoryData);
       }
+
+      if (imgFile) {
+        const filePath = `public/${imgFile.name}`;
+        const { data: imgData, error: imgDataError } = await supabase.storage
+          .from('feed-image')
+          .upload(filePath, imgFile);
+      }
     } catch (error) {
       console.error('error=>', error);
     }
@@ -70,7 +85,7 @@ const StCreateFeed = () => {
   return (
     <StPageContainer>
       <StToastImageEditorContainer>
-        <ToastImageEditor />
+        <input type="file" accept="image/*" onChange={handleImgFile} />
       </StToastImageEditorContainer>
       <StUserFeedContainer>
         <div className="button-container">
@@ -80,6 +95,7 @@ const StCreateFeed = () => {
           <button id="save-button">임시저장</button>
           <button id="cancle-button">돌아가기</button>
         </div>
+
         <div className="titleInput-container">
           <label>Title</label>
           <input
