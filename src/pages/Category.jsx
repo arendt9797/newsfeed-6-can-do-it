@@ -19,9 +19,9 @@ function Category() {
   // const testImg = user?.my_profile_image_url || logo;
 
   //user의 관심사 및 기타(ETC)를 제외한 카테고리
-  const others = c.categoryArr
+  const others = [...c.categoryArr]
     .slice(0, 9)
-    .filter((i) => !myInterests.includes(i) && i !== c.ETC);
+    .filter((i) => !myInterests.includes(i.name) && i.name !== c.ETC);
 
   //그리드 큰 위치에 user 관심사를 우선적으로 배치하기 위해 사용
   const myPick = [1, 2, 5];
@@ -40,7 +40,7 @@ function Category() {
 
   return (
     <StCategoriesSection>
-      {c.categoryArr.slice(0, 9).map((defaultCategory, i) => {
+      {[...c.categoryArr].slice(0, 9).map((defaultCategory, i) => {
         let loginCategoryName = '';
         let loginCategoryImg = defaultCategory.img;
         if (myPick.includes(i)) {
