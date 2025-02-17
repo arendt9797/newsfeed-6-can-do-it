@@ -1,6 +1,5 @@
 import { Link, Outlet } from 'react-router-dom';
 import styled from 'styled-components';
-import profile from '../../public/test_profile.png';
 import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import { useContext } from 'react';
@@ -36,7 +35,7 @@ function NavigationLayout() {
 
         <div className="profile-div">
           <Link to={isLogin ? '/my-profile' : '/sign-in'}>
-            <img src={user?.my_profile_image_url || profile} alt="profile" />
+            <img src={user?.my_profile_image_url || '/default_user.jpg'} alt="profile" />
           </Link>
           <div className="tip">
             <p>이미지를 클릭하면 sign in 혹은 My Profile로 이동합니다.</p>
@@ -119,13 +118,14 @@ const StBodyDiv = styled.div`
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 200px;
+      width: 250px;
       margin: 50px auto;
 
       img {
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         border-radius: 100%;
+        object-fit: cover;
       }
       .tip {
         position: relative;
