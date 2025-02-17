@@ -70,7 +70,7 @@ function AboutUs() {
           </StyledTeamMemberList>
         </div>
         {user?.role === 'developer' && (
-          <StyledHandleButton onClick={() => navigate('/developer-page')}>
+          <StyledHandleButton onClick={() => navigate('/admin-page')}>
             <StyledButtonImg
               src="https://cdn-icons-png.flaticon.com/128/10337/10337203.png"
               alt="개발자 전용 아이콘"

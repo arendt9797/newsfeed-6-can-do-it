@@ -10,7 +10,7 @@ export const validateNickname = (nickname) => {
 
 export const validatePassword = (password) => {
   const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
+    /^(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-z0-9!@#$%^&*]{8,}$/;
   return passwordRegex.test(password);
 };
 
@@ -22,6 +22,8 @@ export const validateGithub = (github) => {
 
 export const validateBlog = (blog) => {
   if (!blog) return true;
-  const blogRegex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const blogRegex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}([\/\w@.-]*)*\/?$/;
   return blogRegex.test(blog);
 };
+
+
