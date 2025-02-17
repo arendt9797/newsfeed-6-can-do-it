@@ -24,8 +24,8 @@ function Category() {
     (i) => !myInterests.includes(i) && i !== c.ETC,
   );
 
-  //그리드 위치에 사용자 관심사를 우선적으로 배치하기 위해 사용
-  const myPickSet = [1, 2, 5];
+  //그리드 큰 위치에 사용자 관심사를 우선적으로 배치하기 위해 사용
+  const myPick = [1, 2, 5];
   //각 버튼에 부여할 CSS 클래스명
   const classNames = [
     'one',
@@ -43,7 +43,7 @@ function Category() {
     <StCategoriesSection>
       {categories.slice(0, 9).map((defaultCategory, i) => {
         let loginCategory = [];
-        if (myPickSet.includes(i)) {
+        if (myPick.includes(i)) {
           const candidate = myInterests.shift() || defaultCategory;
           // 기타(ETC)가 myInterests에 있으면 others 배열의 마지막 요소로 대체
           loginCategory =
@@ -111,8 +111,9 @@ const StCategoriesSection = styled.section`
     }
 
     p {
-      font-size: 25px;
+      font-size: 27px;
       font-weight: bold;
+      text-shadow: -1px 0 #d8dfe5, 0 1px #d8dfe5, 1px 0 #d8dfe5, 0 -1px #d8dfe5;
     }
   }
 
@@ -121,9 +122,9 @@ const StCategoriesSection = styled.section`
   .six {
     background-color: #6764642c;
 
-  &::after {
-    opacity: 0.8;
-  }
+    &::after {
+      opacity: 0.8;
+    }
   }
 
   .two {
