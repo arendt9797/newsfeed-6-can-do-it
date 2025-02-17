@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 
 //파일 선택 호출 함수
 export const handleImageChange = (e, setImage, setPreview) => {
+
   const file = e.target.files[0];
 
   if (file) {
@@ -30,6 +31,7 @@ export const handleImageChange = (e, setImage, setPreview) => {
 //파일 업로드 함수
 export const handleImageUpload = async (image, profile) => {
 
+  if (!image) return profile.my_profile_image_url;
 
   const fileExtension = image.name.split('.').pop(); // 확장자 추출
   const newFileName = `${uuidv4()}.${fileExtension}`; // UUID + 확장자로 파일명 생성

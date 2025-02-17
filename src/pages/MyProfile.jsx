@@ -132,7 +132,7 @@ function MyProfile() {
     if (!validateNickname(profile.nickname)) return alert("닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.");
     if (!validateGithub(profile.github)) return alert("GitHub URL 형식이 올바르지 않습니다.");
     if (!validateBlog(profile.blog)) return alert("블로그 URL 형식이 올바르지 않습니다.");
-    // if (!validatePassword(profile.password)) return alert("비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.")
+    if (!validatePassword(profile.password)) return alert("비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.")
 
     try {
       const imageUrl = await handleImageUpload(image, profile);
@@ -169,10 +169,18 @@ function MyProfile() {
               alt="프로필 이미지"
               onClick={() => document.getElementById("file-upload").click()}
             />
-            <input type="file" id="file-upload" 
+            {preview && (
+              <img className="delete-image" src="https://cdn-icons-png.flaticon.com/128/190/190406.png"
+                onClick={() => {
+                  setPreview(profile.my_profile_image_url); // 이전 이미지로 복구
+                  setImage(null); // 파일 선택 취소
+                }} />
+
+            )}
+            <input type="file" id="file-upload"
               onChange={
-              (e) => handleImageChange(e, setImage, setPreview)
-            }
+                (e) => handleImageChange(e, setImage, setPreview)
+              }
               style={{ display: "none" }} />
           </div>
 
@@ -260,7 +268,7 @@ const StMyProfileContainer = styled.div`
     border-radius: 20px;
     margin-bottom: 50px;
   }
-
+  
 
   /* input file 커스터마이즈 */
   .file-wrapper > input {
@@ -303,8 +311,23 @@ const StMyProfileContainer = styled.div`
     color: #21212e;
     background-color: #46d7ab;
   }
+  .delete-image {
+  position: absolute;
+  top: 325px;
+  right: 30px;
+  width: 30px; 
+  height: 30px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+  
    /* ========== 오른쪽: 유저정보 영역 ========== */
-   .user-info {
+  .user-info {
     grid-area: info;
     display: flex;
     flex-direction: column;
