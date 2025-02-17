@@ -34,7 +34,7 @@ const MyLike = () => {
         // 3. 피드 정보 얻기
         const { data: feedsData, error: feedsError } = await supabase
           .from('feeds')
-          .select('*')
+          .select('*, user: users(nickname, my_profile_image_url)')
           .in('id', feedIds)
           .order('created_at', { ascending: false });
 
