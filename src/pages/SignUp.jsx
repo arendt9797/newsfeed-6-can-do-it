@@ -5,29 +5,28 @@ import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import { toggleInterest } from '../shared/utils/categoryUtils';
-import {
-  validateBlog,
-  validateEmail,
-  validateGithub,
-  validateNickname,
-  validatePassword,
-} from '../shared/utils/validationUtils';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthProvider';
+import { useValidation } from '../hooks/useValidation';
 
 const Signup = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPW, setShowPW] = useState(false);
+  const { errors, validateField, validateForm, setErrors } = useValidation();
+
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+    nickname: '',
+    github: '',
+    blog: '',
+  });
+
   const [myImage, setMyImage] = useState(null);
-  const [myNickname, setMyNickname] = useState('');
-  const [myBlog, setMyBlog] = useState('');
-  const [myGithub, setMyGithub] = useState('');
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [uploadedFileName, setUploadedFileName] =
     useState('사진을 선택해주세요');
   const [previewImage, setPreviewImage] = useState(null);
   const { setUser } = useContext(AuthContext);
+  const [showPW, setShowPW] = useState(false);
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
@@ -49,37 +48,36 @@ const Signup = () => {
   const toggleInterestHandler = (category) =>
     toggleInterest(category, setSelectedInterests, selectedInterests);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: validateField(name, value),
+    }));
+  };
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    // 검증단계
-    if (!myImage) {
-      alert('프로필 이미지를 선택해주세요.');
+    const newErrors = validateForm();
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      alert('입력 필드를 확인해주세요.');
       return;
     }
-    if (selectedInterests.length < 3) {
-      alert('카테고리 3개를 선택해주세요.');
-      return;
-    }
-    if (!validateEmail(email)) return alert('이메일 형식이 올바르지 않습니다.');
-    if (!validatePassword(password))
-      return alert(
-        '비밀번호는 영어 소문자, 숫자, 특수문자 포함하여 8자 이상이어야 합니다.',
-      );
-    if (!validateNickname(myNickname))
-      return alert('닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.');
-    if (!validateGithub(myGithub))
-      return alert('GitHub URL 형식이 올바르지 않습니다.');
-    if (!validateBlog(myBlog))
-      return alert('블로그 URL 형식이 올바르지 않습니다.');
 
     try {
       const {
         data: { user: authUser },
         error: signupError,
       } = await supabase.auth.signUp({
-        email,
-        password,
+        email: form.email,
+        password: form.password,
       });
       if (signupError) throw signupError;
 
@@ -98,9 +96,9 @@ const Signup = () => {
         .getPublicUrl(`public/${uniqueImageName}`);
       const { error: userError } = await supabase.from('users').insert({
         id: authUser.id,
-        nickname: myNickname,
-        github: myGithub,
-        blog: myBlog,
+        nickname: form.nickname,
+        github: form.github,
+        blog: form.blog,
         my_profile_image_url: publicUrl.publicUrl,
       });
       if (userError) throw userError;
@@ -174,54 +172,74 @@ const Signup = () => {
               <p>{'Nickname'}</p>
               <input
                 type="text"
+                name="nickname"
                 placeholder="  닉네임을 입력해주세요"
-                value={myNickname}
-                onChange={(e) => setMyNickname(e.target.value)}
+                value={form.nickname}
+                onChange={handleChange}
                 required
               />
+              {errors.nickname && (
+                <span className="error-message">{errors.nickname}</span>
+              )}
             </div>
             <div>
               <p>{'E-mail'}</p>
               <input
                 type="text"
+                name="email"
                 placeholder="  이메일을 입력해주세요"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={form.email}
+                onChange={handleChange}
                 required
               />
+              {errors.email && (
+                <span className="error-message">{errors.email}</span>
+              )}
             </div>
             <div className="password-wrapper">
               <p>{'Password'}</p>
               <input
                 type={showPW ? 'text' : 'password'}
+                name="password"
                 placeholder="  비밀번호를 입력해주세요"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={form.password}
+                onChange={handleChange}
                 required
               />
+              {errors.password && (
+                <span className="error-message">{errors.password}</span>
+              )}
               {showPW ? (
-                <span onClick={() => setShowPW(false)}>🙉</span>
+                <div className="monkey" onClick={() => setShowPW(false)}>🙉</div>
               ) : (
-                <span onClick={() => setShowPW(true)}>🙈</span>
+                <div className="monkey" onClick={() => setShowPW(true)}>🙈</div>
               )}
             </div>
             <div>
               <p>{'Github (선택)'}</p>
               <input
-                type="text"
+                type="url"
+                name="github"
                 placeholder="  깃헙이 있다면 알려주세요"
-                value={myGithub}
-                onChange={(e) => setMyGithub(e.target.value)}
+                value={form.github || ''}
+                onChange={handleChange}
               />
+              {errors.github && (
+                <span className="error-message">{errors.github}</span>
+              )}
             </div>
             <div>
               <p>{'Blog (선택)'}</p>
               <input
                 type="text"
+                name="blog"
                 placeholder="  블로그가 있다면 알려주세요"
-                value={myBlog}
-                onChange={(e) => setMyBlog(e.target.value)}
+                value={form.blog}
+                onChange={handleChange}
               />
+              {errors.blog && (
+                <span className="error-message">{errors.blog}</span>
+              )}
               {/* 🔹 관심 카테고리 선택 버튼 */}
             </div>
             <div className="categories">
@@ -366,7 +384,7 @@ const StSignUpContainer = styled.div`
   .user-info input {
     font-size: 16px;
     height: 50px;
-    width: 300px;
+    width: 350px;
     border: none;
     border-bottom: 3px solid #21212e;
     outline: none;
@@ -380,10 +398,11 @@ const StSignUpContainer = styled.div`
   .password-wrapper {
     position: relative;
 
-    span {
+    .monkey {
       position: absolute;
       font-size: large;
       top: 35px;
+      right: 10px;
       cursor: pointer;
       // 드래그 방지
       -webkit-user-select: none;
@@ -395,6 +414,15 @@ const StSignUpContainer = styled.div`
 
   .user-info p {
     height: 20px;
+    font-weight: bold;
+  }
+
+  .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+    min-height: 18px;
   }
 
   .categories {
