@@ -27,7 +27,7 @@ function AuthProvider({ children }) {
         .from('users')
         .select(
           `
-          nickname, github, blog, my_profile_image_url,
+          nickname, github, blog, my_profile_image_url,role,
           user_interests (user_interest)  -- 👈 내 관심 카테고리 JOIN (SQL에서 한 줄 주석은 -- 으로 표시)
         `,
         )

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../supabase/client';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { validateEmail, validatePassword } from '../shared/utils/validationUtils';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,6 +11,14 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    // 검증단계
+    if (!validateEmail(email)) return alert('이메일 형식이 올바르지 않습니다.');
+    if (!validatePassword(password))
+      return alert(
+        '비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.',
+      );
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -29,7 +38,11 @@ const Login = () => {
   return (
     <StSignIn>
       <StSignInContainer>
-        <img src="/src/assets/test-logo.png" alt="site_logo" />
+        <img
+          src="/team_logo.png"
+          alt="site_logo"
+          onClick={() => navigate('/')}
+        />
         <form onSubmit={handleLogin}>
           <input
             type="email"
@@ -90,6 +103,7 @@ const StSignInContainer = styled.div`
     width: 130px;
     border-radius: 20px;
     margin-bottom: 100px;
+    cursor: pointer;
   }
 
   input {

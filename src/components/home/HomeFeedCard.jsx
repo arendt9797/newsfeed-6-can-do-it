@@ -6,7 +6,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 
-const HomeFeedCard = ({ feed }) => {
+const HomeFeedCard = ({ feed, setFeeds }) => {
   const { user, isLogin } = useContext(AuthContext);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
@@ -39,7 +39,7 @@ const HomeFeedCard = ({ feed }) => {
     setComment('');
   };
 
-  const handleDeleteFeed = async (id) => {
+  const handleDeleteComment = async (id, image) => {
     const isConfirm = window.confirm('정말 삭제하시겠습니까?');
     if (isConfirm) {
       const { error } = await supabase.from('comments').delete().eq('id', id);
@@ -48,6 +48,63 @@ const HomeFeedCard = ({ feed }) => {
       getComments();
     }
   };
+  //[*]피드 이미지 url 주소 콘솔창으로 확인!!
+  // console.log(feed.feed_image_url);
+
+  const handleDeleteFeed = async (id) => {
+    // [1]feeds 테이블에서 피드 삭제 _ 작동확인!OK
+    const isConfirm = window.confirm('정말 삭제하시겠습니까?');
+
+    if (isConfirm) {
+      const { feedError } = await supabase.from('feeds').delete().eq('id', id);
+
+      if (feedError) {
+        console.error('피드 삭제 오류:', feedError);
+        throw feedError;
+      }
+
+      // [2]스토리지에서 feed-image 버켓에 있는 이미지 파일 삭제
+
+      // [try_0] 이건 http://~~ 이렇게 쭉 나옴
+      // const filePath = `public/${feed.feed_image_url}`;
+
+      // [try_1] slice 썼더니 첫번째 public에서 걸러니 "public/feed-image/public/1739772606245_test1.jpeg" 결과값 도출
+      // const filePath = feed.feed_image_url.slice(
+      //   feed.feed_image_url.indexOf('public/'),
+      // );
+
+      // [try_2] 첫번째 public인덱스 찾고, 두번째 public 인덱스 찾아서 slice로 주소 추출
+      const firstPublicIndex = feed.feed_image_url.indexOf('public/');
+      const secondPublicIndex = feed.feed_image_url.indexOf(
+        'public/',
+        firstPublicIndex + 1,
+      );
+
+      const filePath = feed.feed_image_url.slice(secondPublicIndex);
+
+      console.log(filePath);
+      // const testfilename = `public/1739770165223_test02.webp`;
+      const { data, FileDeleteError } = await supabase.storage
+        .from('feed-image')
+        .remove([filePath]);
+
+      if (FileDeleteError) {
+        console.error('파일 삭제 오류:', FileDeleteError);
+        throw FileDeleteError;
+      }
+
+      if (!filePath) {
+        alert('이미지 삭제 실패');
+      }
+
+      console.log(data);
+
+      // [3]보이는 화면 상태에도 반영 _ 작동확인!OK
+      setFeeds((prev) => prev.filter((item) => item.id !== feed.id));
+    }
+  };
+
+  // console.log(feed.feed_image_url);
 
   // const handleUpdateFeed = async (id) => {
   //   const isConfirm = window.confirm('정말 수정하시겠습니까?');
@@ -67,6 +124,13 @@ const HomeFeedCard = ({ feed }) => {
           <img src={feed.user?.my_profile_image_url} />
         </StFeedProfileImg>
         <span>{feed.user?.nickname}</span>
+        {user?.id === feed.user_id && (
+          <StFeedDeleteBtn
+            onClick={() => handleDeleteFeed(feed.id, feed.feed_image_url)}
+          >
+            &times;
+          </StFeedDeleteBtn>
+        )}
       </StFeedProfileImgContainer>
       <StFeedBox>
         <StFeedTop>
@@ -103,11 +167,11 @@ const HomeFeedCard = ({ feed }) => {
                   <div>
                     <span>
                       {user?.id === comment.user_id && (
-                        <StDeleteBtn
-                          onClick={() => handleDeleteFeed(comment.id)}
+                        <StCommentDeleteBtn
+                          onClick={() => handleDeleteComment(comment.id)}
                         >
                           &times;
-                        </StDeleteBtn>
+                        </StCommentDeleteBtn>
                       )}
                     </span>
                   </div>
@@ -263,14 +327,32 @@ const StH3 = styled.h3`
   font-weight: 600;
 `;
 
-const StDeleteBtn = styled.button`
+const StCommentDeleteBtn = styled.button`
   border: none;
   font-size: 1.2rem;
+  background-color: transparent;
 
   &:hover {
     color: red;
     cursor: pointer;
     scale: 1.3;
+  }
+`;
+
+const StFeedDeleteBtn = styled.button`
+  justify-content: flex-end;
+  border: none;
+  font-size: 1.5rem;
+  background-color: transparent;
+  background-color: #fd6565;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: white;
+
+  &:hover {
+    cursor: pointer;
+    scale: 1.1;
   }
 `;
 
