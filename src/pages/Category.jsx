@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import styled from 'styled-components';
 import { AuthContext } from '../context/AuthProvider';
 import * as c from '../constants/categoryName';
-import logo from '../assets/test-logo.png';
+// import logo from '../assets/test-logo.png';
 import { useNavigate } from 'react-router-dom';
 
 function Category() {
