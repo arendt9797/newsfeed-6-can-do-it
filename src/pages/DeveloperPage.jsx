@@ -11,9 +11,20 @@ import {
   StyledMemberInfo,
 } from './AboutUs';
 import styled from 'styled-components';
+import { AuthContext } from '../context/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 function DeveloperPage() {
   const [users, setUsers] = useState([]);
+  const { user } = useContext(AuthContext);
+  const naviagte = useNavigate();
+
+  // 개발자가 아닌 계정은 / 으로 리다이렉트
+  useEffect(() => {
+    if (user?.role !== 'developer') {
+      naviagte('/');
+    }
+  }, [user]);
 
   // 모든 사용자 정보 가져오기
   useEffect(() => {
