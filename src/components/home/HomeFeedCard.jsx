@@ -70,25 +70,24 @@ const HomeFeedCard = ({ feed }) => {
       </StFeedProfileImgContainer>
       <StFeedBox>
         <StFeedTop>
-          <div>
-            {/* feed_img_url로 추후 교체 */}
-            <img
-              src="https://media.istockphoto.com/id/1497396873/ko/%EC%82%AC%EC%A7%84/%ED%95%B4%EB%B3%80-%ED%9C%B4%EA%B0%80%EB%A5%BC-%EC%8B%9C%EC%9E%91%ED%95%A0-%EC%A4%80%EB%B9%84%EA%B0%80-%EB%90%98%EC%97%88%EC%8A%B5%EB%8B%88%EB%8B%A4.jpg?s=612x612&w=0&k=20&c=okICg7-m2NXrvTnU4Jl2Vy3coHYd7DcjtyMMUA3Vg7E="
-              width={250}
-            />
-          </div>
-          <div>
+          <StFeedImgContainerLeft>
+            <img src={feed.feed_image_url} />
+          </StFeedImgContainerLeft>
+          <StFeedContentRight>
             <StH2>{feed.title}</StH2>
-            <br />
             <div>{feed.content}</div>
-            <br />
+          </StFeedContentRight>
+        </StFeedTop>
+        <StCommentsInterestContainer>
+          <div>체크한 관심사 : #DIY</div>
+          <div>
             {!comments.length ? (
               <div></div>
             ) : (
               <div>comments({comments.length})</div>
             )}
           </div>
-        </StFeedTop>
+        </StCommentsInterestContainer>
         {comments.length > 0 && (
           <StCommentsContainer>
             {comments.map((comment) => {
@@ -155,12 +154,15 @@ const StFeedTop = styled.div`
   flex-direction: row;
   padding: 30px;
   gap: 10px;
+  min-height: 200px;
 `;
 
 const StH2 = styled.h2`
   font-size: 1.5rem;
   font-weight: 800;
   color: black;
+  margin-bottom: 50px;
+  margin-top: 20px;
 `;
 
 const StCommentBox = styled.input`
@@ -270,4 +272,27 @@ const StDeleteBtn = styled.button`
     cursor: pointer;
     scale: 1.3;
   }
+`;
+
+const StFeedImgContainerLeft = styled.div`
+  width: 40%;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+const StFeedContentRight = styled.div`
+  width: 60%;
+  padding-left: 20px;
+`;
+
+const StCommentsInterestContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  margin-right: 40px;
+  color: grey;
+  margin-left: 40px;
+  margin-bottom: 5px;
 `;
