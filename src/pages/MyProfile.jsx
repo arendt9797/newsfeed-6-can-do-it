@@ -166,9 +166,12 @@ function MyProfile() {
           {/* 왼쪽: 프로필 이미지 */}
           <div className="user-image">
             <img className="logo-img" src="/src/assets/test-logo.png" alt="site_logo" />
-            <img className="preview-img" src={profile.my_profile_image_url ? profile.my_profile_image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
+            <img className="preview-img" 
+            src={profile.my_profile_image_url ? profile.my_profile_image_url : "/src/assets/test-logo.png"} 
+            alt="프로필 이미지"
+            onClick={() => document.getElementById("file-upload").click()} 
+            />
             <input type="file" id="file-upload" onChange={(e) => handleImageChange(e, setImage)} style={{ display: "none" }} />
-            <StLabel htmlFor="file-upload">{'🧷'}</StLabel>
             <button onClick={handleImageUpdate}>프로필 이미지 변경</button>
           </div>
 
@@ -248,6 +251,7 @@ const StMyProfileContainer = styled.div`
     align-items: center;
     justify-content: center;
     position: relative;
+    
   }
 
   .logo-img {
@@ -298,6 +302,7 @@ const StMyProfileContainer = styled.div`
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #d1d1d1;
+    cursor: pointer;
   }
 
   .default-img {
@@ -386,15 +391,3 @@ const StSubmitButton = styled.button`
       background-color: #46e4b5;
     }
 `;
-/* input file 커스터마이즈 */
-const StLabel = styled.label`
-  background-color: #21212e;
-  padding: 10px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-
-  &:hover {
-    background-color: #46d7ab;
-  }
-  `;
