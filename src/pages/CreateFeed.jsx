@@ -42,7 +42,6 @@ const StCreateFeed = () => {
       .maybeSingle();
 
     try {
-      // feeds 테이블에 피드 데이터 생성 (feed_image_url은 나중에 업데이트)
       const { data: feedData, error: feedError } = await supabase
         .from('feeds')
         .upsert([{ title, content, user_id: publicUser.id }])
@@ -55,7 +54,6 @@ const StCreateFeed = () => {
         console.log(feedData);
       }
 
-      // feed_interests 테이블에 카테고리 정보 삽입
       const { data: categoryData, error: categoryError } = await supabase
         .from('feed_interests')
         .insert([{ id: feedData[0].id, interest_name: feedCategory[0] }]);
@@ -68,13 +66,11 @@ const StCreateFeed = () => {
       if (imgFile) {
         const filePath = `public/${Date.now()}_${imgFile.name}`;
 
-        // 이미지 업로드
         const { error: imageError } = await supabase.storage
           .from('feed-image')
           .upload(filePath, imgFile);
         if (imageError) throw imageError;
 
-        // 업로드된 이미지의 공개 URL 가져오기 (v2 방식)
         const { data: urlData, error: urlError } = await supabase.storage
           .from('feed-image')
           .getPublicUrl(filePath);
@@ -82,7 +78,6 @@ const StCreateFeed = () => {
         const publicURL = urlData.publicUrl;
         console.log('업로드된 이미지 URL:', publicURL);
 
-        // upsert를 사용하여 feeds 테이블의 feed_image_url 필드에 publicURL을 저장
         const { error: upsertError } = await supabase
           .from('feeds')
           .upsert(
