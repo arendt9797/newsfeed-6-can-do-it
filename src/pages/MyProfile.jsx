@@ -15,14 +15,14 @@ function MyProfile() {
     image_url: "",
     nickname: "",
     email: "",
-    password: "",
+    password: "********",
     github: "",
     blog: "",
   });
   const [image, setImage] = useState(null);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [preview, setPreview] = useState(null);
-
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (!isLogin) return;
@@ -127,12 +127,14 @@ function MyProfile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 검증 단계
-    if (!validateEmail(profile.email)) return alert("이메일 형식이 올바르지 않습니다.");
-    if (!validateNickname(profile.nickname)) return alert("닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.");
-    if (!validateGithub(profile.github)) return alert("GitHub URL 형식이 올바르지 않습니다.");
-    if (!validateBlog(profile.blog)) return alert("블로그 URL 형식이 올바르지 않습니다.");
-    if (!validatePassword(profile.password)) return alert("비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.")
+    // 전체 폼을 검증하여 errors 상태 업데이트
+    const newErrors = validateForm();
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      alert("입력 필드를 확인해주세요.");
+      return;
+    }
 
     try {
       const imageUrl = await handleImageUpload(image, profile);
@@ -148,13 +150,51 @@ function MyProfile() {
     }
   };
 
+
   //  수정 내용 입력 핸들러
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setProfile((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
+    }));
+
+    // 현재 필드만 검증하여 errors 상태 업데이트
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: validateField(name, value),
     }));
   };
+
+  // 개별 필드 검증 함수
+  const validateField = (name, value) => {
+    switch (name) {
+      case "email":
+        return validateEmail(value) ? "" : "이메일 형식이 올바르지 않습니다.";
+      case "nickname":
+        return validateNickname(value) ? "" : "닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.";
+      case "github":
+        return validateGithub(value) ? "" : "GitHub URL 형식이 올바르지 않습니다.";
+      case "blog":
+        return validateBlog(value) ? "" : "블로그 URL 형식이 올바르지 않습니다.";
+      case "password":
+        return validatePassword(value) ? "" : "비밀번호는 대소문자, 숫자, 특수문자 포함하여 8자 이상";
+      default:
+        return "";
+    }
+  };
+
+  // 전체 폼 검증 함수
+  const validateForm = () => {
+    const newErrors = {};
+    Object.keys(profile).forEach((key) => {
+      const error = validateField(key, profile[key]);
+      if (error) newErrors[key] = error;
+    });
+    return newErrors;
+  };
+
+
 
 
   return (
@@ -169,18 +209,8 @@ function MyProfile() {
               alt="프로필 이미지"
               onClick={() => document.getElementById("file-upload").click()}
             />
-            {preview && (
-              <img className="delete-image" src="https://cdn-icons-png.flaticon.com/128/190/190406.png"
-                onClick={() => {
-                  setPreview(profile.my_profile_image_url); // 이전 이미지로 복구
-                  setImage(null); // 파일 선택 취소
-                }} />
-
-            )}
             <input type="file" id="file-upload"
-              onChange={
-                (e) => handleImageChange(e, setImage, setPreview)
-              }
+              onChange={(e) => handleImageChange(e, setImage, setPreview)}
               style={{ display: "none" }} />
           </div>
 
@@ -189,24 +219,32 @@ function MyProfile() {
             <div>
               <p>{'E-mail'}</p>
               <input type="email" name="email" value={profile.email} readOnly />
+              {errors.email && <span className="error-message">{errors.email}</span>}
             </div>
+
             <div>
               <p>{'Nickname'}</p>
               <input type="text" name="nickname" value={profile.nickname} onChange={handleChange} />
+              {errors.nickname && <span className="error-message">{errors.nickname}</span>}
             </div>
+
             <div>
               <p>{'Password'}</p>
               <input type="password" name="password" value={profile.password || ""} onChange={handleChange} />
+              {errors.password && <span className="error-message">{errors.password}</span>}
             </div>
+
             <div>
               <p>{'Github'}</p>
               <input type="url" name="github" value={profile.github || ""} onChange={handleChange} />
+              {errors.github && <span className="error-message">{errors.github}</span>}
             </div>
+
             <div>
               <p>{'Blog'}</p>
               <input type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
+              {errors.blog && <span className="error-message">{errors.blog}</span>}
             </div>
-
             {/* 🔹 관심 카테고리 선택 버튼 */}
             <div className="categories">
               <p>{'⭐ 관심 카테고리 (최대 3개 선택)'}</p>
@@ -214,16 +252,15 @@ function MyProfile() {
                 <StCategoryButton
                   key={category}
                   type="button"
-                  onClick={() => toggleInterest(category, selectedInterests, setSelectedInterests)}
+                  onClick={() => toggleInterest(category, setSelectedInterests, selectedInterests)}
                   selected={selectedInterests.includes(category)}
                 >
                   {category}
                 </StCategoryButton>
               ))}
             </div>
-
-            <StSubmitButton type="submit">수정완료</StSubmitButton>
           </div>
+          <StSubmitButton type="submit">수정완료</StSubmitButton>
         </form>
       </StMyProfileContainer>
     </StMyProfile >
@@ -241,10 +278,11 @@ const StMyProfile = styled.div`
 `;
 
 const StMyProfileContainer = styled.div`
-  width: 800px;
-  height: 800px;
+  width: 900px;
+  height: 900px;
   border: 3px solid #d1d1d1;
   border-radius: 20px;
+  padding: 10px;
   
   form {
     display: grid;
@@ -260,6 +298,7 @@ const StMyProfileContainer = styled.div`
     align-items: center;
     justify-content: center;
     position: relative;
+    margin-bottom: 150px;
     
   }
 
@@ -311,35 +350,31 @@ const StMyProfileContainer = styled.div`
     color: #21212e;
     background-color: #46d7ab;
   }
-  .delete-image {
-  position: absolute;
-  top: 325px;
-  right: 30px;
-  width: 30px; 
-  height: 30px;
-  cursor: pointer;
-  border-radius: 50%;
-  transition: transform 0.2s ease-in-out;
 
-  &:hover {
-    transform: scale(1.1);
-  }
-}
   
    /* ========== 오른쪽: 유저정보 영역 ========== */
   .user-info {
     grid-area: info;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     gap: 20px;
+    min-height: 600px;
+    margin-top: 50px;
   }
-
+  .user-info div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-height: 90px; /* 필드 + 에러 메시지를 포함하는 최소 높이 설정 */
+  margin-bottom: 10px; /* 입력 필드 간 일정한 간격 유지 */
+}
   .user-info input {
     font-size: 16px;
     height: 50px;
-    width: 300px;
+    width: 400px;
     border: none;
     border-bottom: 3px solid #21212e;
     outline: none;
@@ -353,12 +388,18 @@ const StMyProfileContainer = styled.div`
   .user-info p {
     height: 20px;
   }
-
+  .error-message{
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+    min-height: 18px;
+  }
   .categories {
-    margin-top: 30px;
     display: flex;
     flex-wrap: wrap;
-    width: 350px;
+    width: 450px;
+    margin-top: 30px;
     gap: 5px;
   }
 
@@ -366,6 +407,7 @@ const StMyProfileContainer = styled.div`
     font-size: large;
     font-weight: bold;
     margin-bottom: 10px;
+    width: 100%;
   }
 `;
 const StCategoryButton = styled.button`
@@ -383,7 +425,7 @@ const StCategoryButton = styled.button`
   }
 `;
 const StSubmitButton = styled.button`
-  width: 150px;
+    width: 150px;
     height: 50px;
     border: none;
     border-radius: 10px;
