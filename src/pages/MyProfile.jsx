@@ -21,7 +21,6 @@ function MyProfile() {
   });
   const [image, setImage] = useState(null);
   const [selectedInterests, setSelectedInterests] = useState([]);
-
   useEffect(() => {
     if (!isLogin) return;
     fetchUserProfile();
@@ -52,6 +51,7 @@ function MyProfile() {
         blog: userData.blog,
         my_profile_image_url: userData.my_profile_image_url,
       }));
+
     } catch (error) {
       console.error("사용자 정보 불러오기 실패:", error);
     }
@@ -130,6 +130,7 @@ function MyProfile() {
     // if (!validatePassword(profile.password)) return alert("비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.")
 
     try {
+
       await Promise.all([updateUserProfile(), updateUserInterests(), updateUserPassword()]);
       alert("프로필 업데이트 완료!");
     } catch (error) {
@@ -145,11 +146,6 @@ function MyProfile() {
     }));
   };
 
-  //  이미지 변경 및 업로드 핸들러
-  const handleImageSelection = (e) => {
-    handleImageChange(e, setImage);
-  };
-
   const handleImageUpdate = async () => {
     try {
       const imageUrl = await handleImageUpload(image, profile);
@@ -162,147 +158,243 @@ function MyProfile() {
   };
 
 
+
   return (
-    <StProfileContainer>
-      <h2>My Profile</h2>
-      {/* 왼쪽: 프로필 이미지 */}
-      <StImageContainer>
-        <StProfileImage src={profile.my_profile_image_url ? profile.my_profile_image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
-        <input type="file" onChange={handleImageSelection} />
-        <button onClick={handleImageUpdate}>이미지 수정</button>
-      </StImageContainer>
-
-      <StFormContainer onSubmit={handleSubmit}>
-        {/* 오른쪽: 입력 필드 및 버튼 */}
-        <StForm>
-          <label>E-mail</label>
-          <StInput type="email" name="email" value={profile.email} readOnly />
-
-          <label>닉네임</label>
-          <StInput type="text" name="nickname" value={profile.nickname} onChange={handleChange} />
-
-          <label>비밀번호</label>
-          <StInput type="password" name="password" value={profile.password || ""} onChange={handleChange} />
-
-          <label>GitHub</label>
-          <StInput type="url" name="github" value={profile.github || ""} onChange={handleChange} />
-
-          <label>Blog</label>
-          <StInput type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
-
-          <label>관심사</label>
-          {/* 🔹 관심 카테고리 선택 버튼 */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-            {categories.map((category) => (
-              <button
-                key={category}
-                type="button"
-                onClick={() =>
-                  toggleInterest(category, setSelectedInterests)}
-                style={{
-                  padding: '8px 12px',
-                  cursor: 'pointer',
-                  backgroundColor: selectedInterests.includes(category)
-                    ? '#007bff'
-                    : '#f0f0f0',
-                  color: selectedInterests.includes(category) ? 'white' : 'black',
-                  border: '1px solid #ccc',
-                  borderRadius: '5px',
-                }}
-              >
-                {category}
-              </button>
-            ))}
+    <StMyProfile>
+      <StMyProfileContainer>
+        <form onSubmit={handleSubmit} >
+          {/* 왼쪽: 프로필 이미지 */}
+          <div className="user-image">
+            <img className="logo-img" src="/src/assets/test-logo.png" alt="site_logo" />
+            <img className="preview-img" src={profile.my_profile_image_url ? profile.my_profile_image_url : "/src/assets/test-logo.png"} alt="프로필 이미지" />
+            <input type="file" id="file-upload" onChange={(e) => handleImageChange(e, setImage)} style={{ display: "none" }} />
+            <StLabel htmlFor="file-upload">{'🧷'}</StLabel>
+            <button onClick={handleImageUpdate}>프로필 이미지 변경</button>
           </div>
 
-          <StButton type="submit">수정완료</StButton>
-        </StForm>
-      </StFormContainer>
-    </StProfileContainer>
+          {/* 오른쪽: 입력 필드 및 버튼 */}
+          <div className="user-info">
+            <div>
+              <p>{'E-mail'}</p>
+              <input type="email" name="email" value={profile.email} readOnly />
+            </div>
+            <div>
+              <p>{'Nickname'}</p>
+              <input type="text" name="nickname" value={profile.nickname} onChange={handleChange} />
+            </div>
+            <div>
+              <p>{'Password'}</p>
+              <input type="password" name="password" value={profile.password || ""} onChange={handleChange} />
+            </div>
+            <div>
+              <p>{'Github'}</p>
+              <input type="url" name="github" value={profile.github || ""} onChange={handleChange} />
+            </div>
+            <div>
+              <p>{'Blog'}</p>
+              <input type="url" name="blog" value={profile.blog || ""} onChange={handleChange} />
+            </div>
+
+            {/* 🔹 관심 카테고리 선택 버튼 */}
+            <div className="categories">
+              <p>{'⭐ 관심 카테고리 (최대 3개 선택)'}</p>
+              {categories.map((category) => (
+                <StCategoryButton
+                  key={category}
+                  type="button"
+                  onClick={() => toggleInterest(category, selectedInterests, setSelectedInterests)}
+                  selected={selectedInterests.includes(category)}
+                >
+                  {category}
+                </StCategoryButton>
+              ))}
+            </div>
+
+            <StSubmitButton type="submit">수정완료</StSubmitButton>
+          </div>
+        </form>
+      </StMyProfileContainer>
+    </StMyProfile >
   );
 }
 
 export default MyProfile;
 
-const StProfileContainer = styled.div`
-  width: 650px;
-  margin: auto;
+const StMyProfile = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-  background: #fff;
-
-  & h2 {
-    margin-bottom: 30px;
-    font-size: 25px;
-    font-weight: bold;
-  }
+  justify-content: center;
+  height: 100vh;
 `;
 
-// 전체 폼을 가로 정렬
-const StFormContainer = styled.form`
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
-  gap: 2rem;
-  width: 100%;
-  max-width: 600px;
-
-  @media (max-width: 600px) {
-    flex-direction: column; 
+const StMyProfileContainer = styled.div`
+  width: 800px;
+  height: 800px;
+  border: 3px solid #d1d1d1;
+  border-radius: 20px;
+  
+  form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: 'image info';
+    height: 800px;
+  }
+    /* ========== 왼쪽: 프로필 이미지 영역 =========== */
+    .user-image {
+    grid-area: image;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .logo-img {
+    width: 130px;
+    border-radius: 20px;
+    margin-bottom: 50px;
+  }
+
+  .user-image > button {
+    width: 150px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    margin-top: 50px;
+    background-color: #46d7ab;
+    color: #21212e;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+      background-color: #46e4b5;
+    }
+  }
+
+  /* input file 커스터마이즈 */
+  .file-wrapper > input {
+    display: none;
+  }
+
+  .file-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 5px;
+    border: 1px solid #d1d1d1;
+    border-radius: 5px;
+    width: 300px;
+    height: 40px;
+  }
+
+  /* 미리보기 기능 */
+  .preview-img {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #d1d1d1;
+  }
+
+  .default-img {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    border: 2px solid #d1d1d1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: xx-large;
+    font-style: italic;
+    font-weight: bold;
+    color: #21212e;
+    background-color: #46d7ab;
+  }
+   /* ========== 오른쪽: 유저정보 영역 ========== */
+   .user-info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .user-info input {
+    font-size: 16px;
+    height: 50px;
+    width: 300px;
+    border: none;
+    border-bottom: 3px solid #21212e;
+    outline: none;
+    transition: border-bottom 0.4s ease-in-out;
+
+    &:focus {
+      border-bottom: 3px solid #46d7ab;
+    }
+  }
+
+  .user-info p {
+    height: 20px;
+  }
+
+  .categories {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    width: 350px;
+    gap: 5px;
+  }
+
+  .categories > p {
+    font-size: large;
+    font-weight: bold;
+    margin-bottom: 10px;
   }
 `;
-
-// 왼쪽 프로필 이미지
-const StImageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  gap: 1rem;
-`;
-
-const StProfileImage = styled.img`
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ddd;
-`;
-
-// 오른쪽 입력 필드 및 버튼
-const StForm = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  width: 100%;
-  gap: 1rem;
-`;
-
-const StInput = styled.input`
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1rem;
-`;
-
-const StButton = styled.button`
-  background: #201e1e;
-  color: white;
-  padding: 0.7rem;
-  border: none;
-  border-radius: 5px;
+const StCategoryButton = styled.button`
+  width: 80px;
+  padding: 8px 12px;
   cursor: pointer;
-  font-size: 1rem;
+  background-color: ${({ selected }) => (selected ? '#0d8b67' : 'transparent')};
+  color: ${({ selected }) => (selected ? 'white' : 'black')};
+  font-size: medium;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 
   &:hover {
-    background: #6b5f60;
+    background-color: ${({ selected }) => (selected ? '#13ad82' : '#c6eee2')};
   }
 `;
+const StSubmitButton = styled.button`
+  width: 150px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    background-color: #46d7ab;
+    color: #21212e;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+
+    &:hover {
+      background-color: #46e4b5;
+    }
+`;
+/* input file 커스터마이즈 */
+const StLabel = styled.label`
+  background-color: #21212e;
+  padding: 10px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+
+  &:hover {
+    background-color: #46d7ab;
+  }
+  `;

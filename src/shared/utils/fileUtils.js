@@ -30,7 +30,7 @@ export const handleImageUpload = async (image, profile) => {
   // 파일 저장 경로 (중복 방지를 위해 timestamp 추가)
   const filePath = `public/${Date.now()}_${image.name}`;
 
-  // storage에 이미지 업로드
+  // 1.storage에 이미지 업로드
   const { data, error } = await supabase
     .storage
     .from("profile-image")
@@ -42,15 +42,17 @@ export const handleImageUpload = async (image, profile) => {
     console.log("업로드성공", data);
   }
 
-  //storage에 업로드된 이미지 URL 가져오기
-  const { data: publicUrlData } = supabase
+  // 2.storage에 업로드된 이미지 URL 가져오기
+  const { data: publicUrlData, error: publicError } = supabase
     .storage
     .from("profile-image")
     .getPublicUrl(filePath);
-
+  if(publicError){
+    console.log("이미지가져오기 실패", publicError)
+  }
   const imageUrl = publicUrlData.publicUrl;
 
-  //table에 URL 저장
+  // 3.table에 URL 저장
   const { error: updateError } = await supabase
     .from("users")
     .update({ my_profile_image_url: imageUrl })
