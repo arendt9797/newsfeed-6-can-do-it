@@ -4,7 +4,7 @@ import categories from '../constants/categories';
 import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
-import { useEffect } from 'react';
+import { toggleInterest } from '../shared/utils/categoryUtils';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -35,28 +35,18 @@ const Signup = () => {
   };
 
   // 내 관심 카테고리 선택
-  const toggleInterest = (category) => {
-    setSelectedInterests((prev) => {
-      if (prev.includes(category)) {
-        return prev.filter((selected) => selected !== category);
-      } else if (prev.length < 3) {
-        return [...prev, category];
-      } else {
-        return prev;
-      }
-    });
-  };
-
+  const toggleInterestHandler = (category) => toggleInterest(category, setSelectedInterests, selectedInterests)
+  
   const handleSignup = async (e) => {
     e.preventDefault();
     // 프로필 사진 필수 업로드
     if (!myImage) {
-      console.error('프로필 사진을 올려주세요!');
+      alert('프로필 이미지를 선택해주세요!');
       return;
     }
     // 카테고리 필수 3개 선택
     if (selectedInterests.length < 3) {
-      console.error('3개를 선택해주세요!');
+      alert('카테고리 3개를 선택해주세요!');
       return;
     }
 
@@ -201,7 +191,7 @@ const Signup = () => {
                 <StCategoryButton
                   key={category}
                   type="button"
-                  onClick={() => toggleInterest(category)}
+                  onClick={() => toggleInterestHandler(category)}
                   selected={selectedInterests.includes(category)}
                 >
                   {category}

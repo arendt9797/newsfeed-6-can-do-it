@@ -7,8 +7,6 @@ import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthProvider';
 import { Link } from 'react-router-dom';
 
-const emtpyArr = Array(2).fill(0);
-
 const HomeList = () => {
   const [feeds, setFeeds] = useState([]);
   const { isLogin } = useContext(AuthContext);
@@ -20,7 +18,6 @@ const HomeList = () => {
           .from('feeds')
           .select('*, user: users(nickname, my_profile_image_url)');
         setFeeds(data);
-        // console.log(data);
       } catch (error) {
         console.log(error);
       }
@@ -31,9 +28,13 @@ const HomeList = () => {
   return (
     <StHomeWrap>
       <div>
-        {feeds.map((feed) => {
-          return <HomeFeedCard key={feed.id} feed={feed} />;
-        })}
+        {feeds
+          //new Date : 문자열을 날짜 객체로 변환
+          //supabase의 created_at은 날짜 문자열
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .map((feed) => {
+            return <HomeFeedCard key={feed.id} feed={feed} />;
+          })}
       </div>
       <div>
         <Link to={isLogin ? '/create-feed' : '/sign-in'}>
@@ -63,10 +64,10 @@ const StButton = styled.button`
   border: none;
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   margin-left: 50px;
-  position: fixed; /* 고정 위치 */
-  right: 80px; /* 오른쪽 20px 여백 */
-  top: 80px; /* 아래쪽 20px 여백 */
-  z-index: 10; /* 버튼이 다른 요소들 위에 보이도록 설정 */
+  position: fixed;
+  right: 80px;
+  top: 80px;
+  z-index: 10;
 
   &:hover {
     background-color: lightgrey;
