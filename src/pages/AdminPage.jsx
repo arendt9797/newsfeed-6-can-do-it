@@ -1,6 +1,7 @@
 // DeveloperPage.jsx
 import { useState, useEffect, useContext } from 'react';
 import { supabase } from '../supabase/client';
+
 import {
   StyledAboutUsContainer,
   StyledAboutUsTitle,
@@ -20,7 +21,7 @@ function DeveloperPage() {
 
   // 개발자가 아닌 계정은 / 으로 리다이렉트
   useEffect(() => {
-    if (!user?.role?.includes('developer')) {
+    if (user?.role !== 'developer') {
       naviagte('/');
     }
   }, [user]);
