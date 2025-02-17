@@ -275,6 +275,29 @@ const StUserFeedContainer = styled.div`
     box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.15);
   }
 
+  .default-img {
+    width: 300px;
+    height: 300px;
+    border-radius: 20px;
+    border: 2px solid #d1d1d1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: xx-large;
+    font-style: italic;
+    font-weight: bold;
+    color: #21212e;
+    background-color: #46d7ab;
+  }
+
+  .preview-img {
+    width: 300px;
+    height: 300px;
+    border-radius: 20px;
+    object-fit: cover;
+    border: 2px solid #d1d1d1;
+  }
+
   #upload-button, #save-button {
   background-color: #46D7AB;
   color: white;
