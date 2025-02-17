@@ -2,7 +2,7 @@ import St from 'styled-components';
 import { supabase } from '../supabase/client';
 import { useState, useContext } from 'react';
 import ToastImageEditor from '../components/ToastImageEditor';
-import Category from '../constants/categories';
+
 import { AuthContext } from '../context/AuthProvider';
 const PageContainer = St.div`
     display:flex;
@@ -27,7 +27,6 @@ const UserFeedContainer = St.div`
     
     .titleInput, .contextInput{
         display:flex;
-        border-radius:20px;
         width:350px;    
     }
 
@@ -38,7 +37,8 @@ const UserFeedContainer = St.div`
     .titleInput{
         width:360px;
         height:20px;
-        border-radius:12px;
+        border-radius:8px;
+        border:none;
     }
     
     .titleInput-container{
@@ -69,11 +69,23 @@ const UserFeedContainer = St.div`
         gap:15px;
         margin:10px 15px;
     }
+    
+    #upload-button,#save-button{
+      background-color:#46D7AB;
+      color:black;
+    }
+    #cancle-button{
+      background-color:red;
+      color:white;
+    }
+
 
     .button-container button{
         border-radius:20px;
+        border:none;
         padding:8px 16px;
         cursor:pointer;
+        
     }
 `;
 
@@ -88,7 +100,7 @@ const CategoryContainer = St.div`
 const CreateFeed = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const { user: authUser, isLogin } = useContext(AuthContext);
+  const { user: authUser } = useContext(AuthContext);
   const handleAddFeed = async () => {
     console.log('handleAddFeed 호출됨');
 
