@@ -29,7 +29,11 @@ const Login = () => {
   return (
     <StSignIn>
       <StSignInContainer>
-        <img src="/src/assets/test-logo.png" alt="site_logo" />
+        <img
+          src="/src/assets/test-logo.png"
+          alt="site_logo"
+          onClick={() => navigate('/')}
+        />
         <form onSubmit={handleLogin}>
           <input
             type="email"
@@ -90,6 +94,7 @@ const StSignInContainer = styled.div`
     width: 130px;
     border-radius: 20px;
     margin-bottom: 100px;
+    cursor: pointer;
   }
 
   input {
