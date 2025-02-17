@@ -12,6 +12,8 @@ import {
   validateNickname,
   validatePassword,
 } from '../shared/utils/validationUtils';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthProvider';
 
 const Signup = () => {
   const [email, setEmail] = useState('');
@@ -25,6 +27,7 @@ const Signup = () => {
   const [uploadedFileName, setUploadedFileName] =
     useState('사진을 선택해주세요');
   const [previewImage, setPreviewImage] = useState(null);
+  const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
@@ -61,7 +64,7 @@ const Signup = () => {
     if (!validateEmail(email)) return alert('이메일 형식이 올바르지 않습니다.');
     if (!validatePassword(password))
       return alert(
-        '비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.',
+        '비밀번호는 영어 소문자, 숫자, 특수문자 포함하여 8자 이상이어야 합니다.',
       );
     if (!validateNickname(myNickname))
       return alert('닉네임은 2~8자 한글, 영어, 숫자 조합만 가능합니다.');
@@ -112,6 +115,21 @@ const Signup = () => {
           })),
         );
       if (categoryError) throw categoryError;
+
+      // 회원가입 후 사용자 정보 다시 가져오기
+      const { data: updatedUser, error: fetchError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // AuthContext의 사용자 정보 업데이트
+      setUser(updatedUser);
+
+      // 홈 화면으로 이동
+      navigate('/');
     } catch (error) {
       alert(error.message);
       console.error('회원가입 오류:', error);
@@ -165,7 +183,7 @@ const Signup = () => {
             <div>
               <p>{'E-mail'}</p>
               <input
-                type="email"
+                type="text"
                 placeholder="  이메일을 입력해주세요"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
