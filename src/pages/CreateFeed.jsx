@@ -93,9 +93,9 @@ const StCreateFeed = () => {
 
   return (
     <StPageContainer>
-      <StToastImageEditorContainer>
+      <StImageInputContainer>
         <input type="file" accept="image/*" onChange={handleImgFile} />
-      </StToastImageEditorContainer>
+      </StImageInputContainer>
       <StUserFeedContainer>
         <div className="button-container">
           <button id="upload-button" onClick={handleAddFeed}>
@@ -146,10 +146,16 @@ const StPageContainer = St.div`
     width: 100%;
 `;
 
-const StToastImageEditorContainer = St.div`
+const StImageInputContainer = St.div`
     display: flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background-color:#EDECE7;
     flex: 1.3;
-    height: 100%;
+ 
+
+
 `;
 
 const StUserFeedContainer = St.div`
@@ -193,7 +199,7 @@ const StUserFeedContainer = St.div`
     
     .contextInput {
         width: 100%;
-        height: 100%;
+        height: 60%;
         border-radius: 12px;
         line-height: normal;
     }
@@ -224,12 +230,15 @@ const StUserFeedContainer = St.div`
 
 const StCategoryContainer = St.div`
   display: grid;
+  align-content:center;
+  justify-content:center;
   grid-template-columns: repeat(3, 80px);
   grid-auto-rows: 36px;
   gap: 5px;
   width: 25vw;
-  height: 20vh;
-  margin-top: 20px;
+  height: 25vh;
+  background-color:red;
+
 `;
 
 const StCategoryButton = St.button`
