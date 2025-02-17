@@ -102,7 +102,7 @@ const CategoryButton = St.button`
     cursor:pointer;
     border-radius:16px;
 
-    &hover{
+    &:hover{
       background-color:red;
     }
 `;
@@ -118,10 +118,10 @@ const CreateFeed = () => {
     if (feedCategory.includes(hobby)) {
       setFeedCategory((prev) => prev.filter((item) => item !== hobby));
     } else {
-      if (feedCategory.length < 3) {
+      if (feedCategory.length < 1) {
         setFeedCategory((prev) => [...prev, hobby]);
       } else {
-        alert('최대 3개까지 고를 수 있습니다');
+        alert('1개의 카테고리만 선택해주세요');
       }
     }
   };
@@ -137,7 +137,9 @@ const CreateFeed = () => {
     try {
       const { data, error } = await supabase
         .from('feeds')
-        .insert([{ title, content, user_id: publicUser.id }]);
+        .insert([
+          { title, content, user_id: publicUser.id, category: feedCategory[0] },
+        ]);
       //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id
       if (error) {
         console.log('error=>', error);
