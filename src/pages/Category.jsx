@@ -1,6 +1,5 @@
 import { useContext } from 'react';
 import styled from 'styled-components';
-import categories from '../constants/categories';
 import { AuthContext } from '../context/AuthProvider';
 import * as c from '../constants/categoryName';
 import logo from '../assets/test-logo.png';
@@ -20,11 +19,11 @@ function Category() {
   const testImg = user?.my_profile_image_url || logo;
 
   //user의 관심사 및 기타(ETC)를 제외한 카테고리
-  const others = categories.filter(
-    (i) => !myInterests.includes(i) && i !== c.ETC,
-  );
+  const others = c.categoryArr
+    .slice(0, 9)
+    .filter((i) => !myInterests.includes(i) && i !== c.ETC);
 
-  //그리드 큰 위치에 사용자 관심사를 우선적으로 배치하기 위해 사용
+  //그리드 큰 위치에 user 관심사를 우선적으로 배치하기 위해 사용
   const myPick = [1, 2, 5];
   //각 버튼에 부여할 CSS 클래스명
   const classNames = [
@@ -41,22 +40,29 @@ function Category() {
 
   return (
     <StCategoriesSection>
-      {categories.slice(0, 9).map((defaultCategory, i) => {
-        let loginCategory = [];
+      {c.categoryArr.slice(0, 9).map((defaultCategory, i) => {
+        let loginCategoryName = '';
+        let loginCategoryImg = defaultCategory.img;
         if (myPick.includes(i)) {
-          const candidate = myInterests.shift() || defaultCategory;
+          const candidate = myInterests.shift() || defaultCategory.name;
           // 기타(ETC)가 myInterests에 있으면 others 배열의 마지막 요소로 대체
-          loginCategory =
-            candidate === c.ETC && others.length !== 0
-              ? others.pop()
-              : candidate;
+
+          if (candidate === c.ETC && others.length !== 0) {
+            const replaced = others.pop();
+            loginCategoryName = replaced.name;
+            loginCategoryImg = replaced.img;
+          } else {
+            const candidateObj =
+              c.categoryArr.find((c) => c.name === candidate) ||
+              defaultCategory;
+            loginCategoryName = candidateObj.name;
+            loginCategoryImg = candidateObj.img;
+          }
         } else {
-          loginCategory = others.shift() || defaultCategory;
+          const other = others.shift() || defaultCategory;
+          loginCategoryName = other.name;
+          loginCategoryImg = other.img;
         }
-        // 카테고리에 맞는 이미지 찾기
-        const categoryImage = categories.includes(loginCategory)
-          ? c.categoryImgArr[categories.indexOf(loginCategory)]
-          : logo;
 
         return (
           <StButton
@@ -65,9 +71,9 @@ function Category() {
             }}
             key={i}
             className={classNames[i]}
-            $img={categoryImage}
+            $img={loginCategoryImg}
           >
-            <p>{isLogin ? loginCategory : defaultCategory}</p>
+            <p>{isLogin ? loginCategoryName : defaultCategory.name}</p>
           </StButton>
         );
       })}
