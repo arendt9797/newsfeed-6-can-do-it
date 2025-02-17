@@ -4,12 +4,16 @@ import styled from 'styled-components';
 import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import HomeFeedCard from './home/HomeFeedCard';
+import * as c from '../constants/categoryName';
 
 const CategoryFeed = () => {
   const [feeds, setFeeds] = useState([]);
   const { isLogin } = useContext(AuthContext);
   const [query] = useSearchParams();
   const categoryId = query.get('id');
+  const categoryImgTest = [...c.categoryArr].find((i) => i.name === categoryId);
+
+  // console.log(categoryImgTest.img);
 
   // console.log('카테고리:', categoryId);
   useEffect(() => {
@@ -40,9 +44,13 @@ const CategoryFeed = () => {
   return (
     <StHomeWrap>
       <div>
-        <div className="category-name">{categoryId} 카테고리 입니다!!</div>
+        <div className="feed-box">
+          <img src={categoryImgTest.img} alt="카테고리 이미지" />
+          <div className="category-name">{categoryId} 카테고리</div>
+        </div>
+
         {feeds.length === 0 ? (
-          <div className="empty-feed"> 아직 아무런 피드도 없어요!!</div>
+          <div className="empty-feed"> 아직 아무런 피드도 없습니다.</div>
         ) : (
           feeds
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -70,10 +78,15 @@ const StHomeWrap = styled.div`
   overflow-y: auto;
   padding: 100px;
 
+  .feed-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   .category-name {
     text-align: center;
     margin-bottom: 10px;
-    color: #666;
     font-size: 20px;
   }
 
@@ -81,6 +94,13 @@ const StHomeWrap = styled.div`
     text-align: center;
     padding: 25px;
     color: #999;
+  }
+
+  img {
+    width: 150px;
+    height: 100px;
+    margin-right: 20px;
+    border-radius: 100%;
   }
 `;
 

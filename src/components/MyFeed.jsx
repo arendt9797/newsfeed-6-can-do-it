@@ -36,7 +36,7 @@ const MyFeed = () => {
       <div>
         <div className="my-feed-title"> My feed List</div>
         {feeds.length === 0 ? (
-          <div className="empty-feed"> 아직 아무런 피드도 없어요!!</div>
+          <div className="empty-feed"> 아직 아무런 피드도 없습니다. </div>
         ) : (
           feeds
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -67,7 +67,6 @@ const StHomeWrap = styled.div`
   .my-feed-title {
     text-align: center;
     margin-bottom: 10px;
-    color: #666;
     font-size: 20px;
   }
 
