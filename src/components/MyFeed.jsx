@@ -26,6 +26,7 @@ const MyFeed = () => {
   return (
     <StHomeWrap>
       <div>
+        <div style={{ textAlign: 'center'}}>임시로 기능만 구현했습니다.</div>
         {feeds
           .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
           .map((feed) => {
