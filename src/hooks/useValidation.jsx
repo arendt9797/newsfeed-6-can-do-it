@@ -12,6 +12,8 @@ export const useValidation = (initialState) => {
 
   //  전체 폼 검증
   const validateForm = (form) => {
+    if(!form) return {};
+
     const newErrors = {};
     Object.keys(form).forEach((key) => {
       const error = validateField(key, form[key]);
