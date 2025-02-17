@@ -11,31 +11,37 @@ const MyFeed = () => {
 
   useEffect(() => {
     const getFeeds = async () => {
+      if (!user || !user.id) return;
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('feeds')
-          .select('*, user: users(nickname, my_profile_image_url)');
+          .select('*, user: users(nickname, my_profile_image_url)')
+          .eq('user_id', user.id);
+        // console.log(data);
         setFeeds(data);
+        if (error) {
+          console.error('오류:', error);
+          return;
+        }
+        setFeeds(data || []);
       } catch (error) {
         console.log(error);
       }
     };
     getFeeds();
-  }, []);
+  }, [user]);
 
   return (
     <StHomeWrap>
       <div>
-        <div style={{ textAlign: 'center'}}>임시로 기능만 구현했습니다.</div>
-        {feeds
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-          .map((feed) => {
-            return (
-              user.id === feed.user_id && (
-                <HomeFeedCard key={feed.id} feed={feed} />
-              )
-            );
-          })}
+        <div className="my-feed-title"> My feed List</div>
+        {feeds.length === 0 ? (
+          <div className="empty-feed"> 아직 아무런 피드도 없어요!!</div>
+        ) : (
+          feeds
+            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .map((feed) => <HomeFeedCard key={feed.id} feed={feed} />)
+        )}
       </div>
 
       <div>
@@ -57,6 +63,19 @@ const StHomeWrap = styled.div`
   height: auto;
   overflow-y: auto;
   padding: 100px;
+
+  .my-feed-title {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 20px;
+  }
+
+  .empty-feed {
+    text-align: center;
+    padding: 25px;
+    color: #999;
+  }
 `;
 
 const StButton = styled.button`

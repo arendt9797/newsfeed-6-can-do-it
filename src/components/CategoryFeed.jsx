@@ -11,8 +11,7 @@ const CategoryFeed = () => {
   const [query] = useSearchParams();
   const categoryId = query.get('id');
 
-  // console.log('카테고리 ID:', categoryId);
-
+  // console.log('카테고리:', categoryId);
   useEffect(() => {
     const getFeed = async () => {
       if (!categoryId) return;
@@ -26,6 +25,8 @@ const CategoryFeed = () => {
           console.error('오류:', error);
           return;
         }
+        // console.log(data);
+        //true값만 내보내기
         const filteredFeeds = data.map((i) => i.feed).filter(Boolean);
         setFeeds(filteredFeeds);
       } catch (error) {
@@ -39,12 +40,14 @@ const CategoryFeed = () => {
   return (
     <StHomeWrap>
       <div>
-        <div style={{ textAlign: 'center' }}>{categoryId} 카테고리 입니다!!</div>
-        {feeds
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-          .map((feed) => (
-            <HomeFeedCard key={feed.id} feed={feed} />
-          ))}
+        <div className="category-name">{categoryId} 카테고리 입니다!!</div>
+        {feeds.length === 0 ? (
+          <div className="empty-feed"> 아직 아무런 피드도 없어요!!</div>
+        ) : (
+          feeds
+            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .map((feed) => <HomeFeedCard key={feed.id} feed={feed} />)
+        )}
       </div>
 
       <div>
@@ -66,6 +69,19 @@ const StHomeWrap = styled.div`
   height: auto;
   overflow-y: auto;
   padding: 100px;
+
+  .category-name {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #666;
+    font-size: 20px;
+  }
+
+  .empty-feed {
+    text-align: center;
+    padding: 25px;
+    color: #999;
+  }
 `;
 
 const StButton = styled.button`
@@ -82,5 +98,10 @@ const StButton = styled.button`
 
   &:hover {
     background-color: lightgrey;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
