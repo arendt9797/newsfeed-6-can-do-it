@@ -1,16 +1,24 @@
 import St from 'styled-components';
 import { supabase } from '../supabase/client';
 import { useState, useContext } from 'react';
-import ToastImageEditor from '../components/ToastImageEditor';
+// import ToastImageEditor from '../components/ToastImageEditor';
 import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
 
 const StCreateFeed = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [imgUrl, setImgUrl] = useState('');
+  const [imgFile, setImgFile] = useState(null);
   const [feedCategory, setFeedCategory] = useState([]);
   const { user: authUser } = useContext(AuthContext);
+
+  const handleImgFile = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImgFile(file);
+      console.log(file);
+    }
+  };
 
   const handleFeedCategory = (hobby) => {
     if (feedCategory.includes(hobby)) {
@@ -23,6 +31,7 @@ const StCreateFeed = () => {
       }
     }
   };
+
   const handleAddFeed = async () => {
     console.log('handleAddFeed 호출됨');
 
@@ -35,12 +44,9 @@ const StCreateFeed = () => {
     try {
       const { data: feedData, error: feedError } = await supabase
         .from('feeds')
-        .upsert([
-          { title, content, user_id: publicUser.id }, //2025년 2월 17일 기준 현재 1개의 카테고리만 데이터에 등록
-        ])
+        .upsert([{ title, content, user_id: publicUser.id }])
         .select();
       console.log(feedData);
-      //user_id라는 수파베이스 데이터 칼럼에 현재 user.id를 넣기 =>user_id: users.id
       if (feedError) {
         console.log('error=>', feedError);
       } else {
@@ -50,17 +56,35 @@ const StCreateFeed = () => {
 
       const { data: categoryData, error: categoryError } = await supabase
         .from('feed_interests')
-        .insert([
-          {
-            id: feedData[0].id,
-            interest_name: feedCategory[0],
-          },
-        ]);
-
+        .insert([{ id: feedData[0].id, interest_name: feedCategory[0] }]);
       if (categoryError) {
         console.log(categoryError);
       } else {
         console.log(categoryData);
+      }
+
+      if (imgFile) {
+        const filePath = `public/${Date.now()}_${imgFile.name}`;
+
+        const { error: imageError } = await supabase.storage
+          .from('feed-image')
+          .upload(filePath, imgFile);
+        if (imageError) throw imageError;
+
+        const { data: urlData, error: urlError } = await supabase.storage
+          .from('feed-image')
+          .getPublicUrl(filePath);
+        if (urlError) throw urlError;
+        const publicURL = urlData.publicUrl;
+        console.log('업로드된 이미지 URL:', publicURL);
+
+        const { error: upsertError } = await supabase
+          .from('feeds')
+          .upsert(
+            { id: feedData[0].id, feed_image_url: publicURL },
+            { onConflict: 'id' },
+          );
+        if (upsertError) throw upsertError;
       }
     } catch (error) {
       console.error('error=>', error);
@@ -69,9 +93,9 @@ const StCreateFeed = () => {
 
   return (
     <StPageContainer>
-      <StToastImageEditorContainer>
-        <ToastImageEditor />
-      </StToastImageEditorContainer>
+      <StImageInputContainer>
+        <input type="file" accept="image/*" onChange={handleImgFile} />
+      </StImageInputContainer>
       <StUserFeedContainer>
         <div className="button-container">
           <button id="upload-button" onClick={handleAddFeed}>
@@ -80,6 +104,7 @@ const StCreateFeed = () => {
           <button id="save-button">임시저장</button>
           <button id="cancle-button">돌아가기</button>
         </div>
+
         <div className="titleInput-container">
           <label>Title</label>
           <input
@@ -98,17 +123,15 @@ const StCreateFeed = () => {
           />
         </div>
         <StCategoryContainer>
-          {categories.map((category, index) => {
-            return (
-              <StCategoryButton
-                key={index}
-                onClick={() => handleFeedCategory(category)} //현재 string으로 선택됨
-                selected={feedCategory.includes(category)}
-              >
-                {category}
-              </StCategoryButton>
-            );
-          })}
+          {categories.map((category, index) => (
+            <StCategoryButton
+              key={index}
+              onClick={() => handleFeedCategory(category)}
+              selected={feedCategory.includes(category)}
+            >
+              {category}
+            </StCategoryButton>
+          ))}
         </StCategoryContainer>
       </StUserFeedContainer>
     </StPageContainer>
@@ -118,103 +141,112 @@ const StCreateFeed = () => {
 export default StCreateFeed;
 
 const StPageContainer = St.div`
-    display:flex;
-    height:100% ;
-    width:100%;
+    display: flex;
+    height: 100%;
+    width: 100%;
 `;
 
-const StToastImageEditorContainer = St.div`
-    display:flex;
-    flex:1.3;
-    height:100%; 
-    
+const StImageInputContainer = St.div`
+    display: flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background-color:#EDECE7;
+    flex: 1.3;
+ 
+
+
 `;
 
 const StUserFeedContainer = St.div`
-    display:flex;
-    flex:0.8;
-    width:100%;
-    flex-direction:column;
-    background-color:#EDECE7;
-    align-items:center;
+    display: flex;
+    flex: 0.8;
+    width: 100%;
+    flex-direction: column;
+    background-color: #EDECE7;
+    align-items: center;
     
-    .titleInput, .contextInput{
-        display:flex;
-        width:350px;    
-    }
-
-    label{
-        font-size:22px;
+    .titleInput, .contextInput {
+        display: flex;
+        width: 350px;
     }
     
-    .titleInput{
-        width:360px;
-        height:20px;
-        border-radius:8px;
-        border:none;
+    label {
+        font-size: 22px;
     }
     
-    .titleInput-container{
-        display:flex;
-        flex-direction:column;
-        gap:10px;
-        margin-bottom:10px;
-    }
-
-    .contextInput-container{
-        display:flex;
-        flex-direction:column;
-        width:380px;
-        height:380px;
-        gap:5px;
-    }
-
-    .contextInput{
-        width:100%;
-        height:100%;
-        border-radius:12px;
-        
-        line-height:normal;
-    }
-
-    .button-container{
-        display:flex;
-        gap:15px;
-        margin:10px 15px;
+    .titleInput {
+        width: 360px;
+        height: 20px;
+        border-radius: 8px;
+        border: none;
     }
     
-    #upload-button,#save-button{
-      background-color:#46D7AB;
-      color:black;
+    .titleInput-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
     }
-    #cancle-button{
-      background-color:red;
-      color:white;
+    
+    .contextInput-container {
+        display: flex;
+        flex-direction: column;
+        width: 380px;
+        height: 380px;
+        gap: 5px;
     }
-    .button-container button{
-        border-radius:20px;
-        border:none;
-        padding:8px 16px;
-        cursor:pointer;
+    
+    .contextInput {
+        width: 100%;
+        height: 60%;
+        border-radius: 12px;
+        line-height: normal;
+    }
+    
+    .button-container {
+        display: flex;
+        gap: 15px;
+        margin: 10px 15px;
+    }
+    
+    #upload-button, #save-button {
+        background-color: #46D7AB;
+        color: black;
+    }
+    
+    #cancle-button {
+        background-color: red;
+        color: white;
+    }
+    
+    .button-container button {
+        border-radius: 20px;
+        border: none;
+        padding: 8px 16px;
+        cursor: pointer;
     }
 `;
 
 const StCategoryContainer = St.div`
-  display:grid;
-  grid-template-columns:repeat(3,80px);
-  grid-auto-rows:36px;
-  gap:5px;
-  width:25vw;
-  height:20vh;
-  margin-top:20px;
-  
-`;
-const StCategoryButton = St.button`
-    background-color:${(props) => (props.selected ? 'red' : 'white')};
-    cursor:pointer;
-    border-radius:16px;
+  display: grid;
+  align-content:center;
+  justify-content:center;
+  grid-template-columns: repeat(3, 80px);
+  grid-auto-rows: 36px;
+  gap: 5px;
+  width: 25vw;
+  height: 25vh;
+  background-color:red;
 
-    &:hover{
-      background-color:red;
+`;
+
+const StCategoryButton = St.button`
+    background-color: ${(props) => (props.selected ? 'red' : 'white')};
+    cursor: pointer;
+    border-radius: 16px;
+
+    &:hover {
+      background-color: red;
     }
 `;
