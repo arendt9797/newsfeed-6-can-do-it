@@ -170,7 +170,7 @@ const Signup = () => {
               />
             </div>
             <div>
-              <p>{'Github'}</p>
+              <p>{'Github (선택)'}</p>
               <input
                 type="text"
                 placeholder="  깃헙이 있다면 알려주세요"
@@ -179,7 +179,7 @@ const Signup = () => {
               />
             </div>
             <div>
-              <p>{'Blog'}</p>
+              <p>{'Blog (선택)'}</p>
               <input
                 type="text"
                 placeholder="  블로그가 있다면 알려주세요"
