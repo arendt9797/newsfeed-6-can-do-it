@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { validateEmail, validatePassword } from '../shared/utils/validationUtils';
 import { NO_MATHCING_USER } from '../constants/errorMesseges';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -14,9 +15,9 @@ const Login = () => {
     e.preventDefault();
 
     // 검증단계
-    if (!validateEmail(email)) return alert('이메일 형식이 올바르지 않습니다.');
+    if (!validateEmail(email)) return toast.info('이메일 형식이 올바르지 않습니다.');
     if (!validatePassword(password))
-      return alert(
+      return toast.info(
         '비밀번호는 대소문자,숫자, 특수문자포함하여 8자 이상이어야 합니다.',
       );
 
@@ -28,12 +29,12 @@ const Login = () => {
 
       if (error) throw error;
 
-      alert('로그인 성공!');
+      toast.success('로그인 성공!');
       navigate('/');
     } catch (error) {
       error.message === NO_MATHCING_USER
-      ? alert('유저 정보가 없습니다!')
-      : alert(error.message)
+      ? toast.error('유저 정보가 없습니다!')
+      : toast.error(error.message)
       console.error('로그인 오류:', error);
     }
   };

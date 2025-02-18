@@ -8,6 +8,7 @@ import { toggleInterest } from '../shared/utils/categoryUtils';
 import { useContext } from 'react';
 import { AuthContext } from '../context/AuthProvider';
 import { useValidation } from '../hooks/useValidation';
+import { toast } from 'react-toastify';
 
 const Signup = () => {
   const { errors, validateField, validateForm, setErrors } = useValidation();
@@ -67,7 +68,7 @@ const Signup = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) {
-      alert('입력 필드를 확인해주세요.');
+      toast.info('입력 필드를 확인해주세요.');
       return;
     }
 
@@ -129,7 +130,7 @@ const Signup = () => {
       // 홈 화면으로 이동
       navigate('/');
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
       console.error('회원가입 오류:', error);
     }
   };
@@ -154,7 +155,6 @@ const Signup = () => {
               <input
                 type="file"
                 id="file-upload"
-                // onChange={(e) => setMyImage(e.target.files[0])}
                 onChange={handleFileChange}
               />
               <StLabel htmlFor="file-upload">{'🧷'}</StLabel>

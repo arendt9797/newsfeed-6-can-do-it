@@ -1,5 +1,6 @@
 import { supabase } from "../../supabase/client";
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "react-toastify";
 
 //파일 선택 호출 함수
 export const handleImageChange = (e, setImage, setPreview) => {

@@ -1,3 +1,5 @@
+import { toast } from "react-toastify";
+
 // 내 관심 카테고리 선택
 export const toggleInterest = (
   category,
@@ -5,7 +7,7 @@ export const toggleInterest = (
   selectedInterests,
 ) => {
   if (selectedInterests.length >= 3 && !selectedInterests.includes(category)) {
-    alert('카테고리 3개를 선택해주세요.');
+    toast.info('카테고리 3개를 선택해주세요.');
     return; 
   }
   setSelectedInterests((prev) => {

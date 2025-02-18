@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import HomeFeedCard from './home/HomeFeedCard';
 import * as c from '../constants/categoryName';
+import { toast } from 'react-toastify';
 
 const CategoryFeed = () => {
   const [feeds, setFeeds] = useState([]);
@@ -36,7 +37,7 @@ const CategoryFeed = () => {
         setFeeds(filteredFeeds);
       } catch (error) {
         console.error('예상치 못한 오류:', error);
-        alert('예상치 못한 오류가 발생했습니다.');
+        toast.error('예상치 못한 오류가 발생했습니다.');
       }
     };
     getFeed();

@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
 
 const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const { user, isLogin } = useContext(AuthContext);
@@ -14,7 +16,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const [isLike, setIsLike] = useState(false);
   const [likeNumber, setLikeNumber] = useState(0);
   const [isEditing, setIsEditing] = useState(null); // 수정 중인 댓글 ID 저장
-  const [editComment, setEditComment] = useState(""); // 수정할 댓글 내용
+  const [editComment, setEditComment] = useState(''); // 수정할 댓글 내용
   const navigate = useNavigate();
 
   // 모든 댓글 가져오기
@@ -22,10 +24,12 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     const { data } = await supabase
       .from('comments')
       .select('*, comment_user: users(nickname, my_profile_image_url)')
-      .eq('feed_id', feed.id);
+      .eq('feed_id', feed.id)
+      .order('created_at', { ascending: true }); // 데이터의 순서 지정하기
+    // ascending: true 는 오름차순
     setComments(data);
   };
-
+///
   useEffect(() => {
     getComments();
   }, []);
@@ -33,7 +37,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   // 댓글 추가 핸들러
   const handleAddComment = async (feedId) => {
     if (!isLogin) {
-      alert('댓글을 입력하려면 로그인을 해주세요!');
+      toast.info('댓글을 입력하려면 로그인을 해주세요!');
       navigate('/sign-in');
       return;
     }
@@ -49,11 +53,25 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   // 댓글 삭제 핸들러
   const handleDeleteComment = async (id) => {
-    const isConfirm = window.confirm('정말 삭제하시겠습니까?');
-    if (isConfirm) {
-      await supabase.from('comments').delete().eq('id', id);
-
+    const result = await Swal.fire({
+      title: "정말 삭제하시겠습니까?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "삭제",
+      cancelButtonText: "취소",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+  
+    if (!result.isConfirmed) return;
+  
+    try {
+      await supabase.from("comments").delete().eq("id", id);
+      Swal.fire("삭제 완료", "댓글이 삭제되었습니다.", "success");
       getComments();
+    } catch (error) {
+      Swal.fire("삭제 실패", "댓글 삭제 중 오류가 발생했습니다.", "error");
+      console.error("댓글 삭제 오류:", error);
     }
   };
 
@@ -67,79 +85,88 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const handleEditComment = async (commentId) => {
     try {
       const { error, data } = await supabase
-        .from("comments")
+        .from('comments')
         .update({ comment: editComment })
-        .eq("id", commentId);
+        .eq('id', commentId);
 
       if (error) {
         console.error("댓글 수정 오류:", error);
-        alert("댓글 수정에 실패했습니다.");
+        toast.error("댓글 수정에 실패했습니다.");
         return;
       }
 
-      console.log("수정된 데이터 =>", data);
+      console.log('수정된 데이터 =>', data);
       //  최신 댓글 목록 가져와서 반영
       await getComments();
       //  수정 완료 후 상태 초기화
       setIsEditing(null);
-      setEditComment("");
+      setEditComment('');
 
-      console.log("수정", isEditing);
-      console.log("수정 댓글", editComment);
+      console.log('수정', isEditing);
+      console.log('수정 댓글', editComment);
     } catch (error) {
-      console.error("댓글 수정 처리 중 오류:", error);
+      console.error('댓글 수정 처리 중 오류:', error);
     }
   };
 
-  // 이미지 삭제 핸들러
   const handleDeleteFeed = async (id) => {
-    // [1]feeds 테이블에서 피드 삭제 _ 작동확인!OK
-    const isConfirm = window.confirm('정말 삭제하시겠습니까?');
-
-    if (isConfirm) {
-      const { feedError } = await supabase.from('feeds').delete().eq('id', id);
-
+    const result = await Swal.fire({
+      title: "정말 삭제하시겠습니까?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "삭제",
+      cancelButtonText: "취소",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+  
+    if (!result.isConfirmed) return;
+  
+    try {
+      // [1] 피드 삭제
+      const { feedError } = await supabase.from("feeds").delete().eq("id", id);
+  
       if (feedError) {
-        console.error('피드 삭제 오류:', feedError);
+        console.error("피드 삭제 오류:", feedError);
         throw feedError;
       }
-
-      // [2]스토리지에서 feed-image 버켓에 있는 이미지 파일 삭제
-
-      // [try_0] 이건 http://~~ 이렇게 쭉 나옴
-      // const filePath = `public/${feed.feed_image_url}`;
-
-      // [try_1] slice 썼더니 첫번째 public에서 걸러니 "public/feed-image/public/1739772606245_test1.jpeg" 결과값 도출
-      // const filePath = feed.feed_image_url.slice(
-      //   feed.feed_image_url.indexOf('public/'),
-      // );
-
-      // [try_2] 첫번째 public인덱스 찾고, 두번째 public 인덱스 찾아서 slice로 주소 추출
-      const firstPublicIndex = feed.feed_image_url.indexOf('public/');
-      const secondPublicIndex = feed.feed_image_url.indexOf(
-        'public/',
-        firstPublicIndex + 1,
-      );
-
-      const filePath = feed.feed_image_url.slice(secondPublicIndex);
-
-      // const testfilename = `public/1739770165223_test02.webp`;
-      const { data, FileDeleteError } = await supabase.storage
-        .from('feed-image')
-        .remove([filePath]);
-
-      if (FileDeleteError) {
-        console.error('파일 삭제 오류:', FileDeleteError);
-        throw FileDeleteError;
+  
+      // [2] 이미지 삭제 (feed_image_url이 존재하는지 체크)
+      if (!feed.feed_image_url) {
+        Swal.fire("이미지 없음", "삭제할 이미지가 없습니다.", "info");
+      } else {
+        const firstPublicIndex = feed.feed_image_url.indexOf("public/");
+        const secondPublicIndex = feed.feed_image_url.indexOf(
+          "public/",
+          firstPublicIndex + 1
+        );
+  
+        const filePath = feed.feed_image_url.slice(secondPublicIndex);
+  
+        const { data, FileDeleteError } = await supabase.storage
+          .from("feed-image")
+          .remove([filePath]);
+  
+        if (FileDeleteError) {
+          console.error("파일 삭제 오류:", FileDeleteError);
+          throw FileDeleteError;
+        }
+  
+        // 이미지 삭제 실패 처리
+        if (!filePath) {
+          Swal.fire("이미지 삭제 실패", "이미지 삭제에 실패했습니다.", "error");
+          return;
+        }
       }
-
-      if (!filePath) {
-        alert('이미지 삭제 실패');
-      }
-
-
-      // [3]보이는 화면 상태에도 반영 _ 작동확인!OK
+  
+      // [3] 화면에서 피드 상태 업데이트
       setFeeds((prev) => prev.filter((item) => item.id !== feed.id));
+  
+      // 피드 삭제 성공 알림
+      Swal.fire("삭제 완료", "피드가 삭제되었습니다.", "success");
+    } catch (error) {
+      Swal.fire("삭제 실패", "삭제 중 오류가 발생했습니다.", "error");
+      console.error("피드 삭제 오류:", error);
     }
   };
 
@@ -183,7 +210,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   const handleLikeToggle = async (feedId) => {
     if (!user?.id) {
-      alert('로그인이 필요합니다!');
+      toast.info('로그인이 필요합니다!');
       return;
     }
 
@@ -227,10 +254,14 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     }
   };
 
+  const handleEditFeed = () => {
+    navigate("/create-feed", { state: { feed } }); // 게시글 정보 전달
+  };
   return (
     <>
       {/* 가져온 피드 보여주는 부분 */}
       <StFeedProfileImgContainer>
+      <button onClick={handleEditFeed}>✏️ 수정</button>
         <StFeedProfileImg>
           <img src={feed.user?.my_profile_image_url} />
         </StFeedProfileImg>
@@ -259,9 +290,9 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
             관심사 :{' '}
             {interests && interests.length > 0
               ? interests
-                .filter((interest) => interest.id === feed.id)
-                .map((interest) => `#${interest.interest_name}`)
-                .join(', ')
+                  .filter((interest) => interest.id === feed.id)
+                  .map((interest) => `#${interest.interest_name}`)
+                  .join(', ')
               : '없음'}
           </div>
           {/* 댓글 개수 */}
@@ -317,9 +348,11 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
                           }
                         }}
                       >
-                        {isEditing === comment.id ? "✔️" : "✏️"}
+                        {isEditing === comment.id ? '✔️' : '✏️'}
                       </StCommentEditBtn>
-                      <StCommentDeleteBtn onClick={() => handleDeleteComment(comment.id)}>
+                      <StCommentDeleteBtn
+                        onClick={() => handleDeleteComment(comment.id)}
+                      >
                         &times;
                       </StCommentDeleteBtn>
                     </div>
