@@ -31,27 +31,35 @@ https://newsfeed-6-can-do-it.vercel.app/
   </tr>
   <tr>
     <td align="center">Sign-up(회원가입 페이지)</td>
-    <td align="center">Categories(카테고리)</td>
+    <td align="center">My-page(마이페이지)</td>
   </tr>
   <tr>
     <td align="center"><img src="./public/SignUp.png"/></td>
-    <td align="center"><img src="./public/Category.png"/></td>
+    <td align="center"><img src="./public/MyPage.png"/></td>
   </tr>
   <tr>
+    <td align="center">Categories(카테고리)</td>
     <td align="center">Create-feed(게시글 작성 페이지)</td>
-    <td align="center">About-us (팀 소개 및 관리자페이지)</td>
   </tr>
   <tr>
+    <td align="center"><img src="./public/Category.png"/></td>
     <td align="center"><img src="./public/CreateFeed.png"/></td>
-    <td align="center"><img src="./public/AboutUs.png"/></td>
   </tr>
   <tr>
+    <td align="center">About-us (팀 소개 및 관리자페이지)</td>
     <td align="center">My-feed(나의 총 게시글)</td>
-    <td align="center">My-like (좋아요♥️ 게시글)</td>
   </tr>
   <tr>
+    <td align="center"><img src="./public/AboutUs.png"/></td>
     <td align="center"><img src="./public/MyFeed.png"/></td>
+  </tr>
+  <tr>
+    <td align="center">My-like (좋아요♥️ 게시글)</td>
+    <td align="center"></td>
+  </tr>
+  <tr>
     <td align="center"><img src="./public/MyLike.png"/></td>
+    <td align="center"></td>
   </tr>
 </table>
 
@@ -74,19 +82,26 @@ https://newsfeed-6-can-do-it.vercel.app/
 
 <br/>
 
-## 3️⃣ 카테고리 페이지
+## 3️⃣ 마이페이지
+
+- 회원가입 시, 입력했던 정보 수정 기능
+- 프로필 이미지 클릭 시, 이미지 변경 가능
+
+<br/>
+
+## 4️⃣ 카테고리 페이지
 
 - 회원가입 시, 설정한 3개의 나의 관심사 분야에 맞는 최신 피드 추천
 
 <br/>
 
-## 4️⃣ 피드 생성 기능
+## 5️⃣ 피드 생성 기능
 
 - 피드 생성 시, 올린 피드에 관한 카테고리 설정
 
 <br/>
 
-## 5️⃣ 댓글 & 좋아요 및 My Feed, My Like 모아보기
+## 6️⃣ 댓글 & 좋아요 및 My Feed, My Like 모아보기
 
 - 실시간 소통을 위한 피드에 댓글 입력/ 수정 기능
 - 북마크(좋아요) 기능을 통한 모아보기 \_ My Like 페이지
@@ -94,7 +109,7 @@ https://newsfeed-6-can-do-it.vercel.app/
 
 <br/>
 
-## 6️⃣ 관리자 페이지
+## 7️⃣ 관리자 페이지
 
 - 개발팀만 접근 가능한 관리자 페이지 생성
 - 개발자 목록 조회 및 개발자 프로필 제공
