@@ -16,7 +16,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const [isLike, setIsLike] = useState(false);
   const [likeNumber, setLikeNumber] = useState(0);
   const [isEditing, setIsEditing] = useState(null); // 수정 중인 댓글 ID 저장
-  const [editComment, setEditComment] = useState(""); // 수정할 댓글 내용
+  const [editComment, setEditComment] = useState(''); // 수정할 댓글 내용
   const navigate = useNavigate();
 
   // 모든 댓글 가져오기
@@ -24,10 +24,12 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     const { data } = await supabase
       .from('comments')
       .select('*, comment_user: users(nickname, my_profile_image_url)')
-      .eq('feed_id', feed.id);
+      .eq('feed_id', feed.id)
+      .order('created_at', { ascending: true }); // 데이터의 순서 지정하기
+    // ascending: true 는 오름차순
     setComments(data);
   };
-
+///
   useEffect(() => {
     getComments();
   }, []);
@@ -83,9 +85,9 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const handleEditComment = async (commentId) => {
     try {
       const { error, data } = await supabase
-        .from("comments")
+        .from('comments')
         .update({ comment: editComment })
-        .eq("id", commentId);
+        .eq('id', commentId);
 
       if (error) {
         console.error("댓글 수정 오류:", error);
@@ -93,17 +95,17 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
         return;
       }
 
-      console.log("수정된 데이터 =>", data);
+      console.log('수정된 데이터 =>', data);
       //  최신 댓글 목록 가져와서 반영
       await getComments();
       //  수정 완료 후 상태 초기화
       setIsEditing(null);
-      setEditComment("");
+      setEditComment('');
 
-      console.log("수정", isEditing);
-      console.log("수정 댓글", editComment);
+      console.log('수정', isEditing);
+      console.log('수정 댓글', editComment);
     } catch (error) {
-      console.error("댓글 수정 처리 중 오류:", error);
+      console.error('댓글 수정 처리 중 오류:', error);
     }
   };
 
@@ -252,10 +254,14 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     }
   };
 
+  const handleEditFeed = () => {
+    navigate("/create-feed", { state: { feed } }); // 게시글 정보 전달
+  };
   return (
     <>
       {/* 가져온 피드 보여주는 부분 */}
       <StFeedProfileImgContainer>
+      <button onClick={handleEditFeed}>✏️ 수정</button>
         <StFeedProfileImg>
           <img src={feed.user?.my_profile_image_url} />
         </StFeedProfileImg>
@@ -284,9 +290,9 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
             관심사 :{' '}
             {interests && interests.length > 0
               ? interests
-                .filter((interest) => interest.id === feed.id)
-                .map((interest) => `#${interest.interest_name}`)
-                .join(', ')
+                  .filter((interest) => interest.id === feed.id)
+                  .map((interest) => `#${interest.interest_name}`)
+                  .join(', ')
               : '없음'}
           </div>
           {/* 댓글 개수 */}
@@ -342,9 +348,11 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
                           }
                         }}
                       >
-                        {isEditing === comment.id ? "✔️" : "✏️"}
+                        {isEditing === comment.id ? '✔️' : '✏️'}
                       </StCommentEditBtn>
-                      <StCommentDeleteBtn onClick={() => handleDeleteComment(comment.id)}>
+                      <StCommentDeleteBtn
+                        onClick={() => handleDeleteComment(comment.id)}
+                      >
                         &times;
                       </StCommentDeleteBtn>
                     </div>

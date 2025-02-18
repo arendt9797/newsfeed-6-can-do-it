@@ -155,7 +155,6 @@ const Signup = () => {
               <input
                 type="file"
                 id="file-upload"
-                // onChange={(e) => setMyImage(e.target.files[0])}
                 onChange={handleFileChange}
               />
               <StLabel htmlFor="file-upload">{'🧷'}</StLabel>
