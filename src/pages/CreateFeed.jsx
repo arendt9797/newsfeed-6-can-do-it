@@ -1,11 +1,10 @@
-
 import { supabase } from '../supabase/client';
 import { useEffect, useState, useContext } from 'react';
-// import ToastImageEditor from '../components/ToastImageEditor';
 import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { v4 as uuidv4 } from 'uuid';
 
 const StCreateFeed = () => {
   const [title, setTitle] = useState('');
@@ -106,7 +105,9 @@ const StCreateFeed = () => {
       }
 
       if (imgFile) {
-        const filePath = `public/${Date.now()}_${imgFile.name}`;
+        const imageExt = imgFile.name.split('.').pop(); // 확장자 추출
+        const uniqueImageName = `${uuidv4()}.${imageExt}`; // UUID + 원래 확장자
+        const filePath = `public${uniqueImageName}`;
 
         const { error: imageError } = await supabase.storage
           .from('feed-image')
@@ -200,7 +201,7 @@ const StPageContainer = styled.div`
   border: 3px solid lightgray;
   border-radius: 25px;
   padding: 30px;
-  background-color: #F4F7FC; /* 💡 부드러운 파스텔톤 배경 적용 */
+  background-color: #f4f7fc; /* 💡 부드러운 파스텔톤 배경 적용 */
   position: absolute;
   top: 20%;
   left: 30%;
@@ -226,7 +227,7 @@ const StUserFeedContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #FFFFFF; /* 💡 흰색 배경으로 변경 */
+  background-color: #ffffff; /* 💡 흰색 배경으로 변경 */
   width: 100%;
   border-radius: 15px;
   padding: 20px;
@@ -298,38 +299,39 @@ const StUserFeedContainer = styled.div`
     border: 2px solid #d1d1d1;
   }
 
-  #upload-button, #save-button {
-  background-color: #46D7AB;
-  color: white;
-  border: 2px solid #3CB0A0;
-
-  &:hover {
-    background-color: #3CB0A0;
+  #upload-button,
+  #save-button {
+    background-color: #46d7ab;
     color: white;
-    transform: scale(1.05);
-    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    border: 2px solid #3cb0a0;
+
+    &:hover {
+      background-color: #3cb0a0;
+      color: white;
+      transform: scale(1.05);
+      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
   }
 
-  &:active {
-    transform: scale(0.98);
-  }
-}
+  #cancle-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: 2px solid #d93636;
 
-#cancle-button {
-  background-color: #FF4D4D;
-  color: white;
-  border: 2px solid #D93636;
+    &:hover {
+      background-color: #d93636;
+      transform: scale(1.05);
+      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    }
 
-  &:hover {
-    background-color: #D93636;
-    transform: scale(1.05);
-    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    &:active {
+      transform: scale(0.98);
+    }
   }
-
-  &:active {
-    transform: scale(0.98);
-  }
-}
 `;
 
 const StCategoryContainer = styled.div`
@@ -343,17 +345,19 @@ const StCategoryContainer = styled.div`
 `;
 
 const StCategoryButton = styled.button`
-  background-color: ${(props) => (props.selected ? '#005BBB' : '#5A67D8')}; 
+  background-color: ${(props) => (props.selected ? '#005BBB' : '#5A67D8')};
   color: white;
-  font-size: 18px; 
+  font-size: 18px;
   font-weight: bold;
   cursor: pointer;
   border-radius: 20px;
-  border: 3px solid ${(props) => (props.selected ? '#003F7F' : '#4C51BF')}; 
-  padding: 14px 20px; 
+  border: 3px solid ${(props) => (props.selected ? '#003F7F' : '#4C51BF')};
+  padding: 14px 20px;
   transition: all 0.3s ease-in-out;
   box-shadow: ${(props) =>
-    props.selected ? '4px 4px 10px rgba(0, 0, 0, 0.25)' : '3px 3px 8px rgba(0, 0, 0, 0.15)'};
+    props.selected
+      ? '4px 4px 10px rgba(0, 0, 0, 0.25)'
+      : '3px 3px 8px rgba(0, 0, 0, 0.15)'};
 
   &:hover {
     transform: scale(1.1);
