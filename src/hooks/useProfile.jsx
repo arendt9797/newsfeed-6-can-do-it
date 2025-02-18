@@ -98,7 +98,7 @@ export const useProfile = () => {
       throw error;
     }
   };
-  // 5. 사용자 프로필 정보를 업데이트하는 함수
+  // 5. 사용자 프로필 정보를 업데이트하는 함수//
   const updateUserProfile = async (imageUrl) => {
     try {
       await supabase
