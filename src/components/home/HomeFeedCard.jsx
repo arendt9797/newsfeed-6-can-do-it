@@ -7,7 +7,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
 
 const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const { user: authUser, isLogin } = useContext(AuthContext);
@@ -54,24 +54,24 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   // 댓글 삭제 핸들러
   const handleDeleteComment = async (id) => {
     const result = await Swal.fire({
-      title: "정말 삭제하시겠습니까?",
-      icon: "warning",
+      title: '정말 삭제하시겠습니까?',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "삭제",
-      cancelButtonText: "취소",
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
     });
 
     if (!result.isConfirmed) return;
 
     try {
-      await supabase.from("comments").delete().eq("id", id);
-      Swal.fire("삭제 완료", "댓글이 삭제되었습니다.", "success");
+      await supabase.from('comments').delete().eq('id', id);
+      Swal.fire('삭제 완료', '댓글이 삭제되었습니다.', 'success');
       getComments();
     } catch (error) {
-      Swal.fire("삭제 실패", "댓글 삭제 중 오류가 발생했습니다.", "error");
-      console.error("댓글 삭제 오류:", error);
+      Swal.fire('삭제 실패', '댓글 삭제 중 오류가 발생했습니다.', 'error');
+      console.error('댓글 삭제 오류:', error);
     }
   };
 
@@ -90,8 +90,8 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
         .eq('id', commentId);
 
       if (error) {
-        console.error("댓글 수정 오류:", error);
-        toast.error("댓글 수정에 실패했습니다.");
+        console.error('댓글 수정 오류:', error);
+        toast.error('댓글 수정에 실패했습니다.');
         return;
       }
 
@@ -111,50 +111,50 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   const handleDeleteFeed = async (id) => {
     const result = await Swal.fire({
-      title: "정말 삭제하시겠습니까?",
-      icon: "warning",
+      title: '정말 삭제하시겠습니까?',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "삭제",
-      cancelButtonText: "취소",
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonText: '삭제',
+      cancelButtonText: '취소',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
     });
 
     if (!result.isConfirmed) return;
 
     try {
       // [1] 피드 삭제
-      const { feedError } = await supabase.from("feeds").delete().eq("id", id);
+      const { feedError } = await supabase.from('feeds').delete().eq('id', id);
 
       if (feedError) {
-        console.error("피드 삭제 오류:", feedError);
+        console.error('피드 삭제 오류:', feedError);
         throw feedError;
       }
 
       // [2] 이미지 삭제 (feed_image_url이 존재하는지 체크)
       if (!feed.feed_image_url) {
-        Swal.fire("이미지 없음", "삭제할 이미지가 없습니다.", "info");
+        Swal.fire('이미지 없음', '삭제할 이미지가 없습니다.', 'info');
       } else {
-        const firstPublicIndex = feed.feed_image_url.indexOf("public/");
+        const firstPublicIndex = feed.feed_image_url.indexOf('public/');
         const secondPublicIndex = feed.feed_image_url.indexOf(
-          "public/",
-          firstPublicIndex + 1
+          'public/',
+          firstPublicIndex + 1,
         );
 
         const filePath = feed.feed_image_url.slice(secondPublicIndex);
 
         const { data, FileDeleteError } = await supabase.storage
-          .from("feed-image")
+          .from('feed-image')
           .remove([filePath]);
 
         if (FileDeleteError) {
-          console.error("파일 삭제 오류:", FileDeleteError);
+          console.error('파일 삭제 오류:', FileDeleteError);
           throw FileDeleteError;
         }
 
         // 이미지 삭제 실패 처리
         if (!filePath) {
-          Swal.fire("이미지 삭제 실패", "이미지 삭제에 실패했습니다.", "error");
+          Swal.fire('이미지 삭제 실패', '이미지 삭제에 실패했습니다.', 'error');
           return;
         }
       }
@@ -163,10 +163,10 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
       setFeeds((prev) => prev.filter((item) => item.id !== feed.id));
 
       // 피드 삭제 성공 알림
-      Swal.fire("삭제 완료", "피드가 삭제되었습니다.", "success");
+      Swal.fire('삭제 완료', '피드가 삭제되었습니다.', 'success');
     } catch (error) {
-      Swal.fire("삭제 실패", "삭제 중 오류가 발생했습니다.", "error");
-      console.error("피드 삭제 오류:", error);
+      Swal.fire('삭제 실패', '삭제 중 오류가 발생했습니다.', 'error');
+      console.error('피드 삭제 오류:', error);
     }
   };
 
@@ -202,7 +202,6 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     }
 
     setIsLike(data?.is_like || false); // 데이터 없으면 false로 설정
-
   };
 
   useEffect(() => {
@@ -256,19 +255,23 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   };
 
   const handleEditFeed = () => {
-    navigate("/create-feed", { state: { feed } }); // 게시글 정보 전달
+    navigate('/create-feed', { state: { feed } }); // 게시글 정보 전달
   };
   return (
     <>
       {/* 가져온 피드 보여주는 부분 */}
       <StFeedProfileImgContainer>
-        <div>{authUser?.id === feed.user_id && (
-          <button onClick={handleEditFeed}>✏️ 수정</button>
-        )}</div>
         <StFeedProfileImg>
           <img src={feed.user?.my_profile_image_url} />
         </StFeedProfileImg>
         <span>{feed.user?.nickname}</span>
+        <div>
+          {authUser?.id === feed.user_id && (
+            <StFeedUpdateBtn onClick={handleEditFeed}>
+              <img src="/updateicon.png" width={15} />
+            </StFeedUpdateBtn>
+          )}
+        </div>
         {authUser?.id === feed.user_id && (
           <StFeedDeleteBtn
             onClick={() => handleDeleteFeed(feed.id, feed.feed_image_url)}
@@ -293,9 +296,9 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
             관심사 :{' '}
             {interests && interests.length > 0
               ? interests
-                .filter((interest) => interest.id === feed.id)
-                .map((interest) => `#${interest.interest_name}`)
-                .join(', ')
+                  .filter((interest) => interest.id === feed.id)
+                  .map((interest) => `#${interest.interest_name}`)
+                  .join(', ')
               : '없음'}
           </div>
           {/* 댓글 개수 */}
@@ -617,5 +620,23 @@ const StCommentEditBtn = styled.button`
   &:hover {
     color: #007bff;
     scale: 1.2;
+  }
+`;
+
+const StFeedUpdateBtn = styled.button`
+  justify-content: flex-end;
+  border: none;
+  font-size: 1.5rem;
+  background-color: transparent;
+  background-color: #e2b051;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: white;
+  background-image: url('');
+
+  &:hover {
+    cursor: pointer;
+    scale: 1.1;
   }
 `;
