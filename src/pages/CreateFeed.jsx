@@ -6,6 +6,7 @@ import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { toast } from 'react-toastify';
 
 const StCreateFeed = () => {
   const [title, setTitle] = useState('');
@@ -32,7 +33,7 @@ const StCreateFeed = () => {
   const handleSaveTemp = () => {
     const temp = { title, content };
     localStorage.setItem('temp', JSON.stringify(temp));
-    alert('내용을 저장했습니다!');
+    toast.success('내용을 저장했습니다!');
   };
   useEffect(() => {
     const temp = localStorage.getItem('temp');
@@ -62,19 +63,19 @@ const StCreateFeed = () => {
       if (feedCategory.length < 1) {
         setFeedCategory((prev) => [...prev, hobby]);
       } else {
-        alert('1개의 카테고리만 선택해주세요');
+        toast.info('1개의 카테고리만 선택해주세요');
       }
     }
   };
 
   const handleAddFeed = async () => {
     if (!title.trim() || !content.trim()) {
-      alert('Title 또는 Context에 내용이 없습니다.');
+      toast.info('Title 또는 Context에 내용이 없습니다.');
       return;
     }
 
     if (feedCategory.length === 0) {
-      alert('카테고리 1개는 선택해주세요.');
+      toast.info('카테고리 1개는 선택해주세요.');
       return;
     }
     const { data: publicUser } = await supabase
@@ -92,7 +93,7 @@ const StCreateFeed = () => {
       if (feedError) {
         console.log('error=>', feedError);
       } else {
-        alert('데이터 입력 성공');
+        toast.success('데이터 입력 성공');
         console.log(feedData);
       }
 

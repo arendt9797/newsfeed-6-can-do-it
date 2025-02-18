@@ -13,6 +13,7 @@ import {
 import styled from 'styled-components';
 import { AuthContext } from '../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function DeveloperPage() {
   const [users, setUsers] = useState([]);
@@ -54,7 +55,7 @@ function DeveloperPage() {
       setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
     } catch (error) {
       console.log('계정 삭제 오류 : ', error);
-      alert('계정 삭제에 실패했습니다.');
+      toast.error('계정 삭제에 실패했습니다.');
     }
   };
   return (

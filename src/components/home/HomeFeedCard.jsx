@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const { user, isLogin } = useContext(AuthContext);
@@ -33,7 +34,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   // 댓글 추가 핸들러
   const handleAddComment = async (feedId) => {
     if (!isLogin) {
-      alert('댓글을 입력하려면 로그인을 해주세요!');
+      toast.info('댓글을 입력하려면 로그인을 해주세요!');
       navigate('/sign-in');
       return;
     }
@@ -73,7 +74,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
       if (error) {
         console.error("댓글 수정 오류:", error);
-        alert("댓글 수정에 실패했습니다.");
+        toast.error("댓글 수정에 실패했습니다.");
         return;
       }
 
@@ -134,7 +135,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
       }
 
       if (!filePath) {
-        alert('이미지 삭제 실패');
+        toast.error('이미지 삭제 실패');
       }
 
 
@@ -183,7 +184,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   const handleLikeToggle = async (feedId) => {
     if (!user?.id) {
-      alert('로그인이 필요합니다!');
+      toast.info('로그인이 필요합니다!');
       return;
     }
 
