@@ -7,10 +7,13 @@ import { NO_MATHCING_USER } from '../constants/errorMesseges';
 import { toast } from 'react-toastify';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
   const navigate = useNavigate();
 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // 로그인 함수
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -33,8 +36,8 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       error.message === NO_MATHCING_USER
-      ? toast.error('유저 정보가 없습니다!')
-      : toast.error(error.message)
+        ? toast.error('유저 정보가 없습니다!')
+        : toast.error(error.message);
       console.error('로그인 오류:', error);
     }
   };

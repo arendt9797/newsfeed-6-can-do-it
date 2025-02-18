@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
 
 const StCreateFeed = () => {
+
   const location = useLocation();
   const existingFeed = location.state?.feed || null;
   const { user: authUser } = useContext(AuthContext);
@@ -63,10 +64,11 @@ const StCreateFeed = () => {
       if (existingFeed.created_at) {
         fetchFeedByCreatedAt(existingFeed.created_at); //  created_at 기준으로 최신 데이터 가져오기
       }
-      
+
     }
   }, [existingFeed]);
 
+  // 이미지 변경 함수
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -80,13 +82,14 @@ const StCreateFeed = () => {
     };
   };
 
+  // 임시 저장 함수 (현재 로컬스토리지 사용중, supabase로 업데이트 예정)
   const handleSaveTemp = () => {
     const temp = { title, content };
     localStorage.setItem('temp', JSON.stringify(temp));
     toast.success('내용을 저장했습니다!');
   };
 
-  
+
   useEffect(() => {
     const temp = localStorage.getItem('temp');
     if (temp) {
@@ -97,11 +100,12 @@ const StCreateFeed = () => {
     }
   }, []);
 
+  // 뒤로가기 네비게이션
   const gotoCategory = () => {
     navigate('/category');
   };
 
-
+  // 카테고리 선택 함수
   const handleFeedCategory = (hobby) => {
     if (feedCategory.includes(hobby)) {
       setFeedCategory((prev) => prev.filter((item) => item !== hobby));
@@ -114,41 +118,42 @@ const StCreateFeed = () => {
     }
   };
 
+  // 제출 함수 (수정과 새게시글 포스팅)
   const handleSaveFeed = async () => {
     if (!title.trim() || !content.trim()) {
       toast.error("제목과 내용을 입력해주세요.");
       return;
     }
-  
+
     if (feedCategory.length === 0) {
       toast.error("카테고리를 선택해주세요.");
       return;
     }
-  
+
     try {
       let publicURL = existingFeed?.feed_image_url || null; // 기존 이미지 URL 유지
-  
+
       //  이미지 업로드 및 URL 가져오기
       if (imgFile) {
         const imageExt = imgFile.name.split(".").pop();
         const uniqueImageName = `${uuidv4()}.${imageExt}`;
         const filePath = `public/${uniqueImageName}`;
-  
+
         const { error: imageError } = await supabase.storage
           .from("feed-image")
           .upload(filePath, imgFile);
-  
+
         if (imageError) throw imageError;
-  
+
         const { data: urlData, error: urlError } = await supabase.storage
           .from("feed-image")
           .getPublicUrl(filePath);
-  
+
         if (urlError) throw urlError;
         publicURL = urlData.publicUrl;
         console.log("업로드된 이미지 URL:", publicURL);
       }
-  
+
       if (existingFeed) {
         //  기존 게시글 수정 (feed_image_url 포함)
         const { error: updateError } = await supabase
@@ -159,9 +164,9 @@ const StCreateFeed = () => {
             feed_image_url: publicURL, // 이미지 URL 업데이트
           })
           .eq("id", existingFeed.id);
-  
+
         if (updateError) throw updateError;
-  
+
         //  `feed_interests` 테이블의 카테고리 수정 (삭제 후 새로 삽입)
         await supabase.from("feed_interests").delete().eq("id", existingFeed.id);
         await supabase.from("feed_interests").insert(
@@ -170,7 +175,7 @@ const StCreateFeed = () => {
             interest_name: category,
           }))
         );
-  
+
         toast.success("게시글이 수정되었습니다!");
         navigate("/");
       } else {
@@ -179,9 +184,9 @@ const StCreateFeed = () => {
           .from("feeds")
           .insert([{ title, content, user_id: authUser.id, feed_image_url: publicURL }])
           .select();
-  
+
         if (newFeedError) throw newFeedError;
-  
+
         if (newFeed.length > 0) {
           await supabase.from("feed_interests").insert(
             feedCategory.map((category) => ({
@@ -190,7 +195,7 @@ const StCreateFeed = () => {
             }))
           );
         }
-  
+
         toast.success("게시글이 작성되었습니다!");
         navigate("/");
       }
@@ -199,7 +204,7 @@ const StCreateFeed = () => {
       toast.error("게시글 저장 중 오류가 발생했습니다.");
     }
   };
-  
+
   return (
     <StPageContainer>
       <StUserFeedContainer>
@@ -424,7 +429,7 @@ const StCategoryButton = styled.button`
     transform: scale(1.1);
     background: #419488;
     /* background-color: ${(props) =>
-      props.selected ? '#000000' : '#000000'}; */
+    props.selected ? '#000000' : '#000000'}; */
     box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.3);
   }
 

@@ -8,16 +8,14 @@ import * as c from '../constants/categoryName';
 import { toast } from 'react-toastify';
 
 const CategoryFeed = () => {
-  const [feeds, setFeeds] = useState([]);
   const { isLogin } = useContext(AuthContext);
   const [query] = useSearchParams();
   const categoryId = query.get('id');
   const categoryImgTest = [...c.categoryArr].find((i) => i.name === categoryId);
+
   const [interests, setInterests] = useState([]);
+  const [feeds, setFeeds] = useState([]);
 
-  // console.log(categoryImgTest.img);
-
-  // console.log('카테고리:', categoryId);
   useEffect(() => {
     const getFeed = async () => {
       if (!categoryId) return;

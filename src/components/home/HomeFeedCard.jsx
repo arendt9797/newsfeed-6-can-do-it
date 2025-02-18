@@ -11,13 +11,15 @@ import Swal from 'sweetalert2';
 
 const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const { user: authUser, isLogin } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
   const [isLike, setIsLike] = useState(false);
   const [likeNumber, setLikeNumber] = useState(0);
   const [isEditing, setIsEditing] = useState(null); // 수정 중인 댓글 ID 저장
   const [editComment, setEditComment] = useState(''); // 수정할 댓글 내용
-  const navigate = useNavigate();
+
 
   // 모든 댓글 가져오기
   const getComments = async () => {
@@ -109,6 +111,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     }
   };
 
+  // 게시글 삭제 핸들러
   const handleDeleteFeed = async (id) => {
     const result = await Swal.fire({
       title: '정말 삭제하시겠습니까?',
@@ -143,7 +146,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
         const filePath = feed.feed_image_url.slice(secondPublicIndex);
 
-        const { data, FileDeleteError } = await supabase.storage
+        const { FileDeleteError } = await supabase.storage
           .from('feed-image')
           .remove([filePath]);
 
@@ -208,6 +211,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     fetchLikeStatus();
   }, [feed.id, authUser?.id]);
 
+  // 좋아요 핸들러
   const handleLikeToggle = async (feedId) => {
     if (!authUser?.id) {
       toast.info('로그인이 필요합니다!');
@@ -247,17 +251,19 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
         return;
       }
 
-      setIsLike(newIsLike); // 상태 업데이트
+      setIsLike(newIsLike);
       fetchLikeStatus();
     } catch (error) {
       console.error('좋아요 토글 오류:', error);
     }
   };
 
+  // 게시글 수정 버튼 핸들러
   const handleEditFeed = () => {
     navigate('/create-feed', { state: { feed } }); // 게시글 정보 전달
   };
   return (
+
     <>
       {/* 가져온 피드 보여주는 부분 */}
       <StFeedProfileImgContainer>
@@ -296,9 +302,9 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
             관심사 :{' '}
             {interests && interests.length > 0
               ? interests
-                  .filter((interest) => interest.id === feed.id)
-                  .map((interest) => `#${interest.interest_name}`)
-                  .join(', ')
+                .filter((interest) => interest.id === feed.id)
+                .map((interest) => `#${interest.interest_name}`)
+                .join(', ')
               : '없음'}
           </div>
           {/* 댓글 개수 */}

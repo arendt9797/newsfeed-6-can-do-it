@@ -1,6 +1,5 @@
 import { supabase } from "../../supabase/client";
 import { v4 as uuidv4 } from "uuid";
-import { toast } from "react-toastify";
 
 //파일 선택 호출 함수
 export const handleImageChange = (e, setImage, setPreview) => {
@@ -8,15 +7,16 @@ export const handleImageChange = (e, setImage, setPreview) => {
   const file = e.target.files[0];
 
   if (file) {
+
     // 파일 확장자 검사
-    const validExtensions = ['image/jpeg', 'image/png']; // 허용되는 이미지 형식
+    const validExtensions = ['image/jpeg', 'image/png']; 
     if (!validExtensions.includes(file.type)) {
       alert('이미지 파일은 jpg, jpeg, png만 가능합니다.');
       return;
     }
 
     // 파일 용량 검사 (5MB 이하)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024; 
     if (file.size > maxSize) {
       alert('이미지 파일 용량은 5MB 이하로 업로드 해주세요.');
       return;
@@ -39,24 +39,23 @@ export const handleImageUpload = async (image, profile) => {
   const filePath = `profile-image/${newFileName}`; // 프로필 이미지 저장 경로
 
   // 1.storage에 이미지 업로드
-  const { data, error } = await supabase
+  const { error } = await supabase
     .storage
     .from("profile-image")
     .upload(filePath, image);
 
   if (error) {
     console.error("업로드실패", error.message);
-  } else {
-    console.log("업로드성공", data);
-  }
+  } 
 
   // 2.storage에 업로드된 이미지 URL 가져오기
   const { data: publicUrlData, error: publicError } = supabase
     .storage
     .from("profile-image")
     .getPublicUrl(filePath);
+
   if (publicError) {
-    console.log("이미지가져오기 실패", publicError);
+    console.error("이미지가져오기 실패", publicError);
   }
 
   const imageUrl = publicUrlData.publicUrl;
@@ -69,8 +68,7 @@ export const handleImageUpload = async (image, profile) => {
 
   if (updateError) {
     console.error("URL 업데이트 실패", updateError.message);
-    throw new Error(updateError.message);  // URL 업데이트 에러 처리
   }
 
-  return imageUrl;  // imageUrl을 반환
+  return imageUrl; 
 };

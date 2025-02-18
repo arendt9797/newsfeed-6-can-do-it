@@ -4,8 +4,10 @@ import { supabase } from '../supabase/client';
 const AuthContext = createContext(null);
 
 function AuthProvider({ children }) {
+
   // 현재 로그인 중인지 확인하는 상태 'isLogin'
   const [isLogin, setIsLogin] = useState(false);
+
   // 현재 로그인한 유저의 auth스키마 정보를 저장하는 상태 'user'
   const [user, setUser] = useState(null);
 

@@ -6,11 +6,15 @@ import { supabase } from '../supabase/client';
 import HomeFeedCard from './home/HomeFeedCard';
 
 const MyLike = () => {
-  const [likedFeeds, setLikedFeeds] = useState([]);
+
   const { user, isLogin } = useContext(AuthContext);
+
+  const [likedFeeds, setLikedFeeds] = useState([]);
   const [interests, setInterests] = useState([]);
 
   useEffect(() => {
+
+    // 좋아요한 피드정보 함수
     const fetchLikedFeeds = async () => {
       if (!user?.id) return;
 
