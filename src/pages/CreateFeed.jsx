@@ -1,20 +1,69 @@
-
 import { supabase } from '../supabase/client';
 import { useEffect, useState, useContext } from 'react';
-// import ToastImageEditor from '../components/ToastImageEditor';
 import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { v4 as uuidv4 } from 'uuid';
 
 const StCreateFeed = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [imgFile, setImgFile] = useState(null);
-  const [feedCategory, setFeedCategory] = useState([]);
-  const [previewImage, setPreviewImage] = useState(null);
+  const location = useLocation();
+  const existingFeed = location.state?.feed || null;
   const { user: authUser } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // 상태 관리
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [feedCategory, setFeedCategory] = useState([]);
+  const [imgFile, setImgFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
+  //  `created_at`을 이용하여 최신 데이터 가져오는 함수
+  const fetchFeedByCreatedAt = async (createdAt) => {
+    try {
+      // `feeds` 테이블에서 제목과 내용 가져오기
+      const { data: feedData, error: feedError } = await supabase
+        .from('feeds')
+        .select('*')
+        .eq('created_at', createdAt)
+        .maybeSingle();
+
+      if (feedError) throw feedError;
+
+      if (feedData) {
+        setTitle(feedData.title || '');
+        setContent(feedData.content || '');
+        setPreviewImage(feedData.feed_image_url || null);
+
+        //  `feed_interests` 테이블에서 해당 피드의 카테고리 가져오기
+        const { data: categoryData, error: categoryError } = await supabase
+          .from('feed_interests')
+          .select('interest_name')
+          .eq('id', feedData.id); // `id`는 `feeds` 테이블과 `feed_interests` 테이블에서 동일
+
+        if (categoryError) throw categoryError;
+
+        // 카테고리 배열 변환
+        if (categoryData.length > 0) {
+          setFeedCategory(categoryData.map((item) => item.interest_name));
+        } else {
+          setFeedCategory([]);
+        }
+      }
+    } catch (error) {
+      console.error('게시글 불러오기 오류:', error);
+    }
+  };
+
+  // 기존 게시글 데이터 불러오기
+  useEffect(() => {
+    if (existingFeed) {
+      if (existingFeed.created_at) {
+        fetchFeedByCreatedAt(existingFeed.created_at); //  created_at 기준으로 최신 데이터 가져오기
+      }
+    }
+  }, [existingFeed]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -106,7 +155,9 @@ const StCreateFeed = () => {
       }
 
       if (imgFile) {
-        const filePath = `public/${Date.now()}_${imgFile.name}`;
+        const imageExt = imgFile.name.split('.').pop(); // 확장자 추출
+        const uniqueImageName = `${uuidv4()}.${imageExt}`; // UUID + 원래 확장자
+        const filePath = `public${uniqueImageName}`;
 
         const { error: imageError } = await supabase.storage
           .from('feed-image')
@@ -133,9 +184,72 @@ const StCreateFeed = () => {
     }
   };
 
+  const handleSaveFeed = async () => {
+    if (!title.trim() || !content.trim()) {
+      alert('제목과 내용을 입력해주세요.');
+      return;
+    }
+
+    if (feedCategory.length === 0) {
+      alert('카테고리를 선택해주세요.');
+      return;
+    }
+
+    try {
+      if (existingFeed) {
+        // 기존 게시글 수정
+        const { error: updateError } = await supabase
+          .from('feeds')
+          .update({ title, content })
+          .eq('id', existingFeed.id);
+
+        if (updateError) throw updateError;
+
+        //  `feed_interests` 테이블의 카테고리 수정 (삭제 후 새로 삽입)
+        await supabase
+          .from('feed_interests')
+          .delete()
+          .eq('id', existingFeed.id);
+        await supabase.from('feed_interests').insert(
+          feedCategory.map((category) => ({
+            id: existingFeed.id,
+            interest_name: category,
+          })),
+        );
+
+        alert('게시글이 수정되었습니다!');
+        navigate('/');
+      } else {
+        // 새 게시글 생성
+        const { data: newFeed, error: newFeedError } = await supabase
+          .from('feeds')
+          .insert([{ title, content, user_id: authUser.id }])
+          .select();
+
+        if (newFeedError) throw newFeedError;
+
+        //  `feed_interests` 테이블에 카테고리 저장
+        if (newFeed.length > 0) {
+          await supabase.from('feed_interests').insert(
+            feedCategory.map((category) => ({
+              id: newFeed[0].id,
+              interest_name: category,
+            })),
+          );
+        }
+
+        alert('게시글이 작성되었습니다!');
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('게시글 처리 오류:', error);
+    }
+  };
   return (
     <StPageContainer>
       <StUserFeedContainer>
+        <StH2>{existingFeed ? '게시글 수정' : '새 게시글 작성'}</StH2>
+        <div>피드의 관심사를 선택해주세요🩷</div>
         <StCategoryContainer>
           {categories.map((category, index) => (
             <StCategoryButton
@@ -148,24 +262,29 @@ const StCreateFeed = () => {
           ))}
         </StCategoryContainer>
         <div className="titleInput-container">
-          <label>Title</label>
+          <StTextAlign>Title</StTextAlign>
           <input
             type="text"
             className="titleInput"
+            placeholder="제목을 입력해주세요"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
         <div className="contextInput-container">
-          <label>Context</label>
+          <StTextAlign>Content</StTextAlign>
           <textarea
             className="contextInput"
+            placeholder="내용을 입력해주세요"
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
         </div>
-        <StImageInputContainer>
+        <div>이미지를 첨부해주세요 📸</div>
+        <StImgSelectBtnContainer>
           <input type="file" accept="image/*" onChange={handleFileChange} />
+        </StImgSelectBtnContainer>
+        <StImageInputContainer>
           {previewImage ? (
             <img className="preview-img" src={previewImage} alt="preview" />
           ) : (
@@ -173,8 +292,8 @@ const StCreateFeed = () => {
           )}
         </StImageInputContainer>
         <div className="button-container">
-          <button id="upload-button" onClick={handleAddFeed}>
-            포스팅하기
+          <button id="upload-button" onClick={handleSaveFeed}>
+            {existingFeed ? '수정 완료' : '포스팅하기'}
           </button>
           <button id="save-button" onClick={handleSaveTemp}>
             임시저장
@@ -195,20 +314,6 @@ const StPageContainer = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  width: 100%;
-  max-width: 800px;
-  border: 3px solid lightgray;
-  border-radius: 25px;
-  padding: 30px;
-  background-color: #F4F7FC; /* 💡 부드러운 파스텔톤 배경 적용 */
-  position: absolute;
-  top: 20%;
-  left: 30%;
-
-  @media (max-width: 900px) {
-    width: 90%;
-    padding: 20px;
-  }
 `;
 
 const StImageInputContainer = styled.div`
@@ -226,29 +331,33 @@ const StUserFeedContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #FFFFFF; /* 💡 흰색 배경으로 변경 */
-  width: 100%;
   border-radius: 15px;
   padding: 20px;
   gap: 20px;
-  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.1); /* 💡 부드러운 그림자 추가 */
+  background-color: white;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  min-width: 500px;
+  margin-top: 100px;
+  margin-bottom: 150px;
+
   .titleInput-container,
   .contextInput-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 100%;
-    max-width: 450px;
+    width: 320px;
+    align-items: center;
   }
 
   .titleInput,
   .contextInput {
     width: 100%;
-    max-width: 450px;
-    padding: 10px;
-    border-radius: 8px;
+    /* max-width: 450px; */
+    border-radius: 10px;
     border: 1px solid #ccc;
     font-size: 16px;
+    height: 40px;
+    padding: 8px;
   }
 
   .contextInput {
@@ -260,34 +369,32 @@ const StUserFeedContainer = styled.div`
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-top: 20px;
     width: 100%;
   }
 
   .button-container button {
     border-radius: 20px;
     border: 2px solid transparent;
-    padding: 14px 22px;
+    padding: 4px 10px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 12px;
     font-weight: bold;
     transition: all 0.3s ease-in-out;
     box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.15);
   }
 
   .default-img {
-    width: 300px;
+    width: 320px;
     height: 300px;
     border-radius: 20px;
-    border: 2px solid #d1d1d1;
+    border: 2px solid #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: xx-large;
-    font-style: italic;
     font-weight: bold;
-    color: #21212e;
-    background-color: #46d7ab;
+    color: #ffffff;
+    background-color: #c4c4c4;
+    box-shadow: rgba(100, 100, 111, 0.2);
   }
 
   .preview-img {
@@ -298,38 +405,38 @@ const StUserFeedContainer = styled.div`
     border: 2px solid #d1d1d1;
   }
 
-  #upload-button, #save-button {
-  background-color: #46D7AB;
-  color: white;
-  border: 2px solid #3CB0A0;
-
-  &:hover {
-    background-color: #3CB0A0;
+  #upload-button,
+  #save-button {
+    background-color: #000000;
     color: white;
-    transform: scale(1.05);
-    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    /* border: 2px solid #3cb0a0; */
+
+    &:hover {
+      /* background-color: #3cb0a0; */
+      color: white;
+      transform: scale(1.05);
+      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
   }
 
-  &:active {
-    transform: scale(0.98);
-  }
-}
+  #cancle-button {
+    background-color: #ff4d4d;
+    color: white;
 
-#cancle-button {
-  background-color: #FF4D4D;
-  color: white;
-  border: 2px solid #D93636;
+    &:hover {
+      background-color: #d93636;
+      transform: scale(1.05);
+      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    }
 
-  &:hover {
-    background-color: #D93636;
-    transform: scale(1.05);
-    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+    &:active {
+      transform: scale(0.98);
+    }
   }
-
-  &:active {
-    transform: scale(0.98);
-  }
-}
 `;
 
 const StCategoryContainer = styled.div`
@@ -338,30 +445,64 @@ const StCategoryContainer = styled.div`
   justify-content: center;
   gap: 10px;
   width: 100%;
-  max-width: 450px;
+  max-width: 250px;
   padding: 10px;
 `;
 
 const StCategoryButton = styled.button`
-  background-color: ${(props) => (props.selected ? '#005BBB' : '#5A67D8')}; 
+  background-color: ${(props) => (props.selected ? '#0f4e49' : '#419488')};
   color: white;
-  font-size: 18px; 
+  font-size: 12px;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 20px;
-  border: 3px solid ${(props) => (props.selected ? '#003F7F' : '#4C51BF')}; 
-  padding: 14px 20px; 
+  padding: 4px 10px;
+  /* border: 3px solid ${(props) =>
+    props.selected ? '#0f4e49' : '#419488'}; */
+  border: none;
   transition: all 0.3s ease-in-out;
-  box-shadow: ${(props) =>
-    props.selected ? '4px 4px 10px rgba(0, 0, 0, 0.25)' : '3px 3px 8px rgba(0, 0, 0, 0.15)'};
+  /* box-shadow: ${(props) =>
+    props.selected
+      ? '4px 4px 10px rgba(0, 0, 0, 0.25)'
+      : '3px 3px 8px rgba(0, 0, 0, 0.15)'}; */
 
   &:hover {
     transform: scale(1.1);
-    background-color: ${(props) => (props.selected ? '#004080' : '#4C51BF')};
+    background: #419488;
+    /* background-color: ${(props) =>
+      props.selected ? '#000000' : '#000000'}; */
     box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.3);
   }
 
   &:active {
     transform: scale(0.92);
   }
+`;
+
+const StImgSelectBtnContainer = styled.label`
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 10px;
+  width: 320px;
+`;
+
+const StTextAlign = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  font-weight: 600;
+  align-items: flex-start;
+  width: 100%;
+`;
+
+const StFileSelectBtn = styled.input`
+  border-radius: 8px;
+  background-color: gray;
+`;
+
+const StH2 = styled.h1`
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 30px;
+  border-bottom: 1px solid grey;
 `;
