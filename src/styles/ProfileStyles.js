@@ -10,17 +10,21 @@ export const StMyProfile = styled.div`
 
 export const StMyProfileContainer = styled.div`
   width: 900px;
-  height: 1000px;
+  height: 90vh;
+  max-height: 90vh;
+  overflow-y: auto;
   border: 3px solid #d1d1d1;
   border-radius: 20px;
   padding: 10px;
+  position: relative;
+  display: block;
   
   form {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-areas: 'image info' 'image categories';
-    height: 800px;
-    
+    height: auto;
+    max-height: 100%;
   }
 
   .user-image {

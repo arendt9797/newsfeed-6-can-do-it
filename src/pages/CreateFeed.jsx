@@ -85,6 +85,8 @@ const StCreateFeed = () => {
     localStorage.setItem('temp', JSON.stringify(temp));
     toast.success('내용을 저장했습니다!');
   };
+
+  
   useEffect(() => {
     const temp = localStorage.getItem('temp');
     if (temp) {
