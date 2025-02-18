@@ -1,71 +1,21 @@
+
 import { supabase } from '../supabase/client';
 import { useEffect, useState, useContext } from 'react';
+// import ToastImageEditor from '../components/ToastImageEditor';
 import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'react-toastify';
 
 const StCreateFeed = () => {
-  const location = useLocation();
-  const existingFeed = location.state?.feed || null;
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [imgFile, setImgFile] = useState(null);
+  const [feedCategory, setFeedCategory] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
   const { user: authUser } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  // 상태 관리
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [feedCategory, setFeedCategory] = useState([]);
-  const [imgFile, setImgFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState(null);
-
-  //  `created_at`을 이용하여 최신 데이터 가져오는 함수
-  const fetchFeedByCreatedAt = async (createdAt) => {
-    try {
-      // `feeds` 테이블에서 제목과 내용 가져오기
-      const { data: feedData, error: feedError } = await supabase
-        .from("feeds")
-        .select("*")
-        .eq("created_at", createdAt)
-        .maybeSingle();
-
-      if (feedError) throw feedError;
-
-      if (feedData) {
-        setTitle(feedData.title || "");
-        setContent(feedData.content || "");
-        setPreviewImage(feedData.feed_image_url || null);
-
-        //  `feed_interests` 테이블에서 해당 피드의 카테고리 가져오기
-        const { data: categoryData, error: categoryError } = await supabase
-          .from("feed_interests")
-          .select("interest_name")
-          .eq("id", feedData.id); // `id`는 `feeds` 테이블과 `feed_interests` 테이블에서 동일
-
-        if (categoryError) throw categoryError;
-
-        // 카테고리 배열 변환
-        if (categoryData.length > 0) {
-          setFeedCategory(categoryData.map((item) => item.interest_name));
-        } else {
-          setFeedCategory([]);
-        }
-      }
-    } catch (error) {
-      console.error("게시글 불러오기 오류:", error);
-    }
-  };
-
-  // 기존 게시글 데이터 불러오기
-  useEffect(() => {
-    if (existingFeed) {
-      if (existingFeed.created_at) {
-        fetchFeedByCreatedAt(existingFeed.created_at); //  created_at 기준으로 최신 데이터 가져오기
-      }
-    }
-  }, [existingFeed]);
-
-
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -83,7 +33,7 @@ const StCreateFeed = () => {
   const handleSaveTemp = () => {
     const temp = { title, content };
     localStorage.setItem('temp', JSON.stringify(temp));
-    alert('내용을 저장했습니다!');
+    toast.success('내용을 저장했습니다!');
   };
   useEffect(() => {
     const temp = localStorage.getItem('temp');
@@ -113,19 +63,19 @@ const StCreateFeed = () => {
       if (feedCategory.length < 1) {
         setFeedCategory((prev) => [...prev, hobby]);
       } else {
-        alert('1개의 카테고리만 선택해주세요');
+        toast.info('1개의 카테고리만 선택해주세요');
       }
     }
   };
 
   const handleAddFeed = async () => {
     if (!title.trim() || !content.trim()) {
-      alert('Title 또는 Context에 내용이 없습니다.');
+      toast.info('Title 또는 Context에 내용이 없습니다.');
       return;
     }
 
     if (feedCategory.length === 0) {
-      alert('카테고리 1개는 선택해주세요.');
+      toast.info('카테고리 1개는 선택해주세요.');
       return;
     }
     const { data: publicUser } = await supabase
@@ -143,7 +93,7 @@ const StCreateFeed = () => {
       if (feedError) {
         console.log('error=>', feedError);
       } else {
-        alert('데이터 입력 성공');
+        toast.success('데이터 입력 성공');
         console.log(feedData);
       }
 
@@ -157,9 +107,7 @@ const StCreateFeed = () => {
       }
 
       if (imgFile) {
-        const imageExt = imgFile.name.split('.').pop(); // 확장자 추출
-        const uniqueImageName = `${uuidv4()}.${imageExt}`; // UUID + 원래 확장자
-        const filePath = `public${uniqueImageName}`;
+        const filePath = `public/${Date.now()}_${imgFile.name}`;
 
         const { error: imageError } = await supabase.storage
           .from('feed-image')
@@ -186,68 +134,8 @@ const StCreateFeed = () => {
     }
   };
 
-
-  const handleSaveFeed = async () => {
-    if (!title.trim() || !content.trim()) {
-      alert("제목과 내용을 입력해주세요.");
-      return;
-    }
-
-    if (feedCategory.length === 0) {
-      alert("카테고리를 선택해주세요.");
-      return;
-    }
-
-    try {
-      if (existingFeed) {
-        // 기존 게시글 수정
-        const { error: updateError } = await supabase
-          .from("feeds")
-          .update({ title, content })
-          .eq("id", existingFeed.id);
-
-        if (updateError) throw updateError;
-
-        //  `feed_interests` 테이블의 카테고리 수정 (삭제 후 새로 삽입)
-        await supabase.from("feed_interests").delete().eq("id", existingFeed.id);
-        await supabase.from("feed_interests").insert(
-          feedCategory.map((category) => ({
-            id: existingFeed.id,
-            interest_name: category,
-          }))
-        );
-
-        alert("게시글이 수정되었습니다!");
-        navigate("/");
-      } else {
-        // 새 게시글 생성
-        const { data: newFeed, error: newFeedError } = await supabase
-          .from("feeds")
-          .insert([{ title, content, user_id: authUser.id }])
-          .select();
-
-        if (newFeedError) throw newFeedError;
-
-        //  `feed_interests` 테이블에 카테고리 저장
-        if (newFeed.length > 0) {
-          await supabase.from("feed_interests").insert(
-            feedCategory.map((category) => ({
-              id: newFeed[0].id,
-              interest_name: category,
-            }))
-          );
-        }
-
-        alert("게시글이 작성되었습니다!");
-        navigate("/");
-      }
-    } catch (error) {
-      console.error("게시글 처리 오류:", error);
-    }
-  };
   return (
     <StPageContainer>
-      <h2>{existingFeed ? "게시글 수정" : "새 게시글 작성"}</h2>
       <StUserFeedContainer>
         <StCategoryContainer>
           {categories.map((category, index) => (
@@ -286,8 +174,8 @@ const StCreateFeed = () => {
           )}
         </StImageInputContainer>
         <div className="button-container">
-          <button id="upload-button" onClick={handleSaveFeed}>
-          {existingFeed ? "수정 완료" : "포스팅하기"}
+          <button id="upload-button" onClick={handleAddFeed}>
+            포스팅하기
           </button>
           <button id="save-button" onClick={handleSaveTemp}>
             임시저장
@@ -313,7 +201,7 @@ const StPageContainer = styled.div`
   border: 3px solid lightgray;
   border-radius: 25px;
   padding: 30px;
-  background-color: #f4f7fc; /* 💡 부드러운 파스텔톤 배경 적용 */
+  background-color: #F4F7FC; /* 💡 부드러운 파스텔톤 배경 적용 */
   position: absolute;
   top: 20%;
   left: 30%;
@@ -339,7 +227,7 @@ const StUserFeedContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #ffffff; /* 💡 흰색 배경으로 변경 */
+  background-color: #FFFFFF; /* 💡 흰색 배경으로 변경 */
   width: 100%;
   border-radius: 15px;
   padding: 20px;
@@ -411,39 +299,38 @@ const StUserFeedContainer = styled.div`
     border: 2px solid #d1d1d1;
   }
 
-  #upload-button,
-  #save-button {
-    background-color: #46d7ab;
+  #upload-button, #save-button {
+  background-color: #46D7AB;
+  color: white;
+  border: 2px solid #3CB0A0;
+
+  &:hover {
+    background-color: #3CB0A0;
     color: white;
-    border: 2px solid #3cb0a0;
-
-    &:hover {
-      background-color: #3cb0a0;
-      color: white;
-      transform: scale(1.05);
-      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    &:active {
-      transform: scale(0.98);
-    }
+    transform: scale(1.05);
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
   }
 
-  #cancle-button {
-    background-color: #ff4d4d;
-    color: white;
-    border: 2px solid #d93636;
-
-    &:hover {
-      background-color: #d93636;
-      transform: scale(1.05);
-      box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
-    }
-
-    &:active {
-      transform: scale(0.98);
-    }
+  &:active {
+    transform: scale(0.98);
   }
+}
+
+#cancle-button {
+  background-color: #FF4D4D;
+  color: white;
+  border: 2px solid #D93636;
+
+  &:hover {
+    background-color: #D93636;
+    transform: scale(1.05);
+    box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
 `;
 
 const StCategoryContainer = styled.div`
@@ -457,19 +344,17 @@ const StCategoryContainer = styled.div`
 `;
 
 const StCategoryButton = styled.button`
-  background-color: ${(props) => (props.selected ? '#005BBB' : '#5A67D8')};
+  background-color: ${(props) => (props.selected ? '#005BBB' : '#5A67D8')}; 
   color: white;
-  font-size: 18px;
+  font-size: 18px; 
   font-weight: bold;
   cursor: pointer;
   border-radius: 20px;
-  border: 3px solid ${(props) => (props.selected ? '#003F7F' : '#4C51BF')};
-  padding: 14px 20px;
+  border: 3px solid ${(props) => (props.selected ? '#003F7F' : '#4C51BF')}; 
+  padding: 14px 20px; 
   transition: all 0.3s ease-in-out;
   box-shadow: ${(props) =>
-    props.selected
-      ? '4px 4px 10px rgba(0, 0, 0, 0.25)'
-      : '3px 3px 8px rgba(0, 0, 0, 0.15)'};
+    props.selected ? '4px 4px 10px rgba(0, 0, 0, 0.25)' : '3px 3px 8px rgba(0, 0, 0, 0.15)'};
 
   &:hover {
     transform: scale(1.1);

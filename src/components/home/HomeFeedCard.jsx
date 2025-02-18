@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Swal from "sweetalert2";
 
 const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   const { user, isLogin } = useContext(AuthContext);
@@ -35,7 +37,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
   // 댓글 추가 핸들러
   const handleAddComment = async (feedId) => {
     if (!isLogin) {
-      alert('댓글을 입력하려면 로그인을 해주세요!');
+      toast.info('댓글을 입력하려면 로그인을 해주세요!');
       navigate('/sign-in');
       return;
     }
@@ -51,11 +53,25 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   // 댓글 삭제 핸들러
   const handleDeleteComment = async (id) => {
-    const isConfirm = window.confirm('정말 삭제하시겠습니까?');
-    if (isConfirm) {
-      await supabase.from('comments').delete().eq('id', id);
-
+    const result = await Swal.fire({
+      title: "정말 삭제하시겠습니까?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "삭제",
+      cancelButtonText: "취소",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+  
+    if (!result.isConfirmed) return;
+  
+    try {
+      await supabase.from("comments").delete().eq("id", id);
+      Swal.fire("삭제 완료", "댓글이 삭제되었습니다.", "success");
       getComments();
+    } catch (error) {
+      Swal.fire("삭제 실패", "댓글 삭제 중 오류가 발생했습니다.", "error");
+      console.error("댓글 삭제 오류:", error);
     }
   };
 
@@ -74,8 +90,8 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
         .eq('id', commentId);
 
       if (error) {
-        console.error('댓글 수정 오류:', error);
-        alert('댓글 수정에 실패했습니다.');
+        console.error("댓글 수정 오류:", error);
+        toast.error("댓글 수정에 실패했습니다.");
         return;
       }
 
@@ -93,54 +109,64 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     }
   };
 
-  // 이미지 삭제 핸들러
   const handleDeleteFeed = async (id) => {
-    // [1]feeds 테이블에서 피드 삭제 _ 작동확인!OK
-    const isConfirm = window.confirm('정말 삭제하시겠습니까?');
-
-    if (isConfirm) {
-      const { feedError } = await supabase.from('feeds').delete().eq('id', id);
-
+    const result = await Swal.fire({
+      title: "정말 삭제하시겠습니까?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "삭제",
+      cancelButtonText: "취소",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+  
+    if (!result.isConfirmed) return;
+  
+    try {
+      // [1] 피드 삭제
+      const { feedError } = await supabase.from("feeds").delete().eq("id", id);
+  
       if (feedError) {
-        console.error('피드 삭제 오류:', feedError);
+        console.error("피드 삭제 오류:", feedError);
         throw feedError;
       }
-
-      // [2]스토리지에서 feed-image 버켓에 있는 이미지 파일 삭제
-
-      // [try_0] 이건 http://~~ 이렇게 쭉 나옴
-      // const filePath = `public/${feed.feed_image_url}`;
-
-      // [try_1] slice 썼더니 첫번째 public에서 걸러니 "public/feed-image/public/1739772606245_test1.jpeg" 결과값 도출
-      // const filePath = feed.feed_image_url.slice(
-      //   feed.feed_image_url.indexOf('public/'),
-      // );
-
-      // [try_2] 첫번째 public인덱스 찾고, 두번째 public 인덱스 찾아서 slice로 주소 추출
-      const firstPublicIndex = feed.feed_image_url.indexOf('public/');
-      const secondPublicIndex = feed.feed_image_url.indexOf(
-        'public/',
-        firstPublicIndex + 1,
-      );
-
-      const filePath = feed.feed_image_url.slice(secondPublicIndex);
-
-      // const testfilename = `public/1739770165223_test02.webp`;
-      const { data, FileDeleteError } = await supabase.storage
-        .from('feed-image')
-        .remove([filePath]);
-
-      if (FileDeleteError) {
-        console.error('파일 삭제 오류:', FileDeleteError);
-        throw FileDeleteError;
+  
+      // [2] 이미지 삭제 (feed_image_url이 존재하는지 체크)
+      if (!feed.feed_image_url) {
+        Swal.fire("이미지 없음", "삭제할 이미지가 없습니다.", "info");
+      } else {
+        const firstPublicIndex = feed.feed_image_url.indexOf("public/");
+        const secondPublicIndex = feed.feed_image_url.indexOf(
+          "public/",
+          firstPublicIndex + 1
+        );
+  
+        const filePath = feed.feed_image_url.slice(secondPublicIndex);
+  
+        const { data, FileDeleteError } = await supabase.storage
+          .from("feed-image")
+          .remove([filePath]);
+  
+        if (FileDeleteError) {
+          console.error("파일 삭제 오류:", FileDeleteError);
+          throw FileDeleteError;
+        }
+  
+        // 이미지 삭제 실패 처리
+        if (!filePath) {
+          Swal.fire("이미지 삭제 실패", "이미지 삭제에 실패했습니다.", "error");
+          return;
+        }
       }
-
-      if (!filePath) {
-        alert('이미지 삭제 실패');
-      }
-
-      // [3]보이는 화면 상태에도 반영 _ 작동확인!OK
+  
+      // [3] 화면에서 피드 상태 업데이트
       setFeeds((prev) => prev.filter((item) => item.id !== feed.id));
+  
+      // 피드 삭제 성공 알림
+      Swal.fire("삭제 완료", "피드가 삭제되었습니다.", "success");
+    } catch (error) {
+      Swal.fire("삭제 실패", "삭제 중 오류가 발생했습니다.", "error");
+      console.error("피드 삭제 오류:", error);
     }
   };
 
@@ -184,7 +210,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   const handleLikeToggle = async (feedId) => {
     if (!user?.id) {
-      alert('로그인이 필요합니다!');
+      toast.info('로그인이 필요합니다!');
       return;
     }
 

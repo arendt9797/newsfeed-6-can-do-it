@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthProvider';
 import { supabase } from '../supabase/client';
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 
 function NavigationLayout() {
@@ -15,14 +16,14 @@ function NavigationLayout() {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('로그아웃 오류:', error.message);
-        alert('로그아웃 중 문제가 발생했습니다. 다시 시도해주세요.');
+        toast.error('로그아웃 중 문제가 발생했습니다. 다시 시도해주세요.');
         return;
       }
-      alert('로그아웃 되었습니다.');
+      toast.success('로그아웃 되었습니다.');
       navigate('/'); 
     } catch (error) {
       console.error('오류:', error);
-      alert('오류가 발생했습니다.');
+      toast.error('오류가 발생했습니다.');
     }
   };
 

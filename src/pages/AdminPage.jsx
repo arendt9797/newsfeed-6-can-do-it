@@ -1,6 +1,7 @@
 // DeveloperPage.jsx
 import { useState, useEffect, useContext } from 'react';
 import { supabase } from '../supabase/client';
+import Swal from "sweetalert2";
 
 import {
   StyledAboutUsContainer,
@@ -42,8 +43,16 @@ function DeveloperPage() {
   // 삭제 버튼 핸들러
   const handleDeleteUser = async (userId) => {
     // 확인 메시지 생성
-    const confirmDelete = window.confirm('정말 이 계정을 삭제하시겠습니까?');
-    if (!confirmDelete) return;
+    const confirmDelete = await Swal.fire({
+      title: "정말 이 계정을 삭제하시겠습니까?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "삭제",
+      cancelButtonText: "취소",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+    if (!confirmDelete.isConfirmed) return;
 
     try {
       const { error } = await supabase.from('users').delete().eq('id', userId);
@@ -52,9 +61,10 @@ function DeveloperPage() {
         throw error;
       }
       setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userId));
+      Swal.fire("삭제 완료", "계정이 삭제되었습니다.", "success");
     } catch (error) {
       console.log('계정 삭제 오류 : ', error);
-      alert('계정 삭제에 실패했습니다.');
+      Swal.fire("삭제 실패", "계정 삭제에 실패했습니다.", "error");
     }
   };
   return (
