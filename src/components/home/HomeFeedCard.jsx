@@ -27,7 +27,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     // ascending: true 는 오름차순
     setComments(data);
   };
-//
+///
   useEffect(() => {
     getComments();
   }, []);
