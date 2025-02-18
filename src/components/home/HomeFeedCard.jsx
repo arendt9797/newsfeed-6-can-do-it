@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import Swal from "sweetalert2";
 
 const HomeFeedCard = ({ feed, setFeeds, interests }) => {
-  const { user: authUser , isLogin } = useContext(AuthContext);
+  const { user: authUser, isLogin } = useContext(AuthContext);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
   const [isLike, setIsLike] = useState(false);
@@ -29,7 +29,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     // ascending: true 는 오름차순
     setComments(data);
   };
-///
+  ///
   useEffect(() => {
     getComments();
   }, []);
@@ -62,9 +62,9 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
     });
-  
+
     if (!result.isConfirmed) return;
-  
+
     try {
       await supabase.from("comments").delete().eq("id", id);
       Swal.fire("삭제 완료", "댓글이 삭제되었습니다.", "success");
@@ -119,18 +119,18 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
     });
-  
+
     if (!result.isConfirmed) return;
-  
+
     try {
       // [1] 피드 삭제
       const { feedError } = await supabase.from("feeds").delete().eq("id", id);
-  
+
       if (feedError) {
         console.error("피드 삭제 오류:", feedError);
         throw feedError;
       }
-  
+
       // [2] 이미지 삭제 (feed_image_url이 존재하는지 체크)
       if (!feed.feed_image_url) {
         Swal.fire("이미지 없음", "삭제할 이미지가 없습니다.", "info");
@@ -140,28 +140,28 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
           "public/",
           firstPublicIndex + 1
         );
-  
+
         const filePath = feed.feed_image_url.slice(secondPublicIndex);
-  
+
         const { data, FileDeleteError } = await supabase.storage
           .from("feed-image")
           .remove([filePath]);
-  
+
         if (FileDeleteError) {
           console.error("파일 삭제 오류:", FileDeleteError);
           throw FileDeleteError;
         }
-  
+
         // 이미지 삭제 실패 처리
         if (!filePath) {
           Swal.fire("이미지 삭제 실패", "이미지 삭제에 실패했습니다.", "error");
           return;
         }
       }
-  
+
       // [3] 화면에서 피드 상태 업데이트
       setFeeds((prev) => prev.filter((item) => item.id !== feed.id));
-  
+
       // 피드 삭제 성공 알림
       Swal.fire("삭제 완료", "피드가 삭제되었습니다.", "success");
     } catch (error) {
@@ -172,6 +172,20 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   // [좋아요] 토클 버튼
   const fetchLikeStatus = async () => {
+    // 특정 feed_id의 좋아요 개수 가져오기
+    const { count, error: countError } = await supabase
+      .from('likes')
+      .select('*', { count: 'exact', head: true }) // 데이터 반환 없이 개수만 세기 위한 옵션
+      .eq('feed_id', feed.id)
+      .eq('is_like', true);
+
+    if (countError) {
+      console.error('좋아요 개수 가져오기 실패:', countError);
+      return;
+    }
+
+    setLikeNumber(count); // 좋아요 개수 업데이트
+
     if (!authUser?.id) return;
 
     // 현재 로그인한 유저의 좋아요 상태 가져오기
@@ -189,19 +203,6 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
     setIsLike(data?.is_like || false); // 데이터 없으면 false로 설정
 
-    // 특정 feed_id의 좋아요 개수 가져오기
-    const { count, error: countError } = await supabase
-      .from('likes')
-      .select('*', { count: 'exact', head: true }) // 데이터 반환 없이 개수만 세기 위한 옵션
-      .eq('feed_id', feed.id)
-      .eq('is_like', true);
-
-    if (countError) {
-      console.error('좋아요 개수 가져오기 실패:', countError);
-      return;
-    }
-
-    setLikeNumber(count); // 좋아요 개수 업데이트
   };
 
   useEffect(() => {
@@ -262,8 +263,8 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
       {/* 가져온 피드 보여주는 부분 */}
       <StFeedProfileImgContainer>
         <div>{authUser?.id === feed.user_id && (
-        <button onClick={handleEditFeed}>✏️ 수정</button>
-      )}</div>
+          <button onClick={handleEditFeed}>✏️ 수정</button>
+        )}</div>
         <StFeedProfileImg>
           <img src={feed.user?.my_profile_image_url} />
         </StFeedProfileImg>
@@ -292,9 +293,9 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
             관심사 :{' '}
             {interests && interests.length > 0
               ? interests
-                  .filter((interest) => interest.id === feed.id)
-                  .map((interest) => `#${interest.interest_name}`)
-                  .join(', ')
+                .filter((interest) => interest.id === feed.id)
+                .map((interest) => `#${interest.interest_name}`)
+                .join(', ')
               : '없음'}
           </div>
           {/* 댓글 개수 */}
