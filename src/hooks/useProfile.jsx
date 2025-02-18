@@ -88,7 +88,7 @@ export const useProfile = () => {
       throw error;
     }
   };
-  // 4. 사용자의 비밀번호를 업데이트하는 함수
+  // 4. 사용자의 비밀번호를 업데이트하는 함수//
   const updateUserPassword = async () => {
     if (!profile.password) return;
     try {
