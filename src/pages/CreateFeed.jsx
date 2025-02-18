@@ -2,18 +2,70 @@ import { supabase } from '../supabase/client';
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthProvider';
 import categories from '../constants/categories';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 
 const StCreateFeed = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [imgFile, setImgFile] = useState(null);
-  const [feedCategory, setFeedCategory] = useState([]);
-  const [previewImage, setPreviewImage] = useState(null);
+  const location = useLocation();
+  const existingFeed = location.state?.feed || null;
   const { user: authUser } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // 상태 관리
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [feedCategory, setFeedCategory] = useState([]);
+  const [imgFile, setImgFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
+  //  `created_at`을 이용하여 최신 데이터 가져오는 함수
+  const fetchFeedByCreatedAt = async (createdAt) => {
+    try {
+      // `feeds` 테이블에서 제목과 내용 가져오기
+      const { data: feedData, error: feedError } = await supabase
+        .from("feeds")
+        .select("*")
+        .eq("created_at", createdAt)
+        .maybeSingle();
+
+      if (feedError) throw feedError;
+
+      if (feedData) {
+        setTitle(feedData.title || "");
+        setContent(feedData.content || "");
+        setPreviewImage(feedData.feed_image_url || null);
+
+        //  `feed_interests` 테이블에서 해당 피드의 카테고리 가져오기
+        const { data: categoryData, error: categoryError } = await supabase
+          .from("feed_interests")
+          .select("interest_name")
+          .eq("id", feedData.id); // `id`는 `feeds` 테이블과 `feed_interests` 테이블에서 동일
+
+        if (categoryError) throw categoryError;
+
+        // 카테고리 배열 변환
+        if (categoryData.length > 0) {
+          setFeedCategory(categoryData.map((item) => item.interest_name));
+        } else {
+          setFeedCategory([]);
+        }
+      }
+    } catch (error) {
+      console.error("게시글 불러오기 오류:", error);
+    }
+  };
+
+  // 기존 게시글 데이터 불러오기
+  useEffect(() => {
+    if (existingFeed) {
+      if (existingFeed.created_at) {
+        fetchFeedByCreatedAt(existingFeed.created_at); //  created_at 기준으로 최신 데이터 가져오기
+      }
+    }
+  }, [existingFeed]);
+
+
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -134,8 +186,68 @@ const StCreateFeed = () => {
     }
   };
 
+
+  const handleSaveFeed = async () => {
+    if (!title.trim() || !content.trim()) {
+      alert("제목과 내용을 입력해주세요.");
+      return;
+    }
+
+    if (feedCategory.length === 0) {
+      alert("카테고리를 선택해주세요.");
+      return;
+    }
+
+    try {
+      if (existingFeed) {
+        // 기존 게시글 수정
+        const { error: updateError } = await supabase
+          .from("feeds")
+          .update({ title, content })
+          .eq("id", existingFeed.id);
+
+        if (updateError) throw updateError;
+
+        //  `feed_interests` 테이블의 카테고리 수정 (삭제 후 새로 삽입)
+        await supabase.from("feed_interests").delete().eq("id", existingFeed.id);
+        await supabase.from("feed_interests").insert(
+          feedCategory.map((category) => ({
+            id: existingFeed.id,
+            interest_name: category,
+          }))
+        );
+
+        alert("게시글이 수정되었습니다!");
+        navigate("/");
+      } else {
+        // 새 게시글 생성
+        const { data: newFeed, error: newFeedError } = await supabase
+          .from("feeds")
+          .insert([{ title, content, user_id: authUser.id }])
+          .select();
+
+        if (newFeedError) throw newFeedError;
+
+        //  `feed_interests` 테이블에 카테고리 저장
+        if (newFeed.length > 0) {
+          await supabase.from("feed_interests").insert(
+            feedCategory.map((category) => ({
+              id: newFeed[0].id,
+              interest_name: category,
+            }))
+          );
+        }
+
+        alert("게시글이 작성되었습니다!");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("게시글 처리 오류:", error);
+    }
+  };
   return (
     <StPageContainer>
+      <h2>{existingFeed ? "게시글 수정" : "새 게시글 작성"}</h2>
       <StUserFeedContainer>
         <StCategoryContainer>
           {categories.map((category, index) => (
@@ -174,8 +286,8 @@ const StCreateFeed = () => {
           )}
         </StImageInputContainer>
         <div className="button-container">
-          <button id="upload-button" onClick={handleAddFeed}>
-            포스팅하기
+          <button id="upload-button" onClick={handleSaveFeed}>
+          {existingFeed ? "수정 완료" : "포스팅하기"}
           </button>
           <button id="save-button" onClick={handleSaveTemp}>
             임시저장
