@@ -11,8 +11,11 @@ import { useValidation } from '../hooks/useValidation';
 import { toast } from 'react-toastify';
 
 const Signup = () => {
-  const { errors, validateField, validateForm, setErrors } = useValidation();
 
+  const { errors, validateField, validateForm, setErrors } = useValidation();
+  const navigate = useNavigate();
+
+  //상태관리
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -20,7 +23,6 @@ const Signup = () => {
     github: '',
     blog: '',
   });
-
   const [myImage, setMyImage] = useState(null);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [uploadedFileName, setUploadedFileName] =
@@ -28,8 +30,8 @@ const Signup = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const { setUser } = useContext(AuthContext);
   const [showPW, setShowPW] = useState(false);
-  const navigate = useNavigate();
 
+  // 이미지 변경 함수
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -49,6 +51,7 @@ const Signup = () => {
   const toggleInterestHandler = (category) =>
     toggleInterest(category, setSelectedInterests, selectedInterests);
 
+  // 입력 데이터 관리
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -61,6 +64,8 @@ const Signup = () => {
       [name]: validateField(name, value),
     }));
   };
+
+  // 전체검증 후 제출
   const handleSignup = async (e) => {
     e.preventDefault();
 

@@ -10,8 +10,10 @@ const StEditorContainer = St.div`
 `;
 
 const MyImageEditor = () => {
+
   const editorRef = useRef(null); // 에디터 인스턴스를 위한 useRef
   const imageEditorInstance = useRef(null); // 로드한 이미지를 위한 useRef
+
   useEffect(() => {
     if (editorRef.current) {
       const instance = new ImageEditor(editorRef.current, {

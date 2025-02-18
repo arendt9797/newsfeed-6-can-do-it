@@ -6,8 +6,10 @@ import { supabase } from '../supabase/client';
 import HomeFeedCard from './home/HomeFeedCard';
 
 const MyFeed = () => {
-  const [feeds, setFeeds] = useState([]);
+
   const { user, isLogin } = useContext(AuthContext);
+
+  const [feeds, setFeeds] = useState([]);
   const [interests, setInterests] = useState([]);
 
   useEffect(() => {

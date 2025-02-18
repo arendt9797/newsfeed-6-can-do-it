@@ -5,8 +5,11 @@ import * as c from '../constants/categoryName';
 import { useNavigate } from 'react-router-dom';
 
 function Category() {
+
+
   const { isLogin, user } = useContext(AuthContext);
   const navigate = useNavigate();
+
   //user의 관심사 카테고리 배열로 가져오기
   //기타(ETC)가 배열 안에 있을 경우 배열의 가장 마지막에 위치시키기
   const myInterests =

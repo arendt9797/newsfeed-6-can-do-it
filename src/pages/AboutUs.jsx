@@ -7,17 +7,21 @@ import { AuthContext } from '../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 
 function AboutUs() {
+
   const [users, setUsers] = useState([]); // 사용자 데이터 저장
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
+
+    // users 테이블 데이터 가져오기
     const fetchUsers = async () => {
-      // users 테이블 데이터 가져오기
+
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('role', 'admin'); // role 값이 developer인 사용자만
+
       if (error) {
         console.error('개발자 정보 가져오기 오류:', error);
       } else {

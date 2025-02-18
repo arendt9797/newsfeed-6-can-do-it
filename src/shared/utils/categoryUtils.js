@@ -8,7 +8,7 @@ export const toggleInterest = (
 ) => {
   if (selectedInterests.length >= 3 && !selectedInterests.includes(category)) {
     toast.info('카테고리 3개를 선택해주세요.');
-    return; 
+    return;
   }
   setSelectedInterests((prev) => {
     if (prev.includes(category)) {

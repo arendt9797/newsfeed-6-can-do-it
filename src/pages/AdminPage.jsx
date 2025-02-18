@@ -16,9 +16,11 @@ import { AuthContext } from '../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 
 function DeveloperPage() {
-  const [users, setUsers] = useState([]);
+
   const { user } = useContext(AuthContext);
   const naviagte = useNavigate();
+
+  const [users, setUsers] = useState([]);
 
   // 개발자가 아닌 계정은 / 으로 리다이렉트
   useEffect(() => {

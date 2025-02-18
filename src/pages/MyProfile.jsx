@@ -3,7 +3,7 @@ import ProfileForm from '../components/profile/ProfileForm';
 import { StMyProfile, StMyProfileContainer } from '../styles/ProfileStyles';
 
 function MyProfile() {
-  const { 
+  const {
     profile,
     errors,
     selectedInterests,

@@ -2,7 +2,6 @@ import { useEffect, useState, useContext } from 'react';
 import { supabase } from '../supabase/client';
 import { AuthContext } from '../context/AuthProvider';
 import { handleImageChange, handleImageUpload } from '../shared/utils/fileUtils';
-// import { validateBlog, validateEmail, validateGithub, validateNickname, validatePassword } from '../shared/utils/validationUtils';
 import { useValidation } from './useValidation';
 
 export const useProfile = () => {
@@ -19,7 +18,6 @@ export const useProfile = () => {
   const [image, setImage] = useState(null);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [preview, setPreview] = useState(null);
-  // const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (!isLogin) return;

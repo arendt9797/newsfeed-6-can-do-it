@@ -8,9 +8,11 @@ import { toast } from 'react-toastify';
 
 
 function NavigationLayout() {
-  const { isLogin, user } = useContext(AuthContext); 
+
+  const { isLogin, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  //로그아웃 함수
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -20,7 +22,7 @@ function NavigationLayout() {
         return;
       }
       toast.success('로그아웃 되었습니다.');
-      navigate('/'); 
+      navigate('/');
     } catch (error) {
       console.error('오류:', error);
       toast.error('오류가 발생했습니다.');

@@ -7,12 +7,12 @@ import {
   validatePassword,
 } from "../shared/utils/validationUtils";
 
-export const useValidation = (initialState) => {
+export const useValidation = () => {
   const [errors, setErrors] = useState({});
 
   //  전체 폼 검증
   const validateForm = (form) => {
-    if(!form) return {};
+    if (!form) return {};
 
     const newErrors = {};
     Object.keys(form).forEach((key) => {
