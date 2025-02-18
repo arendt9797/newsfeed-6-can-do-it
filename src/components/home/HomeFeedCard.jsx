@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 import Swal from "sweetalert2";
 
 const HomeFeedCard = ({ feed, setFeeds, interests }) => {
-  const { user, isLogin } = useContext(AuthContext);
+  const { user: authUser , isLogin } = useContext(AuthContext);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState([]);
   const [isLike, setIsLike] = useState(false);
@@ -45,7 +45,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     await supabase.from('comments').insert({
       feed_id: feedId,
       comment: comment,
-      user_id: user?.id,
+      user_id: authUser?.id,
     });
     setComment('');
     getComments();
@@ -172,14 +172,14 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   // [좋아요] 토클 버튼
   const fetchLikeStatus = async () => {
-    if (!user?.id) return;
+    if (!authUser?.id) return;
 
     // 현재 로그인한 유저의 좋아요 상태 가져오기
     const { data, error } = await supabase
       .from('likes')
       .select('is_like')
       .eq('feed_id', feed.id)
-      .eq('user_id', user.id)
+      .eq('user_id', authUser.id)
       .maybeSingle();
 
     if (error) {
@@ -206,10 +206,10 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
 
   useEffect(() => {
     fetchLikeStatus();
-  }, [feed.id, user?.id]);
+  }, [feed.id, authUser?.id]);
 
   const handleLikeToggle = async (feedId) => {
-    if (!user?.id) {
+    if (!authUser?.id) {
       toast.info('로그인이 필요합니다!');
       return;
     }
@@ -220,7 +220,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
         .from('likes')
         .select('is_like')
         .eq('feed_id', feedId)
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .maybeSingle();
 
       if (fetchError && fetchError.code !== 'PGRST116') {
@@ -235,7 +235,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
         [
           {
             feed_id: feedId,
-            user_id: user.id,
+            user_id: authUser.id,
             is_like: newIsLike,
           },
         ],
@@ -261,12 +261,14 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
     <>
       {/* 가져온 피드 보여주는 부분 */}
       <StFeedProfileImgContainer>
-      <button onClick={handleEditFeed}>✏️ 수정</button>
+        <div>{authUser?.id === feed.user_id && (
+        <button onClick={handleEditFeed}>✏️ 수정</button>
+      )}</div>
         <StFeedProfileImg>
           <img src={feed.user?.my_profile_image_url} />
         </StFeedProfileImg>
         <span>{feed.user?.nickname}</span>
-        {user?.id === feed.user_id && (
+        {authUser?.id === feed.user_id && (
           <StFeedDeleteBtn
             onClick={() => handleDeleteFeed(feed.id, feed.feed_image_url)}
           >
@@ -336,7 +338,7 @@ const HomeFeedCard = ({ feed, setFeeds, interests }) => {
                     )}
                   </StCommentContainer>
                   {/* 댓글 수정 및 삭제 */}
-                  {user?.id === comment.user_id && (
+                  {authUser?.id === comment.user_id && (
                     <div>
                       {/* ✏️ 수정 모드 전환 및 완료 버튼 */}
                       <StCommentEditBtn

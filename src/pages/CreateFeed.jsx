@@ -63,6 +63,7 @@ const StCreateFeed = () => {
       if (existingFeed.created_at) {
         fetchFeedByCreatedAt(existingFeed.created_at); //  created_at 기준으로 최신 데이터 가져오기
       }
+      
     }
   }, [existingFeed]);
 
@@ -97,13 +98,7 @@ const StCreateFeed = () => {
   const gotoCategory = () => {
     navigate('/category');
   };
-  const handleImgFile = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImgFile(file);
-      console.log(file);
-    }
-  };
+
 
   const handleFeedCategory = (hobby) => {
     if (feedCategory.includes(hobby)) {
@@ -117,135 +112,92 @@ const StCreateFeed = () => {
     }
   };
 
-  const handleAddFeed = async () => {
-    if (!title.trim() || !content.trim()) {
-      toast.info('Title 또는 Context에 내용이 없습니다.');
-      return;
-    }
-
-    if (feedCategory.length === 0) {
-      toast.info('카테고리 1개는 선택해주세요.');
-      return;
-    }
-    const { data: publicUser } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', authUser.id)
-      .maybeSingle();
-
-    try {
-      const { data: feedData, error: feedError } = await supabase
-        .from('feeds')
-        .upsert([{ title, content, user_id: publicUser.id }])
-        .select();
-      console.log(feedData);
-      if (feedError) {
-        console.log('error=>', feedError);
-      } else {
-        toast.success('데이터 입력 성공');
-        console.log(feedData);
-      }
-
-      const { data: categoryData, error: categoryError } = await supabase
-        .from('feed_interests')
-        .insert([{ id: feedData[0].id, interest_name: feedCategory[0] }]);
-      if (categoryError) {
-        console.log(categoryError);
-      } else {
-        console.log(categoryData);
-      }
-
-      if (imgFile) {
-        const imageExt = imgFile.name.split('.').pop(); // 확장자 추출
-        const uniqueImageName = `${uuidv4()}.${imageExt}`; // UUID + 원래 확장자
-        const filePath = `public${uniqueImageName}`;
-
-        const { error: imageError } = await supabase.storage
-          .from('feed-image')
-          .upload(filePath, imgFile);
-        if (imageError) throw imageError;
-
-        const { data: urlData, error: urlError } = await supabase.storage
-          .from('feed-image')
-          .getPublicUrl(filePath);
-        if (urlError) throw urlError;
-        const publicURL = urlData.publicUrl;
-        console.log('업로드된 이미지 URL:', publicURL);
-
-        const { error: upsertError } = await supabase
-          .from('feeds')
-          .upsert(
-            { id: feedData[0].id, feed_image_url: publicURL },
-            { onConflict: 'id' },
-          );
-        if (upsertError) throw upsertError;
-      }
-    } catch (error) {
-      console.error('error=>', error);
-    }
-  };
-
   const handleSaveFeed = async () => {
     if (!title.trim() || !content.trim()) {
-      alert('제목과 내용을 입력해주세요.');
+      toast.error("제목과 내용을 입력해주세요.");
       return;
     }
-
+  
     if (feedCategory.length === 0) {
-      alert('카테고리를 선택해주세요.');
+      toast.error("카테고리를 선택해주세요.");
       return;
     }
-
+  
     try {
+      let publicURL = existingFeed?.feed_image_url || null; // 기존 이미지 URL 유지
+  
+      //  이미지 업로드 및 URL 가져오기
+      if (imgFile) {
+        const imageExt = imgFile.name.split(".").pop();
+        const uniqueImageName = `${uuidv4()}.${imageExt}`;
+        const filePath = `public/${uniqueImageName}`;
+  
+        const { error: imageError } = await supabase.storage
+          .from("feed-image")
+          .upload(filePath, imgFile);
+  
+        if (imageError) throw imageError;
+  
+        const { data: urlData, error: urlError } = await supabase.storage
+          .from("feed-image")
+          .getPublicUrl(filePath);
+  
+        if (urlError) throw urlError;
+        publicURL = urlData.publicUrl;
+        console.log("업로드된 이미지 URL:", publicURL);
+      }
+  
       if (existingFeed) {
-        // 기존 게시글 수정
+        //  기존 게시글 수정 (feed_image_url 포함)
         const { error: updateError } = await supabase
-          .from('feeds')
-          .update({ title, content })
-          .eq('id', existingFeed.id);
-
+          .from("feeds")
+          .update({
+            title,
+            content,
+            feed_image_url: publicURL, // 이미지 URL 업데이트
+          })
+          .eq("id", existingFeed.id);
+  
         if (updateError) throw updateError;
-
+  
         //  `feed_interests` 테이블의 카테고리 수정 (삭제 후 새로 삽입)
-        await supabase
-          .from('feed_interests')
-          .delete()
-          .eq('id', existingFeed.id);
-        await supabase.from('feed_interests').insert(
+        await supabase.from("feed_interests").delete().eq("id", existingFeed.id);
+        await supabase.from("feed_interests").insert(
           feedCategory.map((category) => ({
             id: existingFeed.id,
             interest_name: category,
-          })),
+          }))
         );
-
-        alert('게시글이 수정되었습니다!');
-        navigate('/');
+  
+        toast.success("게시글이 수정되었습니다!");
+        navigate("/");
       } else {
-        // 새 게시글 생성
+        //  새 게시글 생성
         const { data: newFeed, error: newFeedError } = await supabase
-          .from('feeds')
-          .insert([{ title, content, user_id: authUser.id }])
+          .from("feeds")
+          .insert([{ title, content, user_id: authUser.id, feed_image_url: publicURL }])
           .select();
-
+  
         if (newFeedError) throw newFeedError;
-
-        //  `feed_interests` 테이블에 카테고리 저장
+  
         if (newFeed.length > 0) {
-          await supabase.from('feed_interests').insert(
+          await supabase.from("feed_interests").insert(
             feedCategory.map((category) => ({
               id: newFeed[0].id,
               interest_name: category,
-            })),
+            }))
           );
         }
-
-        alert('게시글이 작성되었습니다!');
-        navigate('/');
+  
+        toast.success("게시글이 작성되었습니다!");
+        navigate("/");
       }
     } catch (error) {
-      console.error('게시글 처리 오류:', error);
+      console.error("게시글 처리 오류:", error);
+      toast.error("게시글 저장 중 오류가 발생했습니다.");
     }
   };
+  
   return (
     <StPageContainer>
       <StUserFeedContainer>
