@@ -75,7 +75,7 @@ const CategoryFeed = () => {
           <div className="empty-feed"> 아직 아무런 피드도 없습니다.</div>
         ) : (
           feeds
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .map((feed) => (
               <HomeFeedCard key={feed.id} feed={feed} interests={interests} />
             ))
