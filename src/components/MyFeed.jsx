@@ -13,7 +13,7 @@ const MyFeed = () => {
 
   useEffect(() => {
     const getFeeds = async () => {
-      if (!user || !user.id) return ;
+      if (!user || !user.id) return;
       try {
         const { data, error } = await supabase
           .from('feeds')

@@ -9,12 +9,13 @@ function Category() {
   const navigate = useNavigate();
 
   // user의 관심사 카테고리 배열로 가져오기(옵셔널 체이닝 제거)
-  let userInterests = [];
+  let interests = [];
   if (user && user.user_interests) {
-    userInterests = user.user_interests.map((i) => i.user_interest);
+    interests = user.user_interests.map((i) => i.user_interest);
   }
   // 기타(ETC)가 배열 안에 있을 경우 배열의 가장 마지막에 위치시키기
-  const myInterests = userInterests.sort((a, b) =>
+  // 비교 함수에서 a === c.ETC이면 1을 리턴하여 a를 뒤로 보내고, b === c.ETC이면 -1을 리턴하여 b를 뒤로 보냄
+  const myInterests = interests.sort((a, b) =>
     a === c.ETC ? 1 : b === c.ETC ? -1 : 0,
   );
 
