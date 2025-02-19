@@ -8,7 +8,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'react-toastify';
 
 const StCreateFeed = () => {
-
   const location = useLocation();
   const existingFeed = location.state?.feed || null;
   const { user: authUser } = useContext(AuthContext);
@@ -64,7 +63,6 @@ const StCreateFeed = () => {
       if (existingFeed.created_at) {
         fetchFeedByCreatedAt(existingFeed.created_at); //  created_at 기준으로 최신 데이터 가져오기
       }
-
     }
   }, [existingFeed]);
 
@@ -83,22 +81,61 @@ const StCreateFeed = () => {
   };
 
   // 임시 저장 함수 (현재 로컬스토리지 사용중, supabase로 업데이트 예정)
-  const handleSaveTemp = () => {
+  // const handleSaveTemp = () => {
+  //   const temp = { title, content };
+  //   localStorage.setItem('temp', JSON.stringify(temp));
+  //   toast.success('내용을 저장했습니다!');
+  // };
+
+  const handleSaveTemp = async () => {
     const temp = { title, content };
-    localStorage.setItem('temp', JSON.stringify(temp));
-    toast.success('내용을 저장했습니다!');
+    const { error } = await supabase
+      .from('users')
+      .update({ temp })
+      .eq('id', authUser.id);
+
+    if (error) {
+      toast.error('임시 저장 중 오류발생');
+    } else {
+      toast.success('임시저장 성공');
+    }
   };
 
-
-  useEffect(() => {
-    const temp = localStorage.getItem('temp');
-    if (temp) {
-      const tempData = JSON.parse(temp);
-      setTitle(tempData.title || '');
-      setContent(tempData.content || '');
-      setFeedCategory(tempData.feedCategory || []);
+  const handleLoadFeed = async () => {
+    const { data } = await supabase
+      .from('users')
+      .select('temp')
+      .eq('id', authUser.id)
+      .maybeSingle();
+    // console.log(data);
+    if (data === null) {
+      toast.error('불러올 데이터가 없습니다');
+    } else {
+      let tempData = data.temp;
+      try {
+        tempData = JSON.parse(tempData);
+        setTitle(tempData.title || '');
+        setContent(tempData.content || '');
+        toast.success('임시저장한 글을 불러왔습니다.');
+      } catch {
+        toast.error('불러오기 실패');
+      }
     }
-  }, []);
+  };
+  //로컬 DB에 저장되는 임시저장 기능 -> PC 변경 시 못 불러옴
+  //개인마다 불러올 수 있는 기능
+  //createFeed 페이지 접근 시 로그인 한 사용자 정보 로드
+  //해당 사용자의 수파베이스 테이블에 데이터가 있는가?
+
+  // useEffect(() => {
+  //   const temp = localStorage.getItem('temp');
+  //   if (temp) {
+  //     const tempData = JSON.parse(temp);
+  //     setTitle(tempData.title || '');
+  //     setContent(tempData.content || '');
+  //     setFeedCategory(tempData.feedCategory || []);
+  //   }
+  // }, []);
 
   // 뒤로가기 네비게이션
   const gotoCategory = () => {
@@ -121,12 +158,12 @@ const StCreateFeed = () => {
   // 제출 함수 (수정과 새게시글 포스팅)
   const handleSaveFeed = async () => {
     if (!title.trim() || !content.trim()) {
-      toast.error("제목과 내용을 입력해주세요.");
+      toast.error('제목과 내용을 입력해주세요.');
       return;
     }
 
     if (feedCategory.length === 0) {
-      toast.error("카테고리를 선택해주세요.");
+      toast.error('카테고리를 선택해주세요.');
       return;
     }
 
@@ -135,73 +172,77 @@ const StCreateFeed = () => {
 
       //  이미지 업로드 및 URL 가져오기
       if (imgFile) {
-        const imageExt = imgFile.name.split(".").pop();
+        const imageExt = imgFile.name.split('.').pop();
         const uniqueImageName = `${uuidv4()}.${imageExt}`;
         const filePath = `public/${uniqueImageName}`;
 
         const { error: imageError } = await supabase.storage
-          .from("feed-image")
+          .from('feed-image')
           .upload(filePath, imgFile);
 
         if (imageError) throw imageError;
 
         const { data: urlData, error: urlError } = await supabase.storage
-          .from("feed-image")
+          .from('feed-image')
           .getPublicUrl(filePath);
 
         if (urlError) throw urlError;
         publicURL = urlData.publicUrl;
-        console.log("업로드된 이미지 URL:", publicURL);
       }
 
       if (existingFeed) {
         //  기존 게시글 수정 (feed_image_url 포함)
         const { error: updateError } = await supabase
-          .from("feeds")
+          .from('feeds')
           .update({
             title,
             content,
             feed_image_url: publicURL, // 이미지 URL 업데이트
           })
-          .eq("id", existingFeed.id);
+          .eq('id', existingFeed.id);
 
         if (updateError) throw updateError;
 
         //  `feed_interests` 테이블의 카테고리 수정 (삭제 후 새로 삽입)
-        await supabase.from("feed_interests").delete().eq("id", existingFeed.id);
-        await supabase.from("feed_interests").insert(
+        await supabase
+          .from('feed_interests')
+          .delete()
+          .eq('id', existingFeed.id);
+        await supabase.from('feed_interests').insert(
           feedCategory.map((category) => ({
             id: existingFeed.id,
             interest_name: category,
-          }))
+          })),
         );
 
-        toast.success("게시글이 수정되었습니다!");
-        navigate("/");
+        toast.success('게시글이 수정되었습니다!');
+        navigate('/');
       } else {
         //  새 게시글 생성
         const { data: newFeed, error: newFeedError } = await supabase
-          .from("feeds")
-          .insert([{ title, content, user_id: authUser.id, feed_image_url: publicURL }])
+          .from('feeds')
+          .insert([
+            { title, content, user_id: authUser.id, feed_image_url: publicURL },
+          ])
           .select();
 
         if (newFeedError) throw newFeedError;
 
         if (newFeed.length > 0) {
-          await supabase.from("feed_interests").insert(
+          await supabase.from('feed_interests').insert(
             feedCategory.map((category) => ({
               id: newFeed[0].id,
               interest_name: category,
-            }))
+            })),
           );
         }
 
-        toast.success("게시글이 작성되었습니다!");
-        navigate("/");
+        toast.success('게시글이 작성되었습니다!');
+        navigate('/');
       }
     } catch (error) {
-      console.error("게시글 처리 오류:", error);
-      toast.error("게시글 저장 중 오류가 발생했습니다.");
+      console.error('게시글 처리 오류:', error);
+      toast.error('게시글 저장 중 오류가 발생했습니다.');
     }
   };
 
@@ -257,6 +298,9 @@ const StCreateFeed = () => {
           </button>
           <button id="save-button" onClick={handleSaveTemp}>
             임시저장
+          </button>
+          <button id="load-button" onClick={handleLoadFeed}>
+            불러오기
           </button>
           <button id="cancle-button" onClick={gotoCategory}>
             돌아가기
@@ -366,7 +410,8 @@ const StUserFeedContainer = styled.div`
   }
 
   #upload-button,
-  #save-button {
+  #save-button,
+  #load-button {
     background-color: #000000;
     color: white;
     /* border: 2px solid #3cb0a0; */
@@ -429,7 +474,7 @@ const StCategoryButton = styled.button`
     transform: scale(1.1);
     background: #419488;
     /* background-color: ${(props) =>
-    props.selected ? '#000000' : '#000000'}; */
+      props.selected ? '#000000' : '#000000'}; */
     box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.3);
   }
 
