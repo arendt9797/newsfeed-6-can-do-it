@@ -88,7 +88,7 @@ export const useProfile = () => {
       throw error;
     }
   };
-  // 4. 사용자의 비밀번호를 업데이트하는 함수
+  // 4. 사용자의 비밀번호를 업데이트하는 함수//
   const updateUserPassword = async () => {
     if (!profile.password) return;
     try {
@@ -98,7 +98,7 @@ export const useProfile = () => {
       throw error;
     }
   };
-  // 5. 사용자 프로필 정보를 업데이트하는 함수
+  // 5. 사용자 프로필 정보를 업데이트하는 함수//
   const updateUserProfile = async (imageUrl) => {
     try {
       await supabase
