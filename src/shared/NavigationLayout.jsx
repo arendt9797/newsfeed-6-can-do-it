@@ -6,9 +6,7 @@ import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-
 function NavigationLayout() {
-
   const { isLogin, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -33,12 +31,15 @@ function NavigationLayout() {
     <StBodyDiv>
       <header>
         <Link className="home-link" to="/">
-          <img className="logo-img" src='/team_logo.png' alt="logo" />
+          <img className="logo-img" src="/team_logo.png" alt="logo" />
         </Link>
 
         <div className="profile-div">
           <Link to={isLogin ? '/my-profile' : '/sign-in'}>
-            <img src={user?.my_profile_image_url || '/default_user.jpg'} alt="profile" />
+            <img
+              src={user?.my_profile_image_url || '/default_user.jpg'}
+              alt="profile"
+            />
           </Link>
           <div className="tip">
             <p>이미지를 클릭하면 sign in 혹은 My Profile로 이동합니다.</p>
@@ -129,8 +130,8 @@ const StBodyDiv = styled.div`
       }
       .tip {
         position: relative;
-        top: -55px;
-        left: 40px;
+        top: -65px;
+        left: 45px;
 
         font-size: 14px;
         line-height: 26px;

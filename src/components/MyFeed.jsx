@@ -6,7 +6,6 @@ import { supabase } from '../supabase/client';
 import HomeFeedCard from './home/HomeFeedCard';
 
 const MyFeed = () => {
-
   const { user, isLogin } = useContext(AuthContext);
 
   const [feeds, setFeeds] = useState([]);
@@ -59,7 +58,7 @@ const MyFeed = () => {
           <div className="empty-feed"> 아직 아무런 피드도 없습니다. </div>
         ) : (
           feeds
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             .map((feed) => (
               <HomeFeedCard key={feed.id} feed={feed} interests={interests} />
             ))
@@ -68,11 +67,7 @@ const MyFeed = () => {
 
       <div>
         <Link to={isLogin ? '/create-feed' : '/sign-in'}>
-          <StButton>
-            <div className="tip">
-              <p>클릭시 create feed로 이동</p>
-            </div>
-          </StButton>
+          <StButton>+</StButton>
         </Link>
       </div>
     </StHomeWrap>
@@ -114,49 +109,6 @@ const StButton = styled.button`
   right: 80px;
   top: 80px;
   z-index: 10;
-
-  .tip:before {
-    content: '+';
-    font-weight: bold;
-  }
-
-  .tip:hover p {
-    visibility: visible;
-    opacity: 1;
-  }
-
-  .tip p {
-    opacity: 0;
-    visibility: hidden;
-
-    color: #fff;
-    font-size: 12px;
-    line-height: 1.4;
-    text-align: left;
-
-    background-color: #0065b7;
-    width: 80px;
-    padding: 5px;
-    border-radius: 3px;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2), -1px -1px 3px rgba(0, 0, 0, 0.2);
-
-    position: absolute;
-    right: -50px;
-    top: 40px;
-
-    transition: visibility 0s, opacity 0.5s linear;
-  }
-
-  .tip p:before {
-    position: absolute;
-    content: '';
-    width: 0;
-    height: 0;
-    border: 6px solid transparent;
-    border-bottom-color: #0064b7;
-    left: 10px;
-    top: -12px;
-  }
 
   &:hover {
     background-color: lightgrey;

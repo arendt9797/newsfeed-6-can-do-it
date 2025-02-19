@@ -5,27 +5,28 @@ import * as c from '../constants/categoryName';
 import { useNavigate } from 'react-router-dom';
 
 function Category() {
-
-
   const { isLogin, user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  //user의 관심사 카테고리 배열로 가져오기
-  //기타(ETC)가 배열 안에 있을 경우 배열의 가장 마지막에 위치시키기
-  const myInterests =
-    user?.user_interests
-      ?.map((i) => i.user_interest)
-      // 비교 함수에서 a === c.ETC이면 1을 리턴하여 a를 뒤로 보내고, b === c.ETC이면 -1을 리턴하여 b를 뒤로 보냄
-      .sort((a, b) => (a === c.ETC ? 1 : b === c.ETC ? -1 : 0)) || [];
+  // user의 관심사 카테고리 배열로 가져오기(옵셔널 체이닝 제거)
+  let interests = [];
+  if (user && user.user_interests) {
+    interests = user.user_interests.map((i) => i.user_interest);
+  }
+  // 기타(ETC)가 배열 안에 있을 경우 배열의 가장 마지막에 위치시키기
+  // 비교 함수에서 a === c.ETC이면 1을 리턴하여 a를 뒤로 보내고, b === c.ETC이면 -1을 리턴하여 b를 뒤로 보냄
+  const myInterests = interests.sort((a, b) =>
+    a === c.ETC ? 1 : b === c.ETC ? -1 : 0,
+  );
 
-  //user의 관심사 및 기타(ETC)를 제외한 카테고리
+  // user의 관심사 및 기타(ETC)를 제외한 카테고리
   const others = [...c.categoryArr]
     .slice(0, 9)
     .filter((i) => !myInterests.includes(i.name) && i.name !== c.ETC);
 
-  //그리드 큰 위치에 user 관심사를 우선적으로 배치하기 위해 사용
+  // 그리드 큰 위치에 user 관심사를 우선적으로 배치하기 위해 사용
   const myPick = [1, 2, 5];
-  //각 버튼에 부여할 CSS 클래스명
+  // 각 버튼에 부여할 CSS 클래스명
   const classNames = [
     'one',
     'two',
@@ -40,6 +41,7 @@ function Category() {
 
   return (
     <>
+      <StTitle> 관심 카테고리 : {String(myInterests)} </StTitle>
       <StCategoriesSection>
         {[...c.categoryArr].slice(0, 9).map((defaultCategory, i) => {
           let loginCategoryName = '';
@@ -47,7 +49,6 @@ function Category() {
           if (myPick.includes(i)) {
             const candidate = myInterests.shift() || defaultCategory.name;
             // 기타(ETC)가 myInterests에 있으면 others 배열의 마지막 요소로 대체
-
             if (candidate === c.ETC && others.length !== 0) {
               const replaced = others.pop();
               loginCategoryName = replaced.name;
@@ -69,7 +70,9 @@ function Category() {
             <StButton
               onClick={() => {
                 navigate(
-                  `/category-feed?id=${isLogin ? loginCategoryName : defaultCategory.name}`,
+                  `/category-feed?id=${
+                    isLogin ? loginCategoryName : defaultCategory.name
+                  }`,
                 );
               }}
               key={i}
@@ -96,6 +99,12 @@ function Category() {
 }
 
 export default Category;
+
+const StTitle = styled.div`
+  text-align: center;
+  margin-top: 20px;
+  font-size: 20px;
+`;
 const StCategoriesSection = styled.section`
   width: 50vw;
   height: 90vh;
